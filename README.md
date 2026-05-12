@@ -14,3 +14,4 @@ connectinfo
 ```
 
 Trading is intentionally blocked. Secrets live under `secrets/` and must never be printed or committed.
+# wsl
