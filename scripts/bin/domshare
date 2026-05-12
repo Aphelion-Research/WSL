@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+tailscale_ip() {
+  tailscale ip -4 2>/dev/null | head -n 1 || true
+}
+
+ssh_status() {
+  service ssh status 2>&1 | sed -n '1,12p' || true
+}
+
+case "${1:-status}" in
+  start)
+    sudo mkdir -p /run/sshd
+    sudo service ssh restart
+    echo "SSH status:"
+    ssh_status
+    echo
+    echo "Tailscale IPv4: $(tailscale_ip)"
+    echo "Friend command: ssh Martin@100.95.35.80"
+    ;;
+  status)
+    echo "SSH status:"
+    ssh_status
+    echo
+    echo "Tailscale status:"
+    tailscale status 2>&1 | sed -n '1,20p' || true
+    echo
+    echo "tmux sessions:"
+    tmux ls 2>/dev/null || true
+    echo
+    echo "who:"
+    who || true
+    ;;
+  stop)
+    sudo service ssh stop
+    echo "SSH stopped"
+    ;;
+  *)
+    echo "Usage: domshare {start|status|stop}" >&2
+    exit 2
+    ;;
+esac

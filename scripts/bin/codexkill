@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [ "$#" -ne 1 ]; then
+  echo "Usage: codexkill SESSION" >&2
+  exit 2
+fi
+tmux kill-session -t "$1"

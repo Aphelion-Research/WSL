@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [ "$#" -lt 2 ]; then
+  echo "Usage: codexsend SESSION MESSAGE..." >&2
+  exit 2
+fi
+session="$1"
+shift
+tmux send-keys -t "$session" "$*" Enter

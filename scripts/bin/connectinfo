@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ts_ip="$(tailscale ip -4 2>/dev/null | head -n 1 || true)"
+[ -z "$ts_ip" ] && ts_ip="100.95.35.80"
+
+echo "user: Martin"
+echo "tailscale IP: $ts_ip"
+
+if command -v netsh.exe >/dev/null 2>&1; then
+  if netsh.exe interface portproxy show v4tov4 2>/dev/null | tr -d '\r' | grep -q '2222'; then
+    echo "local PowerShell command: ssh Martin@localhost -p 2222"
+  else
+    echo "local PowerShell command: unavailable unless Windows portproxy for localhost:2222 exists"
+  fi
+else
+  echo "local PowerShell command: unavailable from this shell"
+fi
+
+echo "remote Tailscale command: ssh Martin@$ts_ip"
+echo "tmux attach commands:"
+echo "  tmux attach -t matin"
+echo "  tmux attach -t dan"
+echo "  tmux new -A -s dominion"

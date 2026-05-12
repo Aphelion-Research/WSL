@@ -1,0 +1,18 @@
+# ~/.bashrc: Dominion interactive shell startup.
+
+case $- in
+  *i*) ;;
+  *) return ;;
+esac
+
+HISTCONTROL=ignoreboth
+shopt -s histappend
+HISTSIZE=1000
+HISTFILESIZE=2000
+shopt -s checkwinsize
+
+if [ -z "${DOMINIONRC_SOURCED:-}" ] && [ -f "$HOME/.dominionrc" ]; then
+  export DOMINIONRC_SOURCED=1
+  # shellcheck disable=SC1090
+  source "$HOME/.dominionrc"
+fi

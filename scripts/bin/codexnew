@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
+  echo "Usage: codexnew SESSION [PATH]" >&2
+  exit 2
+fi
+session="$1"
+workdir="${2:-$HOME/Dominion}"
+tmux new -A -s "$session" "cd \"$workdir\" && codex"

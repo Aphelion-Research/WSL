@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+env_file="$HOME/Dominion/secrets/mt5.env"
+if [ -f "$env_file" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$env_file"
+  set +a
+fi
+
+export WINEPREFIX="${DOMDATA_WINEPREFIX:-$HOME/.mt5}"
+log_path="/tmp/dominion-mt5.log"
+
+if pgrep -f '[t]erminal64.exe' >/dev/null 2>&1; then
+  echo "MT5 already running"
+  echo "Log: $log_path"
+  exit 0
+fi
+
+terminal_path=""
+if [ -n "${DOMDATA_MT5_PATH:-}" ]; then
+  if command -v winepath >/dev/null 2>&1; then
+    terminal_path="$(winepath -u "$DOMDATA_MT5_PATH" 2>/dev/null || true)"
+  fi
+fi
+
+if [ -z "$terminal_path" ] || [ ! -f "$terminal_path" ]; then
+  terminal_path="$(find "$WINEPREFIX" -iname terminal64.exe -type f 2>/dev/null | head -n 1 || true)"
+fi
+
+if [ -z "$terminal_path" ] || [ ! -f "$terminal_path" ]; then
+  terminal_path="$(find "$HOME" -iname terminal64.exe -type f 2>/dev/null | head -n 1 || true)"
+fi
+
+if [ -z "$terminal_path" ] || [ ! -f "$terminal_path" ]; then
+  echo "No terminal64.exe found under WINEPREFIX or HOME." >&2
+  exit 1
+fi
+
+nohup wine "$terminal_path" >"$log_path" 2>&1 &
+sleep 3
+
+echo "MT5 start requested"
+echo "Log: $log_path"

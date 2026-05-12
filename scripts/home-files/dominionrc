@@ -1,0 +1,122 @@
+# Dominion shared shell layer. Keep startup fast and non-blocking.
+
+export DOMINION_ROOT="$HOME/Dominion"
+export DOMINION_SSH_ALIAS="dominion"
+export DOMINION_SSH_HOST="100.95.35.80"
+export DOMINION_SSH_USER="Martin"
+
+_dominion_path_without() {
+  local remove="$1"
+  local old_ifs="$IFS"
+  local part
+  local next=""
+  IFS=:
+  for part in $PATH; do
+    [ "$part" = "$remove" ] && continue
+    [ -z "$part" ] && continue
+    if [ -z "$next" ]; then
+      next="$part"
+    else
+      next="$next:$part"
+    fi
+  done
+  IFS="$old_ifs"
+  PATH="$next"
+}
+
+_dominion_path_without "$HOME/.npm-global/bin"
+_dominion_path_without "$HOME/.local/bin"
+_dominion_path_without "$HOME/.cargo/bin"
+PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+export PATH
+
+cd "$DOMINION_ROOT" 2>/dev/null || cd "$HOME" || return
+
+if [ -z "${VIRTUAL_ENV:-}" ] && [ -f "$DOMINION_ROOT/.venv/bin/activate" ]; then
+  export VIRTUAL_ENV_DISABLE_PROMPT=1
+  # shellcheck disable=SC1091
+  source "$DOMINION_ROOT/.venv/bin/activate"
+fi
+
+export PS1='(.venv) Martin@Martin:Dominion/ '
+
+alias cls='clear'
+alias c='clear'
+alias ll='ls -lah --color=auto --group-directories-first'
+alias la='ls -A --color=auto --group-directories-first'
+alias l='ls --color=auto --group-directories-first'
+alias dd='domdata'
+alias xau='domdata xau'
+alias xautick='domdata xautick'
+alias xaurates='domdata xaurates'
+alias xauticks='domdata xauticks'
+alias mt5='mt5start'
+
+home() { cd "$DOMINION_ROOT" || return; }
+repo() { mkdir -p "$DOMINION_ROOT/repo" && cd "$DOMINION_ROOT/repo" || return; }
+data() { mkdir -p "$DOMINION_ROOT/data" && cd "$DOMINION_ROOT/data" || return; }
+logs() { mkdir -p "$DOMINION_ROOT/logs" && cd "$DOMINION_ROOT/logs" || return; }
+
+matin() { tmux new -A -s matin; }
+dan() { tmux new -A -s dan; }
+shared() { tmux new -A -s dominion; }
+share() { tmux new -A -s dominion; }
+
+_dominion_remote_code_command() {
+  printf 'code --remote ssh-remote+%s "%s"\n' "$DOMINION_SSH_ALIAS" "$(pwd)"
+}
+
+_dominion_remote_code_fallback() {
+  printf '"%%LocalAppData%%\\Programs\\Microsoft VS Code\\bin\\code.cmd" --remote ssh-remote+%s "%s"\n' "$DOMINION_SSH_ALIAS" "$(pwd)"
+}
+
+_dominion_print_remote_code_help() {
+  echo "Run this on Dan's Windows CMD/PowerShell:"
+  echo "  $(_dominion_remote_code_command)"
+  echo "Fallback:"
+  echo "  $(_dominion_remote_code_fallback)"
+}
+
+_dominion_in_vscode_remote() {
+  [ -n "${VSCODE_IPC_HOOK_CLI:-}" ] || [ "${TERM_PROGRAM:-}" = "vscode" ] && [ -n "${SSH_CONNECTION:-}" ]
+}
+
+codehere() {
+  if _dominion_in_vscode_remote && command -v code >/dev/null 2>&1; then
+    code .
+    return
+  fi
+
+  if [ -n "${SSH_CONNECTION:-}" ]; then
+    _dominion_print_remote_code_help
+    return
+  fi
+
+  if command -v code >/dev/null 2>&1; then
+    code .
+  elif command -v code.exe >/dev/null 2>&1; then
+    code.exe .
+  else
+    echo "VS Code command not found."
+    return 1
+  fi
+}
+
+openhere() {
+  if [ -n "${SSH_CONNECTION:-}" ]; then
+    echo "Explorer cannot open remote WSL paths directly from a plain SSH shell."
+    _dominion_print_remote_code_help
+    return
+  fi
+
+  if command -v explorer.exe >/dev/null 2>&1; then
+    explorer.exe .
+  else
+    echo "explorer.exe not found."
+    return 1
+  fi
+}
+
+remotehere() {
+  _dominion_print_remote_code_help
+}
