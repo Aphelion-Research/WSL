@@ -149,6 +149,35 @@ Baseline audit, git init/config/commit, shell validation, helper validation, dom
 - RAGD chunking is structured regex fallback, not tree-sitter.
 - GitHub push may require credentials/token.
 
+## Dominion V2.5 Phase Start - 2026-05-12
+
+Goal: begin capability expansion into “research intelligence OS” with provenance, maintenance, and agent operations.
+
+Completed (this run):
+
+- Research OS:
+  - Added adapter abstraction and structured `FetchResult` with provenance fields.
+  - Added optional browser fetch adapter that fails cleanly if Playwright is unavailable.
+  - Added deterministic normalization and deterministic quality scoring (persisted in document metadata/frontmatter).
+  - CLI: `research adapters`, `research fetch`, `research doctor --json`.
+- RAGD maintenance:
+  - Added `ragd/scripts/ragd_maintenance.py` with `report` and safe `cleanup-duplicates` dry-run plan (`--apply` marks duplicates deleted).
+  - Added pytest coverage with temp SQLite DB.
+- Agent operations:
+  - Added `dominion phase-report` and `dominion next-prompt`.
+
+Validation (run 2026-05-12):
+
+- `python -m pytest -q`: PASS (16 passed)
+- `python -m pytest -q research_os/tests`: PASS (10 passed)
+- `python -m pytest -q ragd/tests/test_maintenance_report.py`: PASS (3 passed)
+- `python domdata/check_no_trading.py`: PASS
+- `./scripts/bootstrap_python.sh`: PASS (pip network DNS unavailable; proceeded with installed deps)
+
+Known constraint (this run):
+
+- Localhost networking and system services were blocked (`Operation not permitted`), so RAGD daemon reachability checks could not be validated here.
+
 ## Exact Next Commands For Matin
 
 ```bash

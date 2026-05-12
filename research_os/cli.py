@@ -7,9 +7,13 @@ from pathlib import Path
 
 from . import __version__
 from . import db
+from .adapters.registry import available_adapters, default_config, resolve_adapter
 from .config import ensure_dirs, load_sources, paths, upsert_source_yaml, write_default_sources
-from .fetcher import FetchError, validate_url_for_source
+from .fetcher import validate_url_for_source
 from .models import Source
+from .quality import assess_quality
+from .extractor import extract
+from .chunker import chunk_markdown
 from .ragd_client import health as ragd_health, try_index_path
 from .scheduler import run as run_scheduler
 
@@ -57,18 +61,32 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     conn = _conn()
     _sync_sources(conn)
     p = paths()
-    print("Research OS Doctor")
-    print(f"root: {p.root}")
-    print(f"db: {'ok' if p.db.exists() else 'missing'}")
-    print(f"sources_yaml: {'ok' if p.sources_yaml.exists() else 'missing'}")
-    print(f"requests: {'ok' if shutil.which('python') else 'python path unavailable'}")
-    print(f"directories: raw={p.raw.exists()} markdown={p.markdown.exists()} extracted={p.extracted.exists()}")
+    data = {
+        "root": str(p.root),
+        "db": str(p.db),
+        "db_exists": p.db.exists(),
+        "sources_yaml": str(p.sources_yaml),
+        "sources_yaml_exists": p.sources_yaml.exists(),
+        "python": shutil.which("python") or "",
+        "directories": {"raw": p.raw.exists(), "markdown": p.markdown.exists(), "extracted": p.extracted.exists()},
+        "adapters": sorted(available_adapters().keys()),
+    }
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Research OS Doctor")
+        print(f"root: {p.root}")
+        print(f"db: {'ok' if p.db.exists() else 'missing'}")
+        print(f"sources_yaml: {'ok' if p.sources_yaml.exists() else 'missing'}")
+        print(f"python: {data['python'] or 'unavailable'}")
+        print(f"directories: raw={p.raw.exists()} markdown={p.markdown.exists()} extracted={p.extracted.exists()}")
+        print(f"adapters: {', '.join(data['adapters'])}")
     return 0
 
 
 def cmd_add_source(args: argparse.Namespace) -> int:
     conn = _conn()
-    source = Source(args.name, args.base_url, args.trust, args.rate_limit_sec, True)
+    source = Source(args.name, args.base_url, args.trust, args.rate_limit_sec, True, args.adapter_preference)
     db.upsert_source(conn, source)
     upsert_source_yaml(source)
     print(f"source added: {source.name} {source.base_url}")
@@ -95,10 +113,17 @@ def cmd_add_url(args: argparse.Namespace) -> int:
     if not row:
         print(f"source not found: {args.source}")
         return 2
-    source = Source(row["name"], row["base_url"], row["trust"], float(row["rate_limit_sec"]), bool(row["enabled"]))
+    source = Source(
+        row["name"],
+        row["base_url"],
+        row["trust"],
+        float(row["rate_limit_sec"]),
+        bool(row["enabled"]),
+        str(row["adapter_preference"] or "requests"),
+    )
     try:
         validate_url_for_source(args.url, source)
-    except FetchError as exc:
+    except Exception as exc:
         print(f"rejected: {exc}")
         return 2
     db.add_job(conn, args.url, args.source, args.priority)
@@ -189,6 +214,73 @@ def cmd_ragd_status(args: argparse.Namespace) -> int:
     return 0 if status.get("reachable") else 1
 
 
+def cmd_adapters(args: argparse.Namespace) -> int:
+    adapters = available_adapters()
+    if args.json:
+        print(json.dumps({"adapters": sorted(adapters.keys())}, indent=2, sort_keys=True))
+    else:
+        for name in sorted(adapters.keys()):
+            print(name)
+    return 0
+
+
+def cmd_fetch(args: argparse.Namespace) -> int:
+    conn = _conn()
+    _sync_sources(conn)
+    row = db.get_source(conn, args.source)
+    if not row:
+        print(f"source not found: {args.source}")
+        return 2
+    source = Source(
+        name=row["name"],
+        base_url=row["base_url"],
+        trust=row["trust"],
+        rate_limit_sec=float(row["rate_limit_sec"]),
+        enabled=bool(row["enabled"]),
+        adapter_preference=str(row["adapter_preference"] or "requests"),
+    )
+    adapter_name = args.adapter or source.adapter_preference
+    adapter = resolve_adapter(adapter_name)
+    if adapter is None:
+        print(json.dumps({"ok": False, "error": f"unknown adapter: {adapter_name}", "adapters": sorted(available_adapters().keys())}, indent=2, sort_keys=True))
+        return 2
+
+    result = adapter.fetch(args.url, source, default_config())
+    if args.json:
+        print(json.dumps(result.__dict__, indent=2, sort_keys=True))
+        return 0 if result.ok else 1
+
+    if not result.ok:
+        print(f"FAIL adapter={result.adapter_name} error_class={result.error_class} error={result.error}")
+        return 1
+    extracted = extract(
+        result.text,
+        url=result.url,
+        final_url=result.final_url,
+        source_name=source.name,
+        fetched_at_utc=result.fetched_at_utc,
+        content_hash=result.content_hash,
+        trust=source.trust,
+        adapter_name=result.adapter_name,
+        content_type=result.content_type,
+    )
+    chunks = chunk_markdown(extracted.markdown)
+    quality = assess_quality(
+        fetch_ok=True,
+        source_allowed=True,
+        text_length=extracted.text_length,
+        has_title=bool(extracted.title and extracted.title != "Untitled"),
+        chunk_count=len(chunks),
+        duplicate_content_hash=False,
+        adapter_used=result.adapter_name,
+        error_class=None,
+    )
+    print(f"OK adapter={result.adapter_name} status={result.status_code} content_type={result.content_type} bytes={len(result.text)}")
+    print(f"title: {extracted.title}")
+    print(f"chunks: {len(chunks)} quality_score: {quality.score}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="research", description="Dominion Research OS CLI")
     parser.add_argument("--version", action="version", version=__version__)
@@ -202,6 +294,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_status)
 
     p = sub.add_parser("doctor")
+    p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_doctor)
 
     p = sub.add_parser("add-source")
@@ -209,6 +302,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("base_url")
     p.add_argument("--trust", required=True)
     p.add_argument("--rate-limit-sec", type=float, default=2.0)
+    p.add_argument("--adapter-preference", default="requests")
     p.set_defaults(func=cmd_add_source)
 
     p = sub.add_parser("list-sources")
@@ -249,6 +343,17 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("ragd-status")
     p.set_defaults(func=cmd_ragd_status)
+
+    p = sub.add_parser("adapters")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_adapters)
+
+    p = sub.add_parser("fetch")
+    p.add_argument("url")
+    p.add_argument("--source", required=True)
+    p.add_argument("--adapter", default="")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_fetch)
 
     return parser
 

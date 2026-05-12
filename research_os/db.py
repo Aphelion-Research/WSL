@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS sources(
   trust TEXT NOT NULL,
   rate_limit_sec REAL DEFAULT 2.0,
   enabled INTEGER DEFAULT 1,
+  adapter_preference TEXT DEFAULT 'requests',
   created_at TEXT NOT NULL
 );
 
@@ -110,21 +111,29 @@ CREATE TABLE IF NOT EXISTS source_health(
 
 def initialize(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
+    _migrate(conn)
     conn.commit()
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    cols = {row["name"] for row in conn.execute("PRAGMA table_info(sources)")}
+    if "adapter_preference" not in cols:
+        conn.execute("ALTER TABLE sources ADD COLUMN adapter_preference TEXT DEFAULT 'requests'")
 
 
 def upsert_source(conn: sqlite3.Connection, source: Source) -> None:
     conn.execute(
         """
-        INSERT INTO sources(name, base_url, trust, rate_limit_sec, enabled, created_at)
-        VALUES(?, ?, ?, ?, ?, ?)
+        INSERT INTO sources(name, base_url, trust, rate_limit_sec, enabled, adapter_preference, created_at)
+        VALUES(?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(name) DO UPDATE SET
           base_url=excluded.base_url,
           trust=excluded.trust,
           rate_limit_sec=excluded.rate_limit_sec,
-          enabled=excluded.enabled
+          enabled=excluded.enabled,
+          adapter_preference=excluded.adapter_preference
         """,
-        (source.name, source.base_url, source.trust, source.rate_limit_sec, int(source.enabled), utc_now()),
+        (source.name, source.base_url, source.trust, source.rate_limit_sec, int(source.enabled), source.adapter_preference, utc_now()),
     )
     conn.commit()
 

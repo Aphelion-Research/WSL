@@ -4,6 +4,7 @@ import re
 from html import unescape
 
 from .cleaner import clean_text, html_to_text_fallback
+from .normalize import normalize_raw_text
 from .models import ExtractedDocument
 
 
@@ -35,21 +36,42 @@ def _extract_with_bs4(html: str) -> tuple[str, str] | None:
     return title or "Untitled", clean_text(text)
 
 
-def extract(html: str, *, url: str, source_name: str, fetched_at: str, content_hash: str, trust: str) -> ExtractedDocument:
-    extracted = _extract_with_bs4(html)
+def extract(
+    raw: str,
+    *,
+    url: str,
+    final_url: str | None,
+    source_name: str,
+    fetched_at_utc: str,
+    content_hash: str | None,
+    trust: str,
+    adapter_name: str,
+    content_type: str | None,
+) -> ExtractedDocument:
+    extracted = _extract_with_bs4(raw)
     if extracted:
         title, body = extracted
     else:
-        title = _title_from_html(html)
-        body = html_to_text_fallback(html)
+        title = _title_from_html(raw)
+        norm = normalize_raw_text(raw, content_type=content_type)
+        body = norm.text
     frontmatter = (
         "---\n"
         f"source_name: {source_name}\n"
         f"url: {url}\n"
-        f"fetched_at: {fetched_at}\n"
-        f"content_hash: {content_hash}\n"
+        f"final_url: {final_url or ''}\n"
+        f"adapter: {adapter_name}\n"
+        f"content_type: {content_type or ''}\n"
+        f"fetched_at_utc: {fetched_at_utc}\n"
+        f"content_hash: {content_hash or ''}\n"
         f"trust: {trust}\n"
         "---\n\n"
     )
     markdown = frontmatter + f"# {title}\n\n{body}\n"
-    return ExtractedDocument(title=title, markdown=markdown, text_length=len(body))
+    normalization = normalize_raw_text(raw, content_type=content_type)
+    return ExtractedDocument(
+        title=title,
+        markdown=markdown,
+        text_length=len(body),
+        normalization={"method": normalization.method, "removed_noise": normalization.removed_noise},
+    )

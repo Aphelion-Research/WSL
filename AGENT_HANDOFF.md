@@ -1,5 +1,48 @@
 # Dominion Agent Handoff
 
+## Dominion V2.5 Phase - 2026-05-12
+
+Current status: IN PROGRESS (foundation laid; validate on a normal host for daemon reachability).
+
+Key outcomes (this run):
+
+- Research Intelligence:
+  - Added fetch adapter abstraction (`research_os/adapters/`) with structured `FetchResult` and provenance fields.
+  - Requests adapter is default; Browser/JS adapter is opt-in and fails cleanly if Playwright is unavailable.
+  - Added deterministic normalization + deterministic quality scoring persisted into documents.
+  - `research` CLI adds: `adapters`, `fetch`, and `doctor --json`.
+- RAGD Maintenance:
+  - Added `ragd/scripts/ragd_maintenance.py` with safe `report` and duplicate cleanup planning (`--dry-run` default; `--apply` marks duplicates `status='deleted'`).
+  - Added pytest coverage using temp SQLite DB (`ragd/tests/test_maintenance_report.py`).
+- Agent Operations:
+  - Added `dominion phase-report` and `dominion next-prompt`.
+
+Important environment constraint in this run:
+
+- Localhost networking and some system services were blocked (`Operation not permitted`), so RAGD reachability, tmux, and tailscale could not be validated here. Do not assume RAGD is broken; re-check on the real host.
+
+Continuation commands:
+
+```bash
+cd ~/Dominion
+git status --short
+python -m pytest -q
+python domdata/check_no_trading.py
+./scripts/bootstrap_python.sh
+
+research adapters
+research doctor --json
+research fetch <URL> --source <SOURCE> --adapter requests --json || true
+python ragd/scripts/ragd_maintenance.py report --json || true
+python ragd/scripts/ragd_maintenance.py cleanup-duplicates --dry-run --json || true
+
+cat reports/dominion-v2.5-latest.md
+```
+
+Next best task:
+
+- Add `research inspect-document ID --json` (and/or source-health aggregation) plus an offline retrieval smoke for stored chunks.
+
 ## Dominion V2 Superbuild Handoff - 2026-05-12
 
 Current status: COMPLETE for the Dominion V2 MVP superbuild.

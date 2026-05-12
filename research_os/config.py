@@ -32,11 +32,11 @@ class ResearchPaths:
 
 
 DEFAULT_SOURCES: list[dict[str, Any]] = [
-    {"name": "crawl4ai_docs", "base_url": "https://docs.crawl4ai.com/", "trust": "high", "rate_limit_sec": 2, "enabled": True},
-    {"name": "ollama_docs", "base_url": "https://github.com/ollama/ollama/tree/main/docs", "trust": "high", "rate_limit_sec": 2, "enabled": True},
-    {"name": "playwright_docs", "base_url": "https://playwright.dev/python/", "trust": "high", "rate_limit_sec": 2, "enabled": True},
-    {"name": "vllm_docs", "base_url": "https://docs.vllm.ai/", "trust": "high", "rate_limit_sec": 2, "enabled": True},
-    {"name": "mql5_docs", "base_url": "https://www.mql5.com/en/docs", "trust": "high", "rate_limit_sec": 2, "enabled": True},
+    {"name": "crawl4ai_docs", "base_url": "https://docs.crawl4ai.com/", "trust": "high", "rate_limit_sec": 2, "enabled": True, "adapter_preference": "requests"},
+    {"name": "ollama_docs", "base_url": "https://github.com/ollama/ollama/tree/main/docs", "trust": "high", "rate_limit_sec": 2, "enabled": True, "adapter_preference": "requests"},
+    {"name": "playwright_docs", "base_url": "https://playwright.dev/python/", "trust": "high", "rate_limit_sec": 2, "enabled": True, "adapter_preference": "requests"},
+    {"name": "vllm_docs", "base_url": "https://docs.vllm.ai/", "trust": "high", "rate_limit_sec": 2, "enabled": True, "adapter_preference": "requests"},
+    {"name": "mql5_docs", "base_url": "https://www.mql5.com/en/docs", "trust": "high", "rate_limit_sec": 2, "enabled": True, "adapter_preference": "requests"},
 ]
 
 
@@ -69,6 +69,7 @@ def load_sources(path: Path = SOURCES_YAML) -> list[Source]:
                 trust=str(item.get("trust", "unknown")),
                 rate_limit_sec=float(item.get("rate_limit_sec", 2.0)),
                 enabled=bool(item.get("enabled", True)),
+                adapter_preference=str(item.get("adapter_preference", "requests") or "requests"),
             )
         )
     return sources
@@ -85,6 +86,7 @@ def upsert_source_yaml(source: Source, path: Path = SOURCES_YAML) -> None:
             "trust": source.trust,
             "rate_limit_sec": source.rate_limit_sec,
             "enabled": source.enabled,
+            "adapter_preference": source.adapter_preference,
         }
     )
     path.write_text(yaml.safe_dump({"sources": items}, sort_keys=False), encoding="utf-8")

@@ -183,6 +183,73 @@ def cmd_llm(args: argparse.Namespace) -> int:
     return 0
 
 
+def _latest_report() -> str:
+    reports = (ROOT / "reports").glob("dominion-*-latest.md")
+    latest = sorted((p.name for p in reports))
+    return latest[-1] if latest else ""
+
+
+def cmd_phase_report(args: argparse.Namespace) -> int:
+    code, status = run(["git", "-C", str(ROOT), "status", "--short"], timeout=10)
+    data = {
+        "phase": args.phase,
+        "root": str(ROOT),
+        "git_dirty": bool(status.strip()),
+        "git_status_short": status,
+        "research_doctor": run(["research", "doctor", "--json"], timeout=10)[1],
+        "llm_doctor": run(["llm", "doctor"], timeout=10)[1],
+        "ragd_health": ragd_health(),
+        "latest_report": _latest_report(),
+        "recommended_validation": [
+            "python -m pytest -q",
+            "python domdata/check_no_trading.py",
+            "./scripts/bootstrap_python.sh",
+        ],
+    }
+    if args.json:
+        print_json(data)
+    else:
+        print(f"Dominion phase-report ({args.phase})")
+        print(f"root: {ROOT}")
+        print(f"git dirty: {data['git_dirty']}")
+        if status.strip():
+            print("git status --short:")
+            print(status)
+        print(f"latest report: {data['latest_report'] or 'none'}")
+        print("recommended validation:")
+        for cmd in data["recommended_validation"]:
+            print(f"  {cmd}")
+    return 0
+
+
+def cmd_next_prompt(args: argparse.Namespace) -> int:
+    prompt = "\n".join(
+        [
+            "You are Codex working in /home/Martin/Dominion.",
+            "Follow the Dominion Platform Contract in AGENTS.md (data-only, no secrets, no trading, bounded research).",
+            "",
+            "Startup protocol:",
+            "cd /home/Martin/Dominion",
+            "git status --short",
+            "cat AGENT_HANDOFF.md",
+            "cat PROGRESS.md | tail -n 120",
+            "ragd_handoff_read || true",
+            "codexrag \"Dominion V2.5\" || true",
+            "research ragd-status || true",
+            "dominion status || true",
+            "",
+            "Validation:",
+            "python -m pytest -q",
+            "python domdata/check_no_trading.py",
+            "./scripts/bootstrap_python.sh",
+            "",
+            f"Current focus: {args.focus}",
+        ]
+    )
+    print(prompt)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="dominion", description="Dominion V2 command center")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -205,6 +272,15 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_doctor)
     p = sub.add_parser("help")
     p.set_defaults(func=lambda args: (parser.print_help() or 0))
+
+    p = sub.add_parser("phase-report")
+    p.add_argument("--phase", default="v2.5")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_phase_report)
+
+    p = sub.add_parser("next-prompt")
+    p.add_argument("--focus", default="Continue Dominion V2.5 phase work")
+    p.set_defaults(func=cmd_next_prompt)
     return parser
 
 
