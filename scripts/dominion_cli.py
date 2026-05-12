@@ -111,6 +111,8 @@ def cmd_start(args: argparse.Namespace) -> int:
         if run(["tmux", "has-session", "-t", name], timeout=2)[0] != 0:
             run(["tmux", "new-session", "-d", "-s", name, command], timeout=5)
     if not ragd_health().get("ok") and (ROOT / "ragd" / "build" / "ragd").exists():
+        # Note: `dominion start` only manages the local default RAGD instance (127.0.0.1:7474).
+        # If you point `RAGD_URL` elsewhere, this start path does not manage that remote instance.
         command = f"cd {ROOT / 'ragd'}; ./build/ragd --db ~/.ragd/ragd.db --host 127.0.0.1 --port 7474 --path {ROOT}"
         run(["tmux", "new-session", "-d", "-s", "ragd", command], timeout=5)
     print("Next commands:")

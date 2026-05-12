@@ -72,6 +72,6 @@ Remote file editing should use VS Code Remote SSH.
 
 - If MT5 data commands fail, run `mt5start`, wait five seconds, and retry once.
 - If shell startup is broken, restore `.bashrc` and `.dominionrc` from the latest `backups/<RUN_ID>/`.
-- If Dan cannot connect, check `tailscale status`, `service ssh status`, and `connectinfo`.
+- If Dan cannot connect, Matin should check `tailscale status`, `service ssh status`, and `connectinfo` inside WSL/Dominion.
 - If Research OS fetch fails, inspect `research status`, `research list-sources`, and the crawl job error.
 - If Codex lacks RAGD tools, run `codexstatus` and then `/mcp` inside Codex.

@@ -7,10 +7,11 @@
 ```cmd
 tailscale status
 tailscale ip -4
-connectinfo
 tailscale ping <tailscale-ip>
 ssh Martin@<tailscale-ip>
 ```
+
+Note: `connectinfo` is run by Matin inside WSL/Dominion (Linux shell), not by Dan in Windows CMD.
 
 4. After SSH:
 

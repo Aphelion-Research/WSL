@@ -65,6 +65,37 @@ Pass/fail:
 - `python domdata/check_no_trading.py`: PASS.
 - `./scripts/bootstrap_python.sh`: PASS (pip attempted network access but proceeded with installed deps; `llm doctor` reports localhost unreachable as expected).
 
+## Dominion V2 Final Polish - 2026-05-12
+
+Tiny correctness pass:
+
+- `docs/DAN_SETUP_CMD.md`: Windows CMD block now contains only Windows-available commands; `connectinfo` is explicitly Matin-side inside WSL/Dominion.
+- Removed `connectinfo` from Windows CMD blocks in reports.
+- `scripts/home-files/dominionrc`: no literal `<tailscale-ip>` placeholder export; now respects pre-set `DOMINION_SSH_HOST` without forcing a value.
+- `scripts/dominion_cli.py`: clarified that `dominion start` only manages local default RAGD `127.0.0.1:7474` even if `RAGD_URL` points elsewhere.
+
+Commands run (final polish):
+
+```bash
+cd ~/Dominion
+grep -RInE '100\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}|ssh Martin@100\\.' README.md QUICKSTART.md PROGRESS.md AGENT_HANDOFF.md docs reports scripts 2>/dev/null
+grep -RIn 'connectinfo' docs reports PROGRESS.md AGENT_HANDOFF.md scripts
+grep -RIn 'DOMINION_SSH_HOST=\"<tailscale-ip>\"' scripts
+python -m pytest -q
+python domdata/check_no_trading.py
+./scripts/bootstrap_python.sh
+git status --short
+```
+
+Pass/fail:
+
+- Hardcoded IP scan: PASS (no matches).
+- `connectinfo` scan: PASS (no Windows CMD blocks tell Dan to run it; Matin-side only).
+- Placeholder scan: PASS (no `DOMINION_SSH_HOST=\"<tailscale-ip>\"`).
+- `python -m pytest -q`: PASS.
+- `python domdata/check_no_trading.py`: PASS.
+- `./scripts/bootstrap_python.sh`: PASS (same optional localhost/DNS notes as prior run).
+
 ## Current State
 
 - RAGD was upgraded substantially from the prior MVP.

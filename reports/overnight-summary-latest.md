@@ -98,9 +98,9 @@ Baseline audit, git init/config/commit, shell validation, helper validation, dom
 ## Collaboration Status
 
 - SSH active: PASS.
-- Tailscale IP: `<tailscale-ip>` (run `connectinfo` or `tailscale ip -4`).
+- Tailscale IP: `<tailscale-ip>` (run `tailscale ip -4`; Matin can also run `connectinfo` inside WSL/Dominion).
 - tmux sessions: `matin`, `dan`, `dominion`.
-- Dan command: `ssh Martin@<tailscale-ip>`; VS Code: `code --remote ssh-remote+dominion /home/Martin/Dominion` (get the IP via `connectinfo` or `tailscale ip -4`).
+- Dan command: `ssh Martin@<tailscale-ip>`; VS Code: `code --remote ssh-remote+dominion /home/Martin/Dominion` (get the IP via `tailscale ip -4`; Matin can also run `connectinfo` inside WSL/Dominion).
 
 ## Codex Workflow Status
 
@@ -142,7 +142,6 @@ matin
 ```cmd
 tailscale status
 tailscale ip -4
-connectinfo
 tailscale ping <tailscale-ip>
 ssh Martin@<tailscale-ip>
 ```

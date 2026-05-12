@@ -136,7 +136,6 @@ warp matin
 ```cmd
 tailscale status
 tailscale ip -4
-connectinfo
 tailscale ping <tailscale-ip>
 ssh Martin@<tailscale-ip>
 ```

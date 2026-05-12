@@ -2,7 +2,7 @@
 
 export DOMINION_ROOT="$HOME/Dominion"
 export DOMINION_SSH_ALIAS="dominion"
-export DOMINION_SSH_HOST="<tailscale-ip>"
+export DOMINION_SSH_HOST="${DOMINION_SSH_HOST:-}"
 export DOMINION_SSH_USER="Martin"
 
 _dominion_path_without() {
