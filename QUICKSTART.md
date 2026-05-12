@@ -4,6 +4,7 @@ Matin daily start:
 
 ```bash
 cd ~/Dominion
+./scripts/bootstrap_python.sh
 dominion start
 dominion status
 warp matin
@@ -13,8 +14,9 @@ Dan daily start from Windows CMD:
 
 ```cmd
 tailscale status
-tailscale ping 100.95.35.80
-ssh Martin@100.95.35.80
+tailscale ip -4
+REM use the dominion node IP printed above:
+ssh Martin@<tailscale-ip>
 ```
 
 Then inside SSH:

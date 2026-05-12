@@ -2,10 +2,13 @@
 set -euo pipefail
 
 ts_ip="$(tailscale ip -4 2>/dev/null | head -n 1 || true)"
-[ -z "$ts_ip" ] && ts_ip="100.95.35.80"
 
 echo "user: Martin"
-echo "tailscale IP: $ts_ip"
+if [ -n "$ts_ip" ]; then
+  echo "tailscale IP: $ts_ip"
+else
+  echo "tailscale IP: unavailable (tailscale down?)"
+fi
 
 if command -v netsh.exe >/dev/null 2>&1; then
   if netsh.exe interface portproxy show v4tov4 2>/dev/null | tr -d '\r' | grep -q '2222'; then
@@ -17,7 +20,11 @@ else
   echo "local PowerShell command: unavailable from this shell"
 fi
 
-echo "remote Tailscale command: ssh Martin@$ts_ip"
+if [ -n "$ts_ip" ]; then
+  echo "remote Tailscale command: ssh Martin@$ts_ip"
+else
+  echo "remote Tailscale command: unavailable"
+fi
 echo "VS Code Remote SSH command: code --remote ssh-remote+dominion /home/Martin/Dominion"
 echo "VS Code fallback: \"%LocalAppData%\\Programs\\Microsoft VS Code\\bin\\code.cmd\" --remote ssh-remote+dominion /home/Martin/Dominion"
 echo "tmux attach commands:"

@@ -1,0 +1,11 @@
+# Minimal runtime + tooling dependencies for Dominion Python components.
+# Keep this list tight: only third-party imports used in-repo.
+
+duckdb>=1.0.0
+polars>=0.20.0
+PyYAML>=6.0
+requests>=2.31.0
+
+# Test runner for `python -m pytest -q`.
+pytest>=8.0.0
+

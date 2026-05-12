@@ -17,11 +17,15 @@ Current status: COMPLETE for the Dominion V2 MVP superbuild.
 - Added command center, dashboard, Codex/RAGD helper commands, and noninteractive-safe `warp`.
 - Final report: `reports/dominion-v2-latest.md`.
 - Next best task: add a JavaScript-capable Research OS fetch adapter, then add a RAGD cleanup command for historical duplicate deleted chunks.
+- Pytest stable by default: repo-root `pytest.ini` forces `--import-mode=importlib` so `python -m pytest -q` works cleanly across `domdata/`, `local_llm/`, and `research_os/` tests.
+- Fresh-clone bootstrap: `requirements.txt` + `scripts/bootstrap_python.sh` create `.venv`, install deps, and validate `research doctor`, `llm doctor`, pytest, and `python domdata/check_no_trading.py`.
+- Collaboration helpers no longer print a hardcoded Tailscale IP: `scripts/bin/connectinfo` and `scripts/bin/domshare` now use `tailscale ip -4`.
 
 Continuation commands:
 
 ```bash
 cd ~/Dominion
+./scripts/bootstrap_python.sh
 research status || true
 llm doctor || true
 research ragd-status || true

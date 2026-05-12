@@ -16,8 +16,14 @@ case "${1:-status}" in
     echo "SSH status:"
     ssh_status
     echo
-    echo "Tailscale IPv4: $(tailscale_ip)"
-    echo "Friend command: ssh Martin@100.95.35.80"
+    ts_ip="$(tailscale_ip)"
+    if [ -n "$ts_ip" ]; then
+      echo "Tailscale IPv4: $ts_ip"
+      echo "Friend command: ssh Martin@$ts_ip"
+    else
+      echo "Tailscale IPv4: unavailable (tailscale down?)"
+      echo "Friend command: unavailable"
+    fi
     ;;
   status)
     echo "SSH status:"

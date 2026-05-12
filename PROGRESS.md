@@ -6,6 +6,11 @@ RUN_ID: `20260511-221153`
 
 Status: COMPLETE for Dominion V2 MVP superbuild.
 
+- Pytest stabilized: added repo-root `pytest.ini` so `python -m pytest -q` runs all Python tests without `--import-mode=importlib`.
+- Added minimal Python bootstrap: `requirements.txt` (only in-repo third-party imports) and `scripts/bootstrap_python.sh` to create `.venv`, install deps, and run the validation set (`research doctor`, `llm doctor`, pytest, `domdata/check_no_trading.py`).
+- Removed accidental root junk: deleted empty `ssh` file.
+- De-hardcoded Tailscale IP output: `scripts/bin/connectinfo` and `scripts/bin/domshare` now use `tailscale ip -4` instead of printing a fixed IP.
+
 - Baseline captured in `reports/dominion-v2-latest.md`.
 - RAGD MCP first actions passed: `ragd_handoff_read`, task-specific `ragd_query`, and `ragd_todo_list`.
 - `AGENTS.md` now defines the Dominion platform contract and RAGD-first workflow.
@@ -109,9 +114,9 @@ Baseline audit, git init/config/commit, shell validation, helper validation, dom
 ## Collaboration Status
 
 - SSH active: PASS.
-- Tailscale IP: `100.95.35.80`.
+- Tailscale IP: dynamic via `tailscale ip -4` (see `connectinfo`).
 - tmux sessions: `matin`, `dan`, `dominion`.
-- Dan command: `ssh Martin@100.95.35.80`; VS Code: `code --remote ssh-remote+dominion /home/Martin/Dominion`.
+- Dan command: `ssh Martin@<tailscale-ip>`; VS Code: `code --remote ssh-remote+dominion /home/Martin/Dominion`.
 
 ## Codex Workflow Status
 
