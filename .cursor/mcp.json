@@ -1,7 +1,8 @@
 {
   "mcpServers": {
     "ragd": {
-      "url": "http://localhost:7474/mcp"
+      "url": "http://localhost:7474/mcp",
+      "transport": "http"
     }
   }
 }

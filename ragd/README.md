@@ -1,36 +1,65 @@
-# RAGD
+# ragd
 
-RAGD is a C++17 persistent retrieval and agent-memory daemon for Dominion.
+`ragd` is the Dominion local RAG daemon: a C++17 background service that indexes project files, extracts TODOs, stores agent handoffs, and exposes the shared knowledge base over HTTP and MCP.
 
-Current MVP:
+It exists so a new coding agent can start with the current project memory instead of rediscovering decisions, fragile areas, open TODOs, and recent session context.
 
-- SQLite storage with WAL and FTS5.
-- Recursive file indexing with ignore rules.
-- Markdown/code chunking using pragmatic heuristics.
-- TODO extraction and priority scoring.
-- BM25/FTS retrieval.
-- TF-style vector fallback and hybrid retrieval foundation.
-- Agent sessions, file touches, decisions, handoff JSON.
-- HTTP API and MCP JSON-RPC endpoint foundation.
-- Polling watcher interface.
-
-Build:
+## Quick Start
 
 ```bash
-cmake -S ~/Dominion/ragd -B ~/Dominion/ragd/build -DCMAKE_BUILD_TYPE=RelWithDebInfo
-cmake --build ~/Dominion/ragd/build -j$(nproc)
-cd ~/Dominion/ragd/build && ctest --output-on-failure
+cd ~/Dominion/ragd
+./install.sh
+curl http://localhost:7474/health
+ragd-query "how does the handoff protocol work"
+source scripts/agent-init.sh codex
 ```
 
-Run:
+For a local developer build without installing:
 
 ```bash
-~/Dominion/ragd/build/ragd --db ~/.ragd/ragd.sqlite --path ~/Dominion/docs
+cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build -j"$(nproc)"
+ctest --test-dir build --output-on-failure
+./build/ragd --config scripts/config.default.json --daemon
 ```
 
-Deferred honestly:
+## Feature Overview
 
-- Tree-sitter symbol graph.
-- HNSW vector index.
-- Git temporal indexing.
-- WebSocket session bus.
+```text
+filesystem -> watcher -> indexer/chunker -> sqlite chunks + FTS
+                         |              -> TODO engine
+                         |              -> chunk history
+query API -> intent router -> BM25 + TF cosine vector fallback -> RRF results
+agents -> sessions/decisions/touches -> handoff context -> MCP tools
+agents -> bus messages/locks -> warnings and coordination
+```
+
+Implemented surfaces:
+
+- HTTP REST API on `localhost:7474`
+- MCP JSON-RPC endpoint at `/mcp`
+- SQLite WAL storage with chunks, FTS, sessions, decisions, TODOs, bus messages, locks, dead zones, and chunk history
+- Inotify watcher on Linux with polling fallback
+- Structured regex chunking for code, Markdown sections, and config blocks
+- Hybrid retrieval with BM25, TF cosine vector fallback, and reciprocal-rank fusion
+- Agent handoff/session protocol
+- Semantic-ish TODO search through the same retrieval pipeline
+
+## Agent Integration
+
+Claude Code, Cursor, Zed, and other MCP clients can point at:
+
+```json
+{
+  "mcpServers": {
+    "ragd": {
+      "url": "http://localhost:7474/mcp",
+      "transport": "http"
+    }
+  }
+}
+```
+
+At session start, agents should call `ragd_handoff_read`, then `ragd_session_start`. During work they should record touches, decisions, TODOs, and warnings. Before ending they should call `ragd_handoff_write`.
+
+See `docs/agent_integration_guide.md`, `docs/api_reference.md`, and `docs/mcp_tools.md` for the full contract.

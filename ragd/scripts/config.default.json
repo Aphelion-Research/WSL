@@ -1,0 +1,53 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 7474,
+    "unix_socket": "/tmp/ragd.sock",
+    "max_connections": 64,
+    "request_timeout_ms": 30000
+  },
+  "storage": {
+    "db_path": "~/.ragd/ragd.db",
+    "vector_index_path": "~/.ragd/hnsw.bin",
+    "embed_dim": 768,
+    "hnsw_M": 16,
+    "hnsw_ef_construction": 200
+  },
+  "embedding": {
+    "backend": "auto",
+    "ollama_url": "http://localhost:11434/api/embeddings",
+    "ollama_model": "nomic-embed-text",
+    "openai_url": "https://api.openai.com/v1/embeddings",
+    "openai_model": "text-embedding-3-small",
+    "openai_key_env": "RAGD_EMBED_KEY",
+    "batch_size": 32,
+    "fallback_to_tfidf": true
+  },
+  "indexing": {
+    "watch_paths": ["~/Dominion"],
+    "ignore_patterns": ["*.pyc", "__pycache__", "node_modules", ".git", "*.egg-info", "dist/", "build/", "secrets", ".venv", "vendor"],
+    "max_file_size_mb": 10,
+    "extensions": [".py", ".cpp", ".h", ".hpp", ".rs", ".ts", ".js", ".go", ".md", ".txt", ".json", ".yaml", ".toml", ".sh"],
+    "chunk_max_tokens": 512,
+    "chunk_overlap_tokens": 64
+  },
+  "retrieval": {
+    "default_top_k": 10,
+    "bm25_candidates": 50,
+    "vector_candidates": 50,
+    "rrf_k": 60
+  },
+  "temporal": {
+    "enabled": true,
+    "index_last_n_commits": 50
+  },
+  "dead_zone": {
+    "scan_interval_hours": 6,
+    "auto_scan_on_startup": true
+  },
+  "logging": {
+    "level": "info",
+    "file": "~/.ragd/ragd.log",
+    "max_size_mb": 100
+  }
+}

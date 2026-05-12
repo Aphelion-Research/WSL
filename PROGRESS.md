@@ -2,11 +2,11 @@
 
 RUN_ID: `20260511-221153`
 
-Status: PASS with documented RAGD MVP limitations.
+Status: PASS with documented RAGD production-surface limitations.
 
 ## Executive Summary
 
-Dominion shell, helpers, domdata, collector, Parquet/DuckDB normalization, health dashboard, collaboration docs, Codex prompts, and a compilable/tested RAGD C++ MVP are in place. No secrets were read or printed. Trading remains blocked.
+Dominion shell, helpers, domdata, collector, Parquet/DuckDB normalization, health dashboard, collaboration docs, Codex prompts, and an expanded/tested RAGD C++ daemon are in place. No secrets were read or printed. Trading remains blocked.
 
 ## PASS/FAIL Table
 
@@ -21,7 +21,7 @@ Dominion shell, helpers, domdata, collector, Parquet/DuckDB normalization, healt
 | 6 Parquet/DuckDB | PASS | Parquet and DuckDB summary work. |
 | 7 Health dashboard | PASS | `dominion-health` text and JSON work. |
 | 8 Docs | PASS | README, quickstart, runbooks, setup docs, prompts created. |
-| 9-21 RAGD MVP | PASS/PARTIAL | Core MVP builds/tests/API/MCP pass; advanced features documented as deferred. |
+| 9-21 RAGD daemon | PASS/PARTIAL | Expanded storage/API/MCP/indexer/watcher/tests pass; native WebSocket/HNSW/tree-sitter/libgit2 remain documented gaps. |
 | 22 Final gauntlet | PASS | Noninteractive sudo unavailable; non-sudo service fallback worked. |
 
 ## Files Changed
@@ -61,8 +61,8 @@ Baseline audit, git init/config/commit, shell validation, helper validation, dom
 - collector bounded run: PASS.
 - Parquet/DuckDB summary: PASS.
 - dominion-health: PASS.
-- RAGD ctest: 8/8 passed.
-- RAGD HTTP/MCP smoke: PASS.
+- RAGD ctest: 13/13 passed.
+- RAGD HTTP/MCP/CLI/agent-init smoke: PASS.
 
 ## Tests Failed And Why
 
@@ -102,20 +102,27 @@ Baseline audit, git init/config/commit, shell validation, helper validation, dom
 
 - Project structure created: PASS.
 - Builds: PASS.
-- Tests: 8/8 PASS.
+- Tests: 13/13 PASS after RAGD upgrade.
 - HTTP health: PASS.
 - MCP: PASS.
 - Indexing: PASS.
 - Retrieval: PASS.
 - TODO engine: PASS.
 - Agent memory: PASS.
-- Advanced temporal/HNSW/tree-sitter/websocket: deferred and documented.
+- Inotify watcher: PASS.
+- Intent router: PASS.
+- REST bus persistence/locks: PASS.
+- Temporal chunk-history surfaces: PASS.
+- Dead-zone heuristic report: PASS.
+- Native WebSocket/HNSW/tree-sitter/libgit2 deep history: deferred and documented.
 
 ## Remaining Risks
 
 - Persistent collector service is not installed yet.
 - RAGD systemd user service is written but not enabled because user systemd/sudo flow was not validated.
-- RAGD vector store is brute-force in-memory MVP.
+- RAGD native WebSocket bus is not implemented; REST/MCP bus persistence is working.
+- RAGD vector store is TF cosine fallback, not HNSW.
+- RAGD chunking is structured regex fallback, not tree-sitter.
 - GitHub push may require credentials/token.
 
 ## Exact Next Commands For Matin

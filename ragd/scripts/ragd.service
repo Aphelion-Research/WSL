@@ -1,10 +1,17 @@
 [Unit]
-Description=RAGD local agent memory daemon
+Description=RAGD - Blackmark Dominion RAG Daemon
+After=network.target
+Documentation=https://github.com/MatinDeevv/BlackmarkDominion
 
 [Service]
-ExecStart=%h/.local/bin/ragd --db %h/.ragd/ragd.sqlite --host 127.0.0.1 --port 7474 --path %h/Dominion/docs --path %h/Dominion/ragd/docs
-Restart=on-failure
+Type=simple
+ExecStart=/usr/local/bin/ragd --config %h/.ragd/config.json --daemon
+Restart=always
 RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment=HOME=%h
+Environment=RAGD_ENDPOINT=http://localhost:7474
 
 [Install]
 WantedBy=default.target

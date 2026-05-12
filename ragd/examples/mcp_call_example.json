@@ -1,5 +1,55 @@
 {
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/list"
+  "tools_list": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/list"
+  },
+  "query": {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "ragd_query",
+      "arguments": {
+        "q": "agent handoff protocol",
+        "top_k": 3,
+        "mode": "hybrid"
+      }
+    }
+  },
+  "remember": {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "ragd_remember",
+      "arguments": {
+        "kind": "decision",
+        "content": "RAGD stores handoff state in SQLite.",
+        "tags": ["storage"]
+      }
+    }
+  },
+  "todo_add": {
+    "jsonrpc": "2.0",
+    "id": 4,
+    "method": "tools/call",
+    "params": {
+      "name": "ragd_todo_add",
+      "arguments": {
+        "content": "Add a production websocket transport.",
+        "kind": "TODO",
+        "priority": 3
+      }
+    }
+  },
+  "handoff_read": {
+    "jsonrpc": "2.0",
+    "id": 5,
+    "method": "tools/call",
+    "params": {
+      "name": "ragd_handoff_read",
+      "arguments": {}
+    }
+  }
 }

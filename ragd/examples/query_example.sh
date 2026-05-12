@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
-curl -s http://localhost:7474/query -d '{"query":"Dominion MT5 collector","mode":"hybrid","limit":5}'
+set -euo pipefail
+curl -s "${RAGD_ENDPOINT:-http://localhost:7474}/query" \
+  -H "Content-Type: application/json" \
+  -d '{"q":"agent handoff protocol","top_k":5,"mode":"hybrid"}' | jq .

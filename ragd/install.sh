@@ -1,26 +1,49 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
-prefix="${PREFIX:-$HOME/.local}"
-root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "Installing RAGD - Blackmark Dominion RAG Daemon"
 
-mkdir -p "$HOME/.ragd" "$prefix/bin"
-if [ ! -f "$HOME/.ragd/config.json" ]; then
-  printf '{\n  "db_path": "%s/.ragd/ragd.sqlite",\n  "host": "127.0.0.1",\n  "port": 7474\n}\n' "$HOME" > "$HOME/.ragd/config.json"
-fi
+sudo apt-get update -qq
+sudo apt-get install -y -qq build-essential cmake git curl jq libsqlite3-dev libssl-dev libgit2-dev pkg-config
 
-cmake -S "$root" -B "$root/build" -DCMAKE_BUILD_TYPE=RelWithDebInfo
-cmake --build "$root/build" -j"$(nproc)"
-cp "$root/build/ragd" "$prefix/bin/ragd"
-cp "$root/scripts/ragd-cli.sh" "$prefix/bin/ragd-query"
-cp "$root/scripts/ragd-cli.sh" "$prefix/bin/ragd-remember"
-cp "$root/scripts/ragd-cli.sh" "$prefix/bin/ragd-todo"
-cp "$root/scripts/ragd-cli.sh" "$prefix/bin/ragd-handoff"
-cp "$root/scripts/ragd-cli.sh" "$prefix/bin/ragd-warn"
-cp "$root/scripts/ragd-cli.sh" "$prefix/bin/ragd-todos"
-cp "$root/scripts/ragd-cli.sh" "$prefix/bin/ragd-session-start"
-cp "$root/scripts/ragd-cli.sh" "$prefix/bin/ragd-session-end"
-chmod +x "$prefix/bin"/ragd*
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j"$(nproc)"
+sudo cmake --install build --prefix /usr/local
+
+mkdir -p "$HOME/.ragd"
+[ ! -f "$HOME/.ragd/config.json" ] && cp scripts/config.default.json "$HOME/.ragd/config.json"
+echo "Config at: $HOME/.ragd/config.json"
+
+sudo cp scripts/ragd-cli.sh /usr/local/bin/ragd-cli
+sudo chmod +x /usr/local/bin/ragd-cli
+for cmd in ragd-query ragd-remember ragd-todo ragd-handoff ragd-warn ragd-todos ragd-session-start ragd-session-end; do
+  sudo ln -sf /usr/local/bin/ragd-cli "/usr/local/bin/$cmd"
+done
+
+sudo cp scripts/ragd.sh /etc/profile.d/ragd.sh
+sudo chmod +x /etc/profile.d/ragd.sh
+
 mkdir -p "$HOME/.config/systemd/user"
-cp "$root/scripts/ragd.service" "$HOME/.config/systemd/user/ragd.service"
-echo "Installed ragd to $prefix/bin. Start manually with: ragd --db ~/.ragd/ragd.sqlite"
+cp scripts/ragd.service "$HOME/.config/systemd/user/ragd.service"
+systemctl --user daemon-reload || true
+systemctl --user enable ragd || true
+systemctl --user restart ragd || true
+
+mkdir -p .claude .cursor
+cat > .claude/mcp_config.json <<'JSON'
+{
+  "mcpServers": {
+    "ragd": {
+      "url": "http://localhost:7474/mcp",
+      "transport": "http"
+    }
+  }
+}
+JSON
+cp .claude/mcp_config.json .cursor/mcp.json
+
+echo ""
+echo "RAGD installed."
+echo "Query: curl http://localhost:7474/health"
+echo "Docs:  cat docs/api_reference.md"
+echo "Init:  source scripts/agent-init.sh claude-code"

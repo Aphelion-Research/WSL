@@ -15,6 +15,7 @@ class Indexer {
   explicit Indexer(Storage &storage);
   int index_paths(const std::vector<std::string> &paths, std::size_t max_file_bytes);
   int index_file(const std::filesystem::path &path, std::size_t max_file_bytes);
+  void mark_deleted(const std::filesystem::path &path);
   bool should_ignore(const std::filesystem::path &path) const;
   static std::string language_for(const std::filesystem::path &path);
 

@@ -1,6 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
-prefix="${PREFIX:-$HOME/.local}"
-rm -f "$prefix/bin/ragd" "$prefix/bin/ragd-query" "$prefix/bin/ragd-remember" "$prefix/bin/ragd-todo" "$prefix/bin/ragd-handoff" "$prefix/bin/ragd-warn" "$prefix/bin/ragd-todos" "$prefix/bin/ragd-session-start" "$prefix/bin/ragd-session-end"
+
+systemctl --user disable --now ragd 2>/dev/null || true
 rm -f "$HOME/.config/systemd/user/ragd.service"
-echo "RAGD binaries removed. Database under ~/.ragd was not deleted."
+systemctl --user daemon-reload 2>/dev/null || true
+
+sudo rm -f /usr/local/bin/ragd /usr/local/bin/ragd-cli \
+  /usr/local/bin/ragd-query /usr/local/bin/ragd-remember /usr/local/bin/ragd-todo \
+  /usr/local/bin/ragd-handoff /usr/local/bin/ragd-warn /usr/local/bin/ragd-todos \
+  /usr/local/bin/ragd-session-start /usr/local/bin/ragd-session-end \
+  /etc/profile.d/ragd.sh
+
+echo "RAGD binaries, shell hook, and user service were removed. Database under ~/.ragd was left intact."

@@ -20,7 +20,7 @@ int TodoEngine::priority_for(const std::string &tag, const std::string &text) co
 }
 
 std::vector<Todo> TodoEngine::extract(const std::string &filepath, const std::string &content) const {
-  static const std::regex marker(R"((TODO|FIXME|HACK|NOTE|BUG|OPTIMIZE|PERF|SECURITY|WARN|DEPRECATED)[: ](.*))");
+  static const std::regex marker(R"(\b(TODO|FIXME|HACK|NOTE|BUG|OPTIMIZE|PERF|SECURITY|WARN|DEPRECATED)\b\s*:\s*(.*))");
   std::vector<Todo> out;
   std::istringstream in(content);
   std::string line;

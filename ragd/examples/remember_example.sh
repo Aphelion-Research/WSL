@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
-curl -s http://localhost:7474/memory/decision -d '{"session_id":"example","text":"RAGD should never index secrets."}'
+set -euo pipefail
+curl -s "${RAGD_ENDPOINT:-http://localhost:7474}/memory/decision" \
+  -H "Content-Type: application/json" \
+  -d '{"session_id":"example","decision":"Use ragd for cross-agent handoff context.","rationale":"Agents need persistent local memory.","tags":["handoff","memory"]}' | jq .

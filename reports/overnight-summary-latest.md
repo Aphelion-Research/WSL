@@ -2,7 +2,15 @@
 
 RUN_ID: `20260511-221153`
 
-Status: PASS with documented RAGD MVP limitations.
+Status: PASS with documented RAGD production-surface limitations.
+
+## RAGD Upgrade Addendum
+
+RUN_ID: `20260511-ragd-upgrade`
+
+RAGD was upgraded after this overnight summary. Current RAGD validation: CMake build passes, `ctest --test-dir build --output-on-failure` passes 13/13 tests, and live smoke passed health, index, query, handoff, MCP tools/list with 11 tools, CLI wrapper, agent-init, bus persistence, and temporal query.
+
+Known RAGD gaps: native WebSocket `/bus`, HNSW, tree-sitter, libgit2 deep history, and external embedding calls remain documented follow-up work. See `reports/ragd-upgrade-report-20260512-030806.md` and `ragd/AGENT_HANDOFF.md`.
 
 ## Executive Summary
 
