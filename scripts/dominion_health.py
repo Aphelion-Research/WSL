@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 
-ROOT = Path.home() / "Dominion"
+ROOT = Path(os.environ.get("DOMINION_ROOT", str(Path.home() / "Dominion"))).expanduser()
 
 
 def run(cmd: list[str], timeout: int = 5) -> str:

@@ -3,7 +3,14 @@
 SSH endpoint:
 
 ```bash
-ssh Martin@100.95.35.80
+ssh Martin@<tailscale-ip>
+```
+
+Find the current IP with:
+
+```bash
+connectinfo
+tailscale ip -4
 ```
 
 tmux sessions:

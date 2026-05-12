@@ -135,8 +135,10 @@ warp matin
 
 ```cmd
 tailscale status
-tailscale ping 100.95.35.80
-ssh Martin@100.95.35.80
+tailscale ip -4
+connectinfo
+tailscale ping <tailscale-ip>
+ssh Martin@<tailscale-ip>
 ```
 
 Inside SSH:

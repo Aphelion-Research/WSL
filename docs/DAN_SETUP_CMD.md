@@ -6,8 +6,10 @@
 
 ```cmd
 tailscale status
-tailscale ping 100.95.35.80
-ssh Martin@100.95.35.80
+tailscale ip -4
+connectinfo
+tailscale ping <tailscale-ip>
+ssh Martin@<tailscale-ip>
 ```
 
 4. After SSH:
@@ -20,7 +22,7 @@ tmux attach -t dan
 
 ```text
 Host dominion
-  HostName 100.95.35.80
+  HostName <tailscale-ip>
   User Martin
   ServerAliveInterval 30
   ServerAliveCountMax 3

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import sqlite3
 import subprocess
@@ -12,8 +13,8 @@ from urllib.error import URLError
 from urllib.request import Request, urlopen
 
 
-ROOT = Path.home() / "Dominion"
-RAGD = "http://127.0.0.1:7474"
+ROOT = Path(os.environ.get("DOMINION_ROOT", str(Path.home() / "Dominion"))).expanduser()
+RAGD = os.environ.get("RAGD_URL", "http://127.0.0.1:7474").rstrip("/")
 
 
 def run(cmd: list[str], timeout: int = 10) -> tuple[int, str]:

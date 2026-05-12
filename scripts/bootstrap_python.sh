@@ -11,6 +11,12 @@ fi
 PY="${PYTHON:-python3}"
 
 if [ ! -d .venv ]; then
+  if ! "$PY" -c 'import venv' >/dev/null 2>&1; then
+    echo "Python venv support is missing." >&2
+    echo "Fix:" >&2
+    echo "  sudo apt update && sudo apt install -y python3-venv" >&2
+    exit 3
+  fi
   "$PY" -m venv .venv
 fi
 
@@ -32,4 +38,3 @@ echo "Validate: pytest"
 echo
 echo "Validate: domdata safety"
 ./.venv/bin/python domdata/check_no_trading.py
-

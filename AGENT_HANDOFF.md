@@ -38,6 +38,33 @@ RUN_ID: `20260511-ragd-upgrade`
 
 Dominion remains read-only for market data operations. No secrets were read or printed.
 
+## Dominion V2 Cleanup - 2026-05-12
+
+Portability cleanup after GitHub push: removed hardcoded Tailscale IPs, made paths configurable via env, and tightened repo hygiene. No secrets were read or printed.
+
+RAGD-first notes:
+
+- `ragd_handoff_read` shell command was not found in this environment (`command not found`).
+- Attempting `ragd_handoff_read` via `python -c "from ragd.scripts.ragd_mcp_stdio import ragd_handoff_read; ..."` failed to connect to `http://127.0.0.1:7474/mcp` with `[Errno 1] Operation not permitted` (RAGD HTTP unreachable in this run). No RAGD writes were performed.
+
+Commands run (this cleanup):
+
+```bash
+cd ~/Dominion
+git status --short
+grep -RInE '100\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}|ssh Martin@100\\.' README.md QUICKSTART.md PROGRESS.md AGENT_HANDOFF.md docs reports scripts 2>/dev/null
+python -m pytest -q
+python domdata/check_no_trading.py
+./scripts/bootstrap_python.sh
+```
+
+Pass/fail:
+
+- Hardcoded collaboration IP scan: PASS (no matches).
+- `python -m pytest -q`: PASS (16 passed).
+- `python domdata/check_no_trading.py`: PASS.
+- `./scripts/bootstrap_python.sh`: PASS (pip attempted network access but proceeded with installed deps; `llm doctor` reports localhost unreachable as expected).
+
 ## Current State
 
 - RAGD was upgraded substantially from the prior MVP.

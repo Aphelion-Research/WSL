@@ -19,7 +19,7 @@ Start: `2026-05-11T22:11:53-04:00`
 - Python: `.venv` Python 3.13.5 active on current PATH
 - Node/npm/Codex: node v20.19.2, npm 9.2.0, codex-cli 0.130.0
 - tmux: 3.5a; sessions `matin`, `dan`, `dominion` present
-- SSH: active on port 22; Tailscale IP `100.95.35.80`
+- SSH: active on port 22; Tailscale IP `<tailscale-ip>` (run `connectinfo` or `tailscale ip -4`)
 - Wine/MT5: Wine 11.8, `/home/Martin/.mt5`, terminal64.exe and Wine Python present; MT5 process running
 - domdata: command exists and doctor imports MetaTrader5 with masked password status
 - Secrets: `secrets/` mode 700, `secrets/mt5.env` mode 600; contents not read

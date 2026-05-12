@@ -164,8 +164,10 @@ matin
 
 ```cmd
 tailscale status
-tailscale ping 100.95.35.80
-ssh Martin@100.95.35.80
+connectinfo
+tailscale ip -4
+tailscale ping <tailscale-ip>
+ssh Martin@<tailscale-ip>
 ```
 
 Inside SSH:
@@ -188,3 +190,33 @@ cat AGENT_HANDOFF.md
 cat ragd/AGENT_HANDOFF.md
 git status --short
 ```
+
+## Dominion V2 Cleanup - 2026-05-12
+
+Goal: make collaboration + scripts portable after GitHub push (remove hardcoded Tailscale IPs, portable `DOMINION_ROOT`, bootstrap robustness, repo hygiene).
+
+Changes:
+
+- Removed all hardcoded Tailscale IPs from `docs/`, `reports/`, and setup notes; replaced with `<tailscale-ip>` + `connectinfo`/`tailscale ip -4`.
+- `scripts/dominion_cli.py`: `DOMINION_ROOT` (default `~/Dominion`) and `RAGD_URL` (default `http://127.0.0.1:7474`).
+- `scripts/dominion_health.py`: `DOMINION_ROOT` (default `~/Dominion`).
+- `scripts/bootstrap_python.sh`: detects missing venv support and prints exact fix `sudo apt update && sudo apt install -y python3-venv`.
+- `.gitignore`: added common caches/build/db artifacts (`.ruff_cache/`, `.coverage`, `htmlcov/`, `dist/`, `build/`, `*.sqlite*`, `*.db*`, `*.egg-info/`).
+
+Validation (run 2026-05-12):
+
+```bash
+cd ~/Dominion
+git status --short
+grep -RInE '100\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}|ssh Martin@100\\.' README.md QUICKSTART.md PROGRESS.md AGENT_HANDOFF.md docs reports scripts 2>/dev/null
+python -m pytest -q
+python domdata/check_no_trading.py
+./scripts/bootstrap_python.sh
+```
+
+Results:
+
+- IP scan: PASS (no matches).
+- Pytest: PASS (16 passed).
+- domdata forbidden-token scan: PASS.
+- bootstrap: PASS (pip showed DNS warnings; continued using installed deps; `llm doctor` reports localhost unreachable as expected).

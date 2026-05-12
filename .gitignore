@@ -25,6 +25,17 @@ ragd/.cache/
 .agents/
 .codex/
 .pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
 research/research.db
 research/raw/
 research/markdown/
