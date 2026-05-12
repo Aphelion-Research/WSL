@@ -25,3 +25,9 @@ ragd/.cache/
 .agents/
 .codex/
 .pytest_cache/
+research/research.db
+research/raw/
+research/markdown/
+research/extracted/ragd_ingest/
+research/logs/
+research/cache/

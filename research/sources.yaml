@@ -1,0 +1,30 @@
+sources:
+  - name: crawl4ai_docs
+    base_url: https://docs.crawl4ai.com/
+    trust: high
+    rate_limit_sec: 2
+    enabled: true
+
+  - name: ollama_docs
+    base_url: https://github.com/ollama/ollama/tree/main/docs
+    trust: high
+    rate_limit_sec: 2
+    enabled: true
+
+  - name: playwright_docs
+    base_url: https://playwright.dev/python/
+    trust: high
+    rate_limit_sec: 2
+    enabled: true
+
+  - name: vllm_docs
+    base_url: https://docs.vllm.ai/
+    trust: high
+    rate_limit_sec: 2
+    enabled: true
+
+  - name: mql5_docs
+    base_url: https://www.mql5.com/en/docs
+    trust: high
+    rate_limit_sec: 2
+    enabled: true

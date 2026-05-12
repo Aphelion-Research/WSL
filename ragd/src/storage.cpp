@@ -222,6 +222,7 @@ void Storage::initialize() {
   add_column_if_missing(*this, db_, "chunks", "embedding", "embedding BLOB");
   add_column_if_missing(*this, db_, "chunks", "embed_model", "embed_model TEXT DEFAULT 'tfidf'");
   add_column_if_missing(*this, db_, "chunks", "fts_rowid", "fts_rowid INTEGER");
+  exec("CREATE INDEX IF NOT EXISTS idx_chunks_identity ON chunks(filepath,line_start,line_end,content_hash);");
   exec("CREATE VIRTUAL TABLE IF NOT EXISTS fts_chunks USING fts5(content, filepath, chunk_id UNINDEXED);");
 
   exec("CREATE TABLE IF NOT EXISTS agent_sessions(id TEXT PRIMARY KEY, agent TEXT, started_at TEXT, ended_at TEXT, status TEXT, git_branch TEXT DEFAULT '', git_commit TEXT DEFAULT '', summary TEXT DEFAULT '', handoff_note TEXT DEFAULT '', parent_session TEXT DEFAULT '');");
@@ -290,41 +291,72 @@ void Storage::transaction(const std::function<void()> &fn) {
 }
 
 int64_t Storage::upsert_chunk(const Chunk &chunk) {
-  Statement stmt(db_, "INSERT INTO chunks(filepath,content,lang,chunk_type,symbol_name,line_start,line_end,content_hash,metadata_json,status,updated_at,summary,repo_root,git_commit,indexed_at,modified_at,embed_model) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-  stmt.bind(1, chunk.filepath);
-  stmt.bind(2, chunk.content);
-  stmt.bind(3, chunk.lang);
-  stmt.bind(4, chunk.chunk_type);
-  stmt.bind(5, chunk.symbol_name);
-  stmt.bind(6, chunk.line_start);
-  stmt.bind(7, chunk.line_end);
-  stmt.bind(8, chunk.content_hash);
-  stmt.bind(9, chunk.metadata_json.empty() ? "{}" : chunk.metadata_json);
-  stmt.bind(10, chunk.status.empty() ? "active" : chunk.status);
-  stmt.bind(11, now_utc());
-  stmt.bind(12, chunk.summary);
-  stmt.bind(13, chunk.repo_root);
-  stmt.bind(14, chunk.git_commit);
-  stmt.bind(15, chunk.indexed_at ? chunk.indexed_at : now_epoch());
-  stmt.bind(16, chunk.modified_at);
-  stmt.bind(17, "tfidf");
-  stmt.step_done();
-  int64_t id = sqlite3_last_insert_rowid(db_);
+  int64_t id = 0;
+  Statement existing(db_, "SELECT id FROM chunks WHERE filepath=? AND line_start=? AND line_end=? AND content_hash=? ORDER BY id DESC LIMIT 1");
+  existing.bind(1, chunk.filepath);
+  existing.bind(2, chunk.line_start);
+  existing.bind(3, chunk.line_end);
+  existing.bind(4, chunk.content_hash);
+  if (existing.step_row()) id = existing.column_int64(0);
+
+  if (id > 0) {
+    Statement upd(db_, "UPDATE chunks SET content=?,lang=?,chunk_type=?,symbol_name=?,metadata_json=?,status=?,updated_at=?,summary=?,repo_root=?,git_commit=?,indexed_at=?,modified_at=?,embed_model=? WHERE id=?");
+    upd.bind(1, chunk.content);
+    upd.bind(2, chunk.lang);
+    upd.bind(3, chunk.chunk_type);
+    upd.bind(4, chunk.symbol_name);
+    upd.bind(5, chunk.metadata_json.empty() ? "{}" : chunk.metadata_json);
+    upd.bind(6, chunk.status.empty() ? "active" : chunk.status);
+    upd.bind(7, now_utc());
+    upd.bind(8, chunk.summary);
+    upd.bind(9, chunk.repo_root);
+    upd.bind(10, chunk.git_commit);
+    upd.bind(11, chunk.indexed_at ? chunk.indexed_at : now_epoch());
+    upd.bind(12, chunk.modified_at);
+    upd.bind(13, "tfidf");
+    upd.bind(14, id);
+    upd.step_done();
+  } else {
+    Statement stmt(db_, "INSERT INTO chunks(filepath,content,lang,chunk_type,symbol_name,line_start,line_end,content_hash,metadata_json,status,updated_at,summary,repo_root,git_commit,indexed_at,modified_at,embed_model) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    stmt.bind(1, chunk.filepath);
+    stmt.bind(2, chunk.content);
+    stmt.bind(3, chunk.lang);
+    stmt.bind(4, chunk.chunk_type);
+    stmt.bind(5, chunk.symbol_name);
+    stmt.bind(6, chunk.line_start);
+    stmt.bind(7, chunk.line_end);
+    stmt.bind(8, chunk.content_hash);
+    stmt.bind(9, chunk.metadata_json.empty() ? "{}" : chunk.metadata_json);
+    stmt.bind(10, chunk.status.empty() ? "active" : chunk.status);
+    stmt.bind(11, now_utc());
+    stmt.bind(12, chunk.summary);
+    stmt.bind(13, chunk.repo_root);
+    stmt.bind(14, chunk.git_commit);
+    stmt.bind(15, chunk.indexed_at ? chunk.indexed_at : now_epoch());
+    stmt.bind(16, chunk.modified_at);
+    stmt.bind(17, "tfidf");
+    stmt.step_done();
+    id = sqlite3_last_insert_rowid(db_);
+
+    Statement hist(db_, "INSERT INTO chunk_history(chunk_id,git_commit,content,event,indexed_at,created_at) VALUES(?,?,?,?,?,?)");
+    hist.bind(1, id);
+    hist.bind(2, chunk.git_commit);
+    hist.bind(3, chunk.content);
+    hist.bind(4, "index");
+    hist.bind(5, now_epoch());
+    hist.bind(6, now_utc());
+    hist.step_done();
+  }
+
+  Statement clear_fts(db_, "DELETE FROM fts_chunks WHERE chunk_id=?");
+  clear_fts.bind(1, id);
+  clear_fts.step_done();
 
   Statement fts(db_, "INSERT INTO fts_chunks(content, filepath, chunk_id) VALUES(?,?,?)");
   fts.bind(1, chunk.content);
   fts.bind(2, chunk.filepath);
   fts.bind(3, id);
   fts.step_done();
-
-  Statement hist(db_, "INSERT INTO chunk_history(chunk_id,git_commit,content,event,indexed_at,created_at) VALUES(?,?,?,?,?,?)");
-  hist.bind(1, id);
-  hist.bind(2, chunk.git_commit);
-  hist.bind(3, chunk.content);
-  hist.bind(4, "index");
-  hist.bind(5, now_epoch());
-  hist.bind(6, now_utc());
-  hist.step_done();
   return id;
 }
 

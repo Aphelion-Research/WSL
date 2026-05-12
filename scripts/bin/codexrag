@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+set -euo pipefail
+exec "$HOME/Dominion/.venv/bin/python" "$HOME/Dominion/scripts/codexrag.py" "$@"

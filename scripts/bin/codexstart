@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+dominion start >/dev/null || true
+tmux has-session -t codex-matin 2>/dev/null || tmux new-session -d -s codex-matin "cd '$HOME/Dominion'; export DOMINION_PERSON=codex; exec codex"
+echo "Codex session ready: tmux attach -t codex-matin"
+echo "Inside Codex, run /mcp and confirm ragd tools are listed."

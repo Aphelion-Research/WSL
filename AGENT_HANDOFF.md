@@ -1,5 +1,35 @@
 # Dominion Agent Handoff
 
+## Dominion V2 Superbuild Handoff - 2026-05-12
+
+Current status: COMPLETE for the Dominion V2 MVP superbuild.
+
+- Baseline report exists at `reports/dominion-v2-latest.md`.
+- RAGD MCP first actions passed and showed RAGD `1.0.0`, TF-IDF backend, project indexing, and two open TODOs.
+- `AGENTS.md` was upgraded into the Dominion platform contract with explicit RAGD-first workflow, safety, validation, reporting, research, data, and collaboration policies.
+- Added platform layout and engineering standards docs.
+- Added Research OS foundation under `research_os/` with runtime state under `research/`.
+- Added optional Ollama-compatible local LLM adapter under `local_llm/`.
+- Validation passed: Research OS pytest `7 passed`, local LLM pytest `3 passed`, and one approved `crawl4ai_docs` URL fetched/chunked successfully.
+- Ollama is not running on `127.0.0.1:11434`; `llm doctor` reports disabled cleanly.
+- RAGD ingest bridge passed and `research ingest-ragd` indexed the bundle through RAGD `POST /index`.
+- RAGD storage now reuses unchanged chunk identity and live RAGD was restarted with the rebuilt binary.
+- Added command center, dashboard, Codex/RAGD helper commands, and noninteractive-safe `warp`.
+- Final report: `reports/dominion-v2-latest.md`.
+- Next best task: add a JavaScript-capable Research OS fetch adapter, then add a RAGD cleanup command for historical duplicate deleted chunks.
+
+Continuation commands:
+
+```bash
+cd ~/Dominion
+research status || true
+llm doctor || true
+research ragd-status || true
+dominion status || true
+dominion-ui --once || true
+cat reports/dominion-v2-latest.md
+```
+
 RUN_ID: `20260511-ragd-upgrade`
 
 Dominion remains read-only for market data operations. No secrets were read or printed.

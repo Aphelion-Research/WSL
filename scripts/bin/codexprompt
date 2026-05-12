@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cat <<'EOF'
+Start in /home/Martin/Dominion.
+
+1. Call ragd_handoff_read.
+2. Call ragd_query with the task-specific query.
+3. Inspect the files RAGD points to and any local code needed.
+4. Edit only after understanding the context.
+5. Validate focused behavior.
+6. Call ragd_remember for important decisions.
+7. Update PROGRESS.md, AGENT_HANDOFF.md, and reports/ for major work.
+
+Safety: no secrets, no live trading, no uncontrolled crawling.
+EOF

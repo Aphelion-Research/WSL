@@ -2,6 +2,25 @@
 
 RUN_ID: `20260511-221153`
 
+## Dominion V2 Superbuild - 2026-05-12
+
+Status: COMPLETE for Dominion V2 MVP superbuild.
+
+- Baseline captured in `reports/dominion-v2-latest.md`.
+- RAGD MCP first actions passed: `ragd_handoff_read`, task-specific `ragd_query`, and `ragd_todo_list`.
+- `AGENTS.md` now defines the Dominion platform contract and RAGD-first workflow.
+- Added `docs/PLATFORM_LAYOUT.md` and `docs/ENGINEERING_STANDARDS.md`.
+- RAGD decisions stored for the RAGD-first workflow and platform layout.
+- `dominion` command was missing at baseline and remains a target for the command center phase.
+- Added Research OS package, runtime source registry, CLI wrapper, docs, and tests.
+- Added optional Ollama-compatible local LLM package, CLI wrapper, docs, and offline-safe tests.
+- Research validation passed: `research init`, `research status`, `research list-sources`, `research add-url`, `research run --limit 1`, `research list`, `research doctor`.
+- Local LLM validation passed in disabled mode: `llm doctor`, local LLM pytest.
+- RAGD research ingest passed and RAGD MCP query can retrieve the new context.
+- RAGD unchanged-content reindex idempotency fixed in storage and validated with CMake/ctest.
+- Added `dominion`, `dominion-ui`, `codexrag`, `codexstatus`, `codexstart`, `codexprompt`, and `warp` wrappers.
+- Final validation passed; see `reports/dominion-v2-latest.md`.
+
 Status: PASS with documented RAGD production-surface limitations.
 
 ## Executive Summary

@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cmd="${1:-}"
+shift || true
+ROOT="$HOME/Dominion"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  warp matin      jump to Matin tmux
+  warp dan        jump to Dan tmux
+  warp shared     jump to shared Dominion tmux
+  warp dominion   jump to shared Dominion tmux
+  warp codex      jump to Codex tmux
+  warp ragd       jump to RAGD server tmux
+  warp list       list tmux sessions
+  warp kill NAME  kill tmux session
+EOF
+}
+
+ensure_session() {
+  local name="$1"
+  local command="$2"
+  tmux has-session -t "$name" 2>/dev/null || tmux new-session -d -s "$name" "$command"
+}
+
+jump_session() {
+  local name="$1"
+  if [ -n "${TMUX:-}" ]; then
+    tmux switch-client -t "$name"
+  elif [ -t 0 ] && [ -t 1 ]; then
+    exec tmux attach -t "$name"
+  else
+    echo "Session '$name' is ready. Attach with: tmux attach -t $name"
+  fi
+}
+
+case "$cmd" in
+  matin)
+    ensure_session "matin" "cd '$ROOT'; export DOMINION_PERSON=matin; exec bash -l"
+    jump_session "matin"
+    ;;
+  dan)
+    ensure_session "dan" "cd '$ROOT'; export DOMINION_PERSON=dan; exec bash -l"
+    jump_session "dan"
+    ;;
+  shared|dominion)
+    ensure_session "dominion" "cd '$ROOT'; export DOMINION_PERSON=dominion; exec bash -l"
+    jump_session "dominion"
+    ;;
+  codex)
+    ensure_session "codex-matin" "cd '$ROOT'; export DOMINION_PERSON=codex; exec codex"
+    jump_session "codex-matin"
+    ;;
+  ragd)
+    ensure_session "ragd" "cd '$ROOT/ragd'; ./build/ragd --db ~/.ragd/ragd.db --host 127.0.0.1 --port 7474 --path '$ROOT'"
+    jump_session "ragd"
+    ;;
+  list|ls)
+    tmux ls 2>/dev/null || echo "No tmux sessions."
+    ;;
+  kill)
+    target="${1:-}"
+    if [ -z "$target" ]; then
+      echo "Usage: warp kill SESSION"
+      exit 2
+    fi
+    tmux kill-session -t "$target"
+    ;;
+  help|-h|--help|"")
+    usage
+    ;;
+  *)
+    echo "Unknown warp target: $cmd"
+    usage
+    exit 2
+    ;;
+esac
