@@ -1,0 +1,39 @@
+# Dan Setup From Windows CMD
+
+1. Install Tailscale if needed.
+2. Accept Matin's Tailnet invite.
+3. In CMD:
+
+```cmd
+tailscale status
+tailscale ping 100.95.35.80
+ssh Martin@100.95.35.80
+```
+
+4. After SSH:
+
+```bash
+tmux attach -t dan
+```
+
+5. VS Code Remote SSH config at `%USERPROFILE%\.ssh\config`:
+
+```text
+Host dominion
+  HostName 100.95.35.80
+  User Martin
+  ServerAliveInterval 30
+  ServerAliveCountMax 3
+```
+
+Open:
+
+```cmd
+code --remote ssh-remote+dominion /home/Martin/Dominion
+```
+
+Fallback:
+
+```cmd
+"%LocalAppData%\Programs\Microsoft VS Code\bin\code.cmd" --remote ssh-remote+dominion /home/Martin/Dominion
+```

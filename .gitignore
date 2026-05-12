@@ -14,6 +14,7 @@ secrets/
 .mt5/
 apps/wine-python/
 apps/mt5/
+apps/mt5-official/
 apps/mt5-official/*.exe
 *.log
 *.tmp

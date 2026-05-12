@@ -18,6 +18,8 @@ else
 fi
 
 echo "remote Tailscale command: ssh Martin@$ts_ip"
+echo "VS Code Remote SSH command: code --remote ssh-remote+dominion /home/Martin/Dominion"
+echo "VS Code fallback: \"%LocalAppData%\\Programs\\Microsoft VS Code\\bin\\code.cmd\" --remote ssh-remote+dominion /home/Martin/Dominion"
 echo "tmux attach commands:"
 echo "  tmux attach -t matin"
 echo "  tmux attach -t dan"

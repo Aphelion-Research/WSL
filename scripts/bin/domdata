@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+env_file="$HOME/Dominion/secrets/mt5.env"
+if [ -f "$env_file" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$env_file"
+  set +a
+fi
+
+case "${1:-}" in
+  convert-xau|duckdb-init|duckdb-summary)
+    exec "$HOME/Dominion/.venv/bin/python" "$HOME/Dominion/domdata/domdata.py" "$@"
+    ;;
+esac
+
+export WINEPREFIX="${DOMDATA_WINEPREFIX:-$HOME/.mt5}"
+
+wine_py="${DOMDATA_WINE_PYTHON:-C:\\Python311\\python.exe}"
+script_win_path="$(winepath -w "$HOME/Dominion/domdata/domdata.py")"
+
+exec wine "$wine_py" "$script_win_path" "$@"

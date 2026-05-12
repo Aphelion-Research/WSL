@@ -4,6 +4,7 @@ import argparse
 
 from . import commands
 from .collector import collect_status, collect_xau
+from .convert import convert_xau, duckdb_init, duckdb_summary
 from .safety import BLOCKED_COMMANDS, blocked_command, notice
 
 
@@ -139,6 +140,23 @@ def main() -> None:
     p = sub.add_parser("collect-status")
     p.add_argument("--out-root", default="~/Dominion/data/raw/mt5")
     p.set_defaults(func=collect_status)
+
+    p = sub.add_parser("convert-xau")
+    p.add_argument("--date", required=True)
+    p.add_argument("--raw-root", default="~/Dominion/data/raw/mt5")
+    p.add_argument("--out-root", default="~/Dominion/data/normalized/mt5")
+    p.set_defaults(func=convert_xau)
+
+    p = sub.add_parser("duckdb-init")
+    p.add_argument("--db", default="~/Dominion/data/dominion.duckdb")
+    p.add_argument("--normalized-root", default="~/Dominion/data/normalized/mt5")
+    p.set_defaults(func=duckdb_init)
+
+    p = sub.add_parser("duckdb-summary")
+    p.add_argument("--date", required=True)
+    p.add_argument("--db", default="~/Dominion/data/dominion.duckdb")
+    p.add_argument("--normalized-root", default="~/Dominion/data/normalized/mt5")
+    p.set_defaults(func=duckdb_summary)
 
     for name in sorted(BLOCKED_COMMANDS):
         p = sub.add_parser(name, help="BLOCKED by read-only policy")

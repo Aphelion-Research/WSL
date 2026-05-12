@@ -1,0 +1,10 @@
+[Unit]
+Description=RAGD local agent memory daemon
+
+[Service]
+ExecStart=%h/.local/bin/ragd --db %h/.ragd/ragd.sqlite --host 127.0.0.1 --port 7474 --path %h/Dominion/docs --path %h/Dominion/ragd/docs
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

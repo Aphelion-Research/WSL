@@ -38,7 +38,7 @@ if [ -z "$terminal_path" ] || [ ! -f "$terminal_path" ]; then
   exit 1
 fi
 
-nohup wine "$terminal_path" >"$log_path" 2>&1 &
+nohup wine "$terminal_path" >"$log_path" 2>&1 </dev/null &
 sleep 3
 
 echo "MT5 start requested"
