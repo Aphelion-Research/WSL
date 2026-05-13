@@ -1,0 +1,7 @@
+models:
+  cpu_safe:
+    registry_key: cpu_safe
+  gpu_4gb_safe:
+    registry_key: gpu_4gb_safe
+  embedding:
+    registry_key: embedding

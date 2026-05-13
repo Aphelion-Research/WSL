@@ -6,6 +6,13 @@ import os
 import subprocess
 import time
 from datetime import datetime
+from pathlib import Path
+import sys
+
+
+ROOT = Path(os.environ.get("DOMINION_ROOT", str(Path.home() / "Dominion"))).expanduser()
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 
 def run(cmd: list[str], timeout: int = 5) -> str:
@@ -17,9 +24,13 @@ def run(cmd: list[str], timeout: int = 5) -> str:
 
 
 def render() -> str:
+    from dominion_ai.cli import latest_decisions_panel, latest_queries_panel
+
     sections = [
         ("Overview", run(["dominion", "status"], timeout=20)),
         ("RAGD", run(["dominion", "ragd"], timeout=10)[:1200]),
+        ("Latest queries", latest_queries_panel()),
+        ("Latest decisions", latest_decisions_panel()),
         ("Research", run(["research", "status"], timeout=10)),
         ("Data", run(["domdata", "collect-status"], timeout=20)),
         ("Codex", run(["codexstatus"], timeout=10)),

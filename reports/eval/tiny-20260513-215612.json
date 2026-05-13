@@ -1,0 +1,36 @@
+{
+  "bundle": "dominion_ai/tests/eval_fixtures/tiny",
+  "details": [
+    {
+      "expected": [
+        "1024"
+      ],
+      "mrr": 1.0,
+      "ndcg": 1.0,
+      "observed": [
+        "1024",
+        "698",
+        "699",
+        "700",
+        "664",
+        "705",
+        "704",
+        "697",
+        "506",
+        "691"
+      ],
+      "query": "agent handoff",
+      "recall": 1.0
+    }
+  ],
+  "elapsed_ms": 60.85,
+  "metrics": {
+    "citation_accuracy": 1.0,
+    "mrr": 1.0,
+    "ndcg@10": 1.0,
+    "recall@10": 1.0
+  },
+  "ok": true,
+  "queries": 1,
+  "top_k": 10
+}

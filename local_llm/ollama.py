@@ -7,13 +7,14 @@ import requests
 
 from .models import LLMConfig
 from .prompts import claims_prompt, query_expand_prompt, summarize_prompt, tag_prompt
+from .registry import default_embed_model_id, default_model_id
 
 
 def config() -> LLMConfig:
     return LLMConfig(
         host=os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/"),
-        model=os.environ.get("DOMINION_LLM_MODEL", "qwen2.5:3b"),
-        embed_model=os.environ.get("DOMINION_EMBED_MODEL", "nomic-embed-text"),
+        model=os.environ.get("DOMINION_LLM_MODEL", default_model_id()),
+        embed_model=os.environ.get("DOMINION_EMBED_MODEL", default_embed_model_id()),
     )
 
 

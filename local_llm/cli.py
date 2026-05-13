@@ -4,7 +4,9 @@ import argparse
 import json
 from pathlib import Path
 
+from .governor import doctor as governor_doctor
 from .ollama import extract_claims, health, list_models, query_expand, summarize, tag
+from .registry import registry_json
 
 
 def _read(value: str) -> str:
@@ -21,9 +23,12 @@ def _print(result: dict[str, object]) -> int:
 
 def cmd_doctor(args: argparse.Namespace) -> int:
     result = health()
+    result["governor"] = governor_doctor()
+    result["model_registry"] = json.loads(registry_json())
     print(json.dumps(result, indent=2, sort_keys=True))
     if not result.get("ok"):
-        print("Manual setup, if desired: ollama pull qwen2.5:3b; ollama pull llama3.2:3b; ollama pull nomic-embed-text")
+        suggested = result["governor"]["governor_plan"].get("model_id") or "<configured-model>"
+        print(f"Manual setup, if desired: ollama pull {suggested}; set DOMINION_LLM_MODEL to override.")
     return 0
 
 
@@ -52,6 +57,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("doctor")
+    p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_doctor)
 
     p = sub.add_parser("list")

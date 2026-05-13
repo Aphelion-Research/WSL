@@ -274,3 +274,45 @@ Results:
 - Pytest: PASS.
 - domdata forbidden-token scan: PASS.
 - bootstrap: PASS.
+
+## Agent 2 Phase 2 RAGD Intelligence - 2026-05-13
+
+Goal: complete fewer gates fully for the retrieval cockpit and RAGD-first developer workflow.
+
+Completed:
+
+- Added `dominion_ai/` with RAGD REST client, query planner, BM25/vector RRF composition, heuristic rerank, confidence scoring, budgeted context assembly, trace explorer, eval harness, ledger query layer, lightweight bench runner, and CLI handlers.
+- Added additive commands: `dominion ask`, `dominion search`, `dominion explain`, `dominion trace`, `dominion eval`, `dominion ledger`, `dominion graph`, `dominion bench`, and `dominion hw probe`.
+- Extended `local_llm/` with provider registry, mock/Ollama providers, and a 4 GB class governor.
+- Extended `dominion-ui --once` with Latest queries and Latest decisions panels.
+- Wrote Agent 2 docs under `docs/agents/` and final report `reports/agent-2-phase-2-20260513-214949.md`.
+
+Evidence captured:
+
+```bash
+python -m pytest -q dominion_ai/tests local_llm/tests
+python -m pytest -q
+dominion search "agent handoff" --top-k 3 --json
+dominion ask "how does the handoff protocol work" --json
+dominion ask "how does the handoff protocol work" --generate --json
+dominion trace ad51518679964fab8b78802762e7d5bd
+dominion eval --bundle dominion_ai/tests/eval_fixtures/tiny --top-k 10 --json
+dominion ledger list --kind decision --since 7d --json
+llm doctor --json
+dominion-ui --once
+```
+
+Results:
+
+- Focused pytest: PASS (`26 passed`).
+- Full configured pytest: PASS (`42 passed`).
+- Trading guard: PASS (`python ~/Dominion/domdata/check_no_trading.py`).
+- Tiny eval: PASS (`recall@10=1.0`, `MRR=1.0`, `nDCG@10=1.0`, `citation_accuracy=1.0`).
+- Governor: PASS; current 4 GB class GPU refuses the installed ~3.8 GB Ollama model because it exceeds the 3.5 GB safety ceiling, so `--generate` falls back retrieve-only.
+- Existing smoke: PASS for `dominion status`, `research status`, `domdata notice`, `warp list`, and `codexrag "agent handoff"`.
+
+Deferred honestly:
+
+- Full Agent 1 benchmark harness registration is not implemented; `dominion bench` is a lightweight local suite.
+- RAGD `/query` does not expose `content_hash`; Agent 2 uses `TEMP_ADAPTER(agent-1)` until Agent 1 adds the field.
+- Agent 2 consumes `dominion_loader.api.hw_probe` for `dominion hw probe --json`; a `TEMP_ADAPTER(agent-1)` fallback remains for older checkouts.

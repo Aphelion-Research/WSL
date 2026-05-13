@@ -166,3 +166,38 @@ cmake --build build -j$(nproc)
 ctest --test-dir build --output-on-failure
 ./build/ragd --db /tmp/ragd-smoke.db --host 127.0.0.1 --port 7474 --path docs --daemon
 ```
+
+## Agent 2 Phase 2 Handoff - 2026-05-13
+
+Agent 2 completed the RAGD intelligence cockpit core without creating a duplicate retrieval stack.
+
+Use now:
+
+```bash
+cd ~/Dominion
+dominion search "agent handoff" --top-k 3 --json
+dominion ask "how does the handoff protocol work" --json
+dominion ask "how does the handoff protocol work" --generate --json
+dominion trace <trace_id>
+dominion eval --bundle dominion_ai/tests/eval_fixtures/tiny --top-k 10 --json
+dominion ledger list --kind decision --since 7d --json
+llm doctor --json
+dominion-ui --once
+```
+
+Evidence:
+
+- `python -m pytest -q dominion_ai/tests local_llm/tests`: PASS (`26 passed`).
+- `python -m pytest -q`: PASS (`42 passed`).
+- `python ~/Dominion/domdata/check_no_trading.py`: PASS.
+- `dominion eval --bundle dominion_ai/tests/eval_fixtures/tiny --top-k 10 --json`: PASS (`recall@10=1.0`, `MRR=1.0`, `nDCG@10=1.0`, `citation_accuracy=1.0`).
+- `dominion trace ad51518679964fab8b78802762e7d5bd`: PASS (plan, retrieve, RRF, filter, rerank, confidence, assemble spans).
+- Existing command smoke passed for `dominion status`, `research status`, `domdata notice`, `warp list`, and `codexrag "agent handoff"`.
+
+Important caveats:
+
+- `TEMP_ADAPTER(agent-1)` derives `content_hash` because RAGD `/query` currently omits it.
+- `dominion hw probe --json` consumes `dominion_loader.api.hw_probe`; `TEMP_ADAPTER(agent-1)` remains only as a fallback.
+- The current Ollama model is present but governor-gated on the 4 GB class GPU because it is about 3.8 GB and exceeds the 3.5 GB ceiling; `--generate` falls back retrieve-only.
+
+Primary report: `reports/agent-2-phase-2-20260513-214949.md`.
