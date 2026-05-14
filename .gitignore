@@ -42,3 +42,5 @@ research/markdown/
 research/extracted/ragd_ingest/
 research/logs/
 research/cache/
+vault/files/tmp/
+vault/symbols/tmp/

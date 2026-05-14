@@ -409,3 +409,23 @@ Known warnings:
 - `hnswlib` and `tree_sitter` are listed in requirements but not installed in the current venv; code has tested fallbacks and the final report records this honestly.
 
 Report: see `reports/agent-6-phase-6-*.md` and validation log `reports/agent-6-validation-20260514-031442.log`.
+
+## Repo Weight Cleanup - 2026-05-14
+
+Status: COMPLETE. Removed tracked generated pytest snapshot mirrors under `vault/files/tmp/` and `vault/symbols/tmp/` and added ignore rules so they do not re-enter the tree.
+
+Evidence:
+
+```bash
+python - <<'PY'
+from ragd.scripts.ragd_mcp_stdio import ragd_handoff_read, ragd_query
+print(ragd_handoff_read())
+print(ragd_query('repo size reduction compression large files docs generated assets', top_k=8))
+PY
+git rm -r vault/files/tmp vault/symbols/tmp
+```
+
+Notes:
+
+- `ragd_handoff_read` and `ragd_query` failed closed with `Operation not permitted` against `http://127.0.0.1:7474/mcp`; no RAGD writes were performed.
+- The repo now ignores future `vault/files/tmp/` and `vault/symbols/tmp/` snapshots.

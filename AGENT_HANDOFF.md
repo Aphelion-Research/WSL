@@ -338,3 +338,26 @@ Important caveats:
 - No semantic recall improvement is claimed until Matin sets `RAGD_EMBED_API_KEY` and runs `dominion embed run`.
 - `dominion doctor --deep --json` is `warn`, not `ok`, due to missing embedding key, old `/tmp/pytest-*` orphan chunks, missing RAGD ignore-policy hash, and labeled TEMP_ADAPTER debt.
 - RAGD active chunks for the deleted local generation package were soft-deleted through `/index/delete` (`0` active chunks remain for that path).
+
+## Repo Weight Cleanup - 2026-05-14
+
+Done:
+
+- Removed tracked generated pytest snapshot mirrors from `vault/files/tmp/` and `vault/symbols/tmp/`.
+- Added `.gitignore` entries for both paths so future test runs do not repopulate the tree.
+
+Commands:
+
+```bash
+python - <<'PY'
+from ragd.scripts.ragd_mcp_stdio import ragd_handoff_read, ragd_query
+print(ragd_handoff_read())
+print(ragd_query('repo size reduction compression large files docs generated assets', top_k=8))
+PY
+git rm -r vault/files/tmp vault/symbols/tmp
+```
+
+Notes:
+
+- RAGD MCP access was unavailable in this sandbox with `Operation not permitted`; the cleanup proceeded without RAGD writes.
+- This only removed generated temp snapshots, not source code.
