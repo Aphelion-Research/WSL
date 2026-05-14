@@ -73,6 +73,71 @@ def print_json(data: dict) -> None:
     print(json.dumps(data, indent=2, sort_keys=True))
 
 
+def native_binary(name: str) -> Path:
+    return ROOT / "ragd" / "build" / name
+
+
+def run_native_json(cmd: list[str], timeout: int = 60) -> tuple[int, dict]:
+    code, output = run(cmd, timeout=timeout)
+    try:
+        payload = json.loads(output) if output else {}
+    except json.JSONDecodeError:
+        payload = {"native_fallback": True, "error": output}
+    return code, payload
+
+
+def cmd_native(args: argparse.Namespace) -> int:
+    command = args.native_command
+    binary_map = {
+        "scan": "dominion-native-scan",
+        "doctor": "dominion-native-doctor",
+        "manifest": "dominion-native-manifest",
+        "vault-doctor": "dominion-native-vault-doctor",
+        "bench": "dominion-native",
+    }
+    binary = native_binary(binary_map[command])
+    if not binary.exists():
+        payload = {"native_fallback": True, "status": "error", "error": f"native binary missing: {binary}"}
+        if getattr(args, "json", False):
+            print_json(payload)
+        else:
+            print(payload["error"])
+        return 1
+
+    cmd = [str(binary)]
+    if command == "bench":
+        cmd.append("bench")
+    elif command == "manifest":
+        cmd.append(args.manifest_command)
+    if command in {"scan", "doctor", "vault-doctor", "bench"}:
+        cmd.extend(["--root", str(args.root or ROOT)])
+    if command == "doctor":
+        cmd.append("--offline" if args.offline else "--live" if args.live else "--offline")
+        if args.strict:
+            cmd.append("--strict")
+    if command == "manifest":
+        cmd.extend(["--db", str(args.db)])
+        if args.manifest_command == "scan":
+            cmd.extend(["--root", str(args.root or ROOT)])
+    if command == "scan":
+        if args.include_ignored:
+            cmd.append("--include-ignored")
+        if args.strict:
+            cmd.append("--strict")
+        if args.max_files:
+            cmd.extend(["--max-files", str(args.max_files)])
+        if args.max_bytes:
+            cmd.extend(["--max-bytes", str(args.max_bytes)])
+    if command == "vault-doctor" and args.vault:
+        cmd.extend(["--vault", str(args.vault)])
+    if getattr(args, "json", False) and command not in {"manifest", "vault-doctor", "bench"}:
+        cmd.append("--json")
+
+    code, output = run(cmd, timeout=120)
+    print(output)
+    return code
+
+
 def cmd_status(args: argparse.Namespace) -> int:
     tailscale = run(["tailscale", "ip", "-4"], timeout=3)[1]
     ssh = run(["service", "ssh", "status"], timeout=3)[1]
@@ -147,6 +212,13 @@ def cmd_doctor(args: argparse.Namespace) -> int:
                 status = result.get("status", "?").upper()
                 print(f"  {status} {name}: {result.get('detail', '')}")
         return 0 if report["overall"] != "fail" else 1
+
+    native_doctor: dict | None = None
+    native_doctor_code: int | None = None
+    native_doctor_bin = native_binary("dominion-native-doctor")
+    if native_doctor_bin.exists() and getattr(args, "offline", False):
+        native_cmd = [str(native_doctor_bin), "--root", str(ROOT), "--offline", "--json"]
+        native_doctor_code, native_doctor = run_native_json(native_cmd, timeout=90)
 
     # Foundation checks — always run, no external dependencies
     foundation_checks: dict[str, dict] = {}
@@ -286,13 +358,25 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         ai_checks["a2_error"] = str(exc)
 
     all_checks = {**foundation_checks, **platform_checks, **ai_checks}
+    if native_doctor is not None:
+        foundation_checks["native_doctor"] = {
+            "status": "ok" if native_doctor_code == 0 else "error",
+            "overall": native_doctor.get("overall"),
+            "native_core_version": native_doctor.get("native_core_version"),
+        }
+        all_checks["native_doctor"] = foundation_checks["native_doctor"]
     overall_ok = all(
         v.get("status") not in {"error", "fail"} if isinstance(v, dict) and "status" in v else bool(v)
         for v in all_checks.values()
     )
 
     if args.json:
-        print_json({"overall": "ok" if overall_ok else "warn", "checks": all_checks})
+        payload = {"overall": "ok" if overall_ok else "warn", "checks": all_checks}
+        if native_doctor is not None:
+            payload["native_doctor"] = native_doctor
+        else:
+            payload["native_fallback"] = True
+        print_json(payload)
         return 0
 
     # Human-readable output
@@ -305,8 +389,11 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             print(f"       {result['error']}")
     print("=== Platform Checks ===")
     for name, result in platform_checks.items():
-        mark = "PASS" if result else "FAIL"
+        mark = "SKIP" if isinstance(result, str) and result.startswith("skipped") else "PASS" if result else "FAIL"
         print(f"  {mark} {name}")
+    if native_doctor is not None:
+        print("=== Native Checks ===")
+        print(f"  {'PASS' if native_doctor_code == 0 else 'FAIL'} native_doctor overall={native_doctor.get('overall', 'unknown')}")
     return 0 if overall_ok else 1
 
 
@@ -790,6 +877,46 @@ def build_parser() -> argparse.ArgumentParser:
     ip = ignore_sub.add_parser("policy")
     ip.add_argument("--json", action="store_true")
     ip.set_defaults(func=cmd_ignore)
+
+    p = sub.add_parser("native", help="Dominion native C++ core tools")
+    native_sub = p.add_subparsers(dest="native_command", required=True)
+
+    np = native_sub.add_parser("scan")
+    np.add_argument("--root", default=None)
+    np.add_argument("--json", action="store_true")
+    np.add_argument("--include-ignored", action="store_true")
+    np.add_argument("--strict", action="store_true")
+    np.add_argument("--max-files", type=int, default=0)
+    np.add_argument("--max-bytes", type=int, default=0)
+    np.set_defaults(func=cmd_native)
+
+    np = native_sub.add_parser("doctor")
+    np.add_argument("--root", default=None)
+    np.add_argument("--json", action="store_true")
+    np.add_argument("--offline", action="store_true")
+    np.add_argument("--live", action="store_true")
+    np.add_argument("--strict", action="store_true")
+    np.set_defaults(func=cmd_native)
+
+    np = native_sub.add_parser("vault-doctor")
+    np.add_argument("--root", default=None)
+    np.add_argument("--vault", default=None)
+    np.add_argument("--json", action="store_true")
+    np.set_defaults(func=cmd_native)
+
+    np = native_sub.add_parser("bench")
+    np.add_argument("--root", default=None)
+    np.add_argument("--json", action="store_true")
+    np.set_defaults(func=cmd_native)
+
+    np = native_sub.add_parser("manifest")
+    manifest_native_sub = np.add_subparsers(dest="manifest_command", required=True)
+    for manifest_command in ("init", "scan", "doctor"):
+        mpn = manifest_native_sub.add_parser(manifest_command)
+        mpn.add_argument("--db", default=str(Path.home() / ".dominion" / "native_manifest.db"))
+        mpn.add_argument("--root", default=None)
+        mpn.add_argument("--json", action="store_true")
+        mpn.set_defaults(func=cmd_native)
 
     # -----------------------------------------------------------------------
     # Foundation (Agent 1) subcommands

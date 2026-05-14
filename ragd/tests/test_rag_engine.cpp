@@ -15,6 +15,12 @@ int main() {
   auto result = parsed["results"][0];
   assert(result["content_hash"] == "r1");
   assert(result["repo_root"] == "/tmp/ragd-test-root");
+  assert(result["document_id"].is_string());
+  assert(result["stable_chunk_id"].is_string());
+  assert(result["relative_path"] == "doc.md");
+  assert(result["language"] == "markdown");
+  assert(result["source_subsystem"] == "ragd");
+  assert(result["score_breakdown"].is_object());
   assert(result["status"] == "active");
   assert(result["indexed_at"] == 1234567890);
   assert(result["modified_at"] == 1234567800);

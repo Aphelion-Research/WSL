@@ -2,6 +2,53 @@
 
 RUN_ID: `20260511-221153`
 
+## Agent 5 Phase 5 Native Core — 2026-05-14
+
+Status: PARTIAL-COMPLETE / OFFLINE-GREEN. Dominion now has a compiled C++ native core under `ragd/` for policy, path normalization, classification, SHA-256 hashing, deterministic scan planning, SQLite manifest primitives, native doctor checks, native vault integrity, forbidden-token policy fingerprints, Agent OS lock/scope/evidence primitives, and native benchmark output.
+
+What changed:
+
+- Added `dominion_native` C++17 library and native tools: `dominion-native`, `dominion-native-scan`, `dominion-native-manifest`, `dominion-native-doctor`, and `dominion-native-vault-doctor`.
+- Hardened `ragd/CMakeLists.txt` with native build options, corrected `URL_HASH` values, OpenSSL SHA-256 support, and multiarch SQLite detection.
+- Replaced RAGD `sha256ish()` internals with real SHA-256.
+- Added RAGD query metadata fields: `document_id`, `stable_chunk_id`, `relative_path`, `language`, `score_breakdown`, and `source_subsystem`.
+- Added `config/forbidden_tokens.json`; Python `domdata_pkg/forbidden_tokens.py` now reads the canonical JSON and exposes a fingerprint.
+- Added Python CLI native commands under `python scripts/dominion_cli.py native ...`; `doctor --offline` invokes native doctor when the binary exists.
+- Added docs: `docs/NATIVE_CORE.md`, `docs/RAGD_NATIVE_CONTRACT.md`, `docs/DOCTOR_CONTRACT.md`, and `docs/CPP_BUILD.md`.
+
+Validation:
+
+```bash
+cmake -S ragd -B ragd/build -DCMAKE_BUILD_TYPE=RelWithDebInfo  # PASS
+cmake --build ragd/build -j$(nproc)                            # PASS
+ctest --test-dir ragd/build --output-on-failure                 # 24/24 passed
+python -m pytest -q                                             # 387 passed, 2 deselected
+python -m pytest -q -m "not integration"                        # 387 passed, 2 deselected
+python domdata/check_no_trading.py                              # PASS
+domdata notice                                                  # READ-ONLY notice
+domdata order-send || true                                      # BLOCKED
+domdata doctor                                                  # PASS, account masked
+domdata xaurates --count 5                                      # PASS
+domdata xauticks --start 2026-05-11T00:00:00Z --count 5          # returned null
+domdata xautick                                                 # tick null, IPC send failed
+python scripts/dominion_cli.py doctor --offline                 # exit 0, native_doctor overall=warn
+ragd/build/dominion-native-doctor --root . --offline --json      # exit 0, overall=warn
+ragd/build/dominion-native-doctor --root . --live --json         # exit 1, RAGD unreachable
+ragd/build/dominion-native-vault-doctor --root . --json          # warn, 298 broken links
+ragd/build/dominion-native bench --root . --json                 # scan_files_per_sec≈1150.7
+```
+
+Known blockers / warnings:
+
+- Release-ready: no. Native core is implemented and tested, but vault remains stale and live RAGD is not reachable on `127.0.0.1:7474`.
+- Python vault doctor reports 281 broken links; native vault doctor reports 298 broken links, including 278 `/tmp/pytest-*` stale/outside-repo links.
+- `domdata xautick` returned `tick: null` with MT5 IPC send failed; historical rates still returned data.
+- `python -m domdata ...` is not a supported command form in this checkout; use `domdata ...`.
+
+Reports: `reports/phase-5-native-core-start-latest.md` and `reports/phase-5-native-core-latest.md`.
+
+---
+
 ## Dominion V2 Superbuild - 2026-05-12
 
 Status: COMPLETE for Dominion V2 MVP superbuild.
@@ -63,6 +110,82 @@ Remaining warnings: RAGD ignore policy hash unavailable, historical orphan activ
 | Complexity budget recalibration | PASS |
 | Full test suite | PASS (`387 passed`) |
 | `check_no_trading.py` | PASS |
+
+---
+
+## Audit + Stabilization — 2026-05-14
+
+Two-cycle external audit fixed all critical/high/medium correctness and validation issues.
+
+| Item | Status |
+|---|---|
+| `acquire_lock()` BEGIN IMMEDIATE (race fix) | PASS |
+| `dangerous` flag bypass (`not payload.get`) | PASS |
+| Dangerous term scan covers `title` + `description` | PASS |
+| Field-specific dangerous-term error messages | PASS |
+| `end_session()` accepts `idle` status | PASS |
+| `abandon_session()` rowcount check | PASS |
+| `_has_pytest_evidence` wired in adversary | PASS |
+| Adversary score: continuous penalty formula | PASS |
+| Canonical `domdata_pkg/forbidden_tokens.py` | PASS |
+| `adversary.py` imports from canonical token file | PASS |
+| `doctor --offline` skips platform checks | PASS |
+| `doctor --offline` exit code consistent (0) | PASS |
+| CLI `ROOT` inferred from script location | PASS |
+| Integration tests gated by default (`-m "not integration"`) | PASS |
+| `test_unreadable_directory` skips on root/WSL | PASS |
+| `test_doctor_runs_without_crash` uses `--offline` | PASS |
+| CMake `URL_HASH` pinned for nlohmann_json + cpp-httplib | PASS |
+| CMake SQLite: multiarch discovery via pkg-config | PASS |
+| Complexity score: test credit capped (cannot erase debt) | PASS |
+| TEMP_ADAPTER(agent-1) debt cleared in `ragd_client.py` | PASS |
+| `complexity.py` `add_parser` dedup hack removed | PASS |
+| `WINE_WSL_DRIVE` env var in `collector.py` | PASS |
+| pytest markers: `requires_hnsw`, `requires_treesitter` | PASS |
+| Full test suite | PASS (`387 passed, 2 deselected`) |
+| `check_no_trading.py` | PASS |
+| `doctor --offline` | PASS (exit 0) |
+
+Vault has 281 broken links from stale committed notes — rebuild with `dominion vault rebuild` after RAGD is stable.  
+`dominion_agent` complexity is over budget (430.2/350.0) — technical debt, not a blocker.
+
+---
+
+## Audit + Stabilization — 2026-05-14
+
+Two-cycle external audit fixed all critical/high/medium correctness and validation issues.
+
+| Item | Status |
+|---|---|
+| `acquire_lock()` BEGIN IMMEDIATE (race fix) | PASS |
+| `dangerous` flag bypass (`not payload.get`) | PASS |
+| Dangerous term scan covers `title` + `description` | PASS |
+| Field-specific dangerous-term error messages | PASS |
+| `end_session()` accepts `idle` status | PASS |
+| `abandon_session()` rowcount check | PASS |
+| `_has_pytest_evidence` wired in adversary | PASS |
+| Adversary score: continuous penalty formula | PASS |
+| Canonical `domdata_pkg/forbidden_tokens.py` | PASS |
+| `adversary.py` imports from canonical token file | PASS |
+| `doctor --offline` skips platform checks | PASS |
+| `doctor --offline` exit code consistent (0) | PASS |
+| CLI `ROOT` inferred from script location | PASS |
+| Integration tests gated by default (`-m "not integration"`) | PASS |
+| `test_unreadable_directory` skips on root/WSL | PASS |
+| `test_doctor_runs_without_crash` uses `--offline` | PASS |
+| CMake `URL_HASH` pinned for nlohmann_json + cpp-httplib | PASS |
+| CMake SQLite: multiarch discovery via pkg-config | PASS |
+| Complexity score: test credit capped (cannot erase debt) | PASS |
+| TEMP_ADAPTER(agent-1) debt cleared in `ragd_client.py` | PASS |
+| `complexity.py` `add_parser` dedup hack removed | PASS |
+| `WINE_WSL_DRIVE` env var in `collector.py` | PASS |
+| pytest markers: `requires_hnsw`, `requires_treesitter` | PASS |
+| Full test suite | PASS (`387 passed, 2 deselected`) |
+| `check_no_trading.py` | PASS |
+| `doctor --offline` | PASS (exit 0) |
+
+Vault has 281 broken links from stale committed notes — rebuild with `dominion vault rebuild` after RAGD is stable.  
+`dominion_agent` complexity is over budget (430.2/350.0) — technical debt, not a blocker.
 
 ---
 

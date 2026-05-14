@@ -1,5 +1,6 @@
 #include "ragd/rag_engine.h"
 
+#include "dominion_native/content_hash.hpp"
 #include "ragd/intent_router.h"
 
 #include <algorithm>
@@ -42,17 +43,29 @@ nlohmann::json parse_array(const std::string &value) {
   return parsed.is_array() ? parsed : nlohmann::json::array();
 }
 
+std::string relative_path_for(const QueryResult &r) {
+  if (!r.repo_root.empty() && r.filepath.rfind(r.repo_root + "/", 0) == 0) return r.filepath.substr(r.repo_root.size() + 1);
+  return r.filepath;
+}
+
 nlohmann::json result_to_json(const QueryResult &r) {
+  const auto relative_path = relative_path_for(r);
+  const auto document_id = dominion_native::document_id(r.repo_root, relative_path);
   return {
       {"chunk_id", r.chunk_id},
+      {"stable_chunk_id", dominion_native::chunk_id(r.repo_root, relative_path, r.line_start, r.line_end, r.content_hash)},
+      {"document_id", document_id},
       {"filepath", r.filepath},
+      {"relative_path", relative_path},
       {"content", r.content},
       {"summary", r.summary},
       {"score", r.score},
       {"bm25_score", r.bm25_score},
       {"vector_score", r.vector_score},
       {"rrf_score", r.rrf_score},
+      {"score_breakdown", {{"total", r.score}, {"bm25", r.bm25_score}, {"vector", r.vector_score}, {"rrf", r.rrf_score}}},
       {"lang", r.lang},
+      {"language", r.lang},
       {"chunk_type", r.chunk_type},
       {"symbol_name", r.symbol_name},
       {"qualified_name", r.qualified_name},
@@ -69,6 +82,7 @@ nlohmann::json result_to_json(const QueryResult &r) {
       {"indexed_at", r.indexed_at},
       {"modified_at", r.modified_at},
       {"git_commit", r.git_commit},
+      {"source_subsystem", "ragd"},
   };
 }
 

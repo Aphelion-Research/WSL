@@ -1,5 +1,7 @@
 #include "ragd/storage.h"
 
+#include "dominion_native/content_hash.hpp"
+
 #include <algorithm>
 #include <chrono>
 #include <iomanip>
@@ -141,10 +143,7 @@ std::string now_utc() {
 }
 
 std::string sha256ish(const std::string &input) {
-  std::hash<std::string> h;
-  std::ostringstream out;
-  out << std::hex << h(input);
-  return out.str();
+  return dominion_native::sha256_string(input);
 }
 
 Statement::Statement(sqlite3 *db, const std::string &sql) : db_(db) {

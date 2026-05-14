@@ -10,25 +10,31 @@ Add tokens here; they propagate to all consumers automatically.
 """
 from __future__ import annotations
 
+import hashlib
+import json
+from pathlib import Path
+
+
+def _policy_path() -> Path:
+    return Path(__file__).resolve().parents[2] / "config" / "forbidden_tokens.json"
+
+
+def _load_policy() -> dict:
+    return json.loads(_policy_path().read_text(encoding="utf-8"))
+
+
+def _tokens_from_policy(policy: dict) -> frozenset[str]:
+    tokens: set[str] = set()
+    for values in policy.get("groups", {}).values():
+        tokens.update(str(token) for token in values)
+    return frozenset(tokens)
+
+
+FORBIDDEN_POLICY: dict = _load_policy()
+
 # Exact string tokens that must never appear outside allowlisted safety files.
-# Covers both snake_case (MT5 Python API) and PascalCase (MQL / third-party)
-# trading execution forms.
-FORBIDDEN_TOKENS: frozenset[str] = frozenset({
-    # MT5 Python API — order execution
-    "order_send",
-    "order_check",
-    # MQL4/5 trade action constants
-    "TRADE_ACTION_DEAL",
-    "TRADE_ACTION_PENDING",
-    # Position management
-    "POSITION_CLOSE",
-    "position_close",
-    # PascalCase / third-party API variants
-    "OrderOpen",
-    "OrderSend",
-    "PositionOpen",
-    "PositionClose",
-    "TradeOpen",
-    # Generic execution helpers
-    "execute_trade",
-})
+# Covers MT5 Python APIs, MQL action constants, and legacy wrapper names.
+FORBIDDEN_TOKENS: frozenset[str] = _tokens_from_policy(FORBIDDEN_POLICY)
+FORBIDDEN_POLICY_FINGERPRINT: str = hashlib.sha256(
+    json.dumps(FORBIDDEN_POLICY, sort_keys=True, separators=(",", ":")).encode("utf-8")
+).hexdigest()

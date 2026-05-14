@@ -114,6 +114,45 @@ Not a real problem. The RAGD `/health` endpoint shows 955 active_chunks, 1478 to
 
 ---
 
+## Audit + Stabilization Update — 2026-05-14
+
+Applied after two external audit cycles. All critical/high/medium findings resolved.
+
+### Validation gates (current)
+
+```bash
+python -m pytest -q                             # 387 passed, 2 deselected
+python domdata/check_no_trading.py              # PASS
+python scripts/dominion_cli.py doctor --offline # exit 0
+```
+
+### Changes applied
+
+| Finding | Fix |
+|---|---|
+| C-1: `acquire_lock()` race | `BEGIN IMMEDIATE` / `COMMIT` / `ROLLBACK` |
+| H-1: `dangerous` flag bypass | `not payload.get("dangerous")` |
+| H-2: `_has_pytest_evidence` dead code | Wired into adversary check #10 |
+| H-3: `end_session` rejects idle | Accepts `"active"` or `"idle"` |
+| M-1: Forbidden token list fragmentation | Canonical `domdata_pkg/forbidden_tokens.py` |
+| M-2: Dangerous terms not in title | Scans both title and description with field name |
+| M-7: `dominion-health` fails in sandbox | Gated with `CODEX_SANDBOX` env check |
+| I-3: TEMP_ADAPTER(agent-1) | Cleared from `ragd_client.py` |
+| L-1: Adversary score flat-categorical | Continuous penalty formula |
+| L-2: `complexity.py` `add_parser` dedup hack | Moved inside non-test branch, `// 2` removed |
+| L-4: `abandon_session` re-queries after UPDATE | `cursor.rowcount == 0` check |
+| L-5: `Z:` Wine drive hardcoded | `WINE_WSL_DRIVE` env var with `Z:` default |
+| H-1(v2): Integration tests not gated | `addopts = -m "not integration"` in pytest.ini |
+| H-2(v2): `doctor --offline` inconsistent | Platform checks skipped in offline mode |
+| H-3(v2): CLI root `~/Dominion` hardcoded | Inferred from `Path(__file__).resolve().parents[1]` |
+| M-1(v2): `test_unreadable_directory` fragile | Skips under root/WSL; soft-skips if FS won't enforce |
+| M-3: CMake no URL_HASH | SHA256 pinned for both FetchContent deps |
+| M-4: SQLite x86 fallback | pkg-config multiarch discovery |
+| M-5: Complexity test credit gaming | Test credit capped at file/symbol contribution |
+| L-3: Dangerous term message not field-specific | Message now says `'title'` or `'description'` |
+
+---
+
 ## Open items
 
 | Item | Severity | Owner |

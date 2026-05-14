@@ -1,5 +1,85 @@
 # Dominion Agent Handoff
 
+## Agent 5 Phase 5 Native Core — 2026-05-14
+
+Status: PARTIAL-COMPLETE / OFFLINE-GREEN. The native C++ spine is now real and validated, but release-ready remains `no` because vault integrity is stale and live RAGD is not reachable.
+
+Use now:
+
+```bash
+cmake -S ragd -B ragd/build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build ragd/build -j$(nproc)
+ctest --test-dir ragd/build --output-on-failure
+ragd/build/dominion-native-scan --root . --json
+ragd/build/dominion-native-manifest scan --root . --db /tmp/dominion-native-test.db
+ragd/build/dominion-native-doctor --root . --offline --json
+python scripts/dominion_cli.py native doctor --offline --json
+python scripts/dominion_cli.py doctor --offline --json
+```
+
+What changed:
+
+- Added `ragd/include/dominion_native/`, `ragd/src/native/`, `ragd/tools/`, and `ragd/tests/native/`.
+- Native C++ now owns ignore-policy decisions, path normalization, file classification, SHA-256 hashing, scan planning, SQLite manifest primitives, doctor aggregation, vault integrity, forbidden-token policy loading, Agent OS lock/scope/evidence primitives, and benchmark metrics.
+- RAGD query JSON now includes stable metadata fields without removing existing numeric `chunk_id`.
+- Python CLI exposes `native` subcommands and embeds native doctor output in `doctor --offline`.
+- `config/forbidden_tokens.json` is the canonical token policy; Python and native fingerprints match.
+
+Validation summary:
+
+- `python -m pytest -q`: PASS (`387 passed, 2 deselected`).
+- `python -m pytest -q -m "not integration"`: PASS (`387 passed, 2 deselected`).
+- CMake configure/build: PASS.
+- `ctest --test-dir ragd/build --output-on-failure`: PASS (`24/24`).
+- `python domdata/check_no_trading.py`: PASS.
+- `domdata order-send || true`: BLOCKED.
+- Native offline doctor: exit 0, `overall=warn`.
+- Native live doctor: exit 1 because RAGD loopback port is not reachable.
+- Native vault doctor: `warn`, 874 notes, 298 broken links, 278 stale/outside temp links, 0 secret references.
+
+Next best task:
+
+1. Start or repair live RAGD on `127.0.0.1:7474`, then rerun native live doctor.
+2. Regenerate or repair vault notes so Python and native vault doctors are no longer stale.
+3. Wire native manifest output into loader/RAGD ingestion rather than using it only as a parallel manifest.
+
+---
+
+## Audit + Stabilization — 2026-05-14
+
+**Status: COMPLETE.** Two external audit cycles fixed all critical/high/medium correctness and validation issues. Repo is offline-green.
+
+### Validation gates (current)
+
+```bash
+python -m pytest -q                                    # 387 passed, 2 deselected
+python domdata/check_no_trading.py                     # PASS
+python scripts/dominion_cli.py doctor --offline        # exit 0
+python scripts/dominion_cli.py doctor --offline --json # overall: ok
+```
+
+### What changed
+
+- **Safety core:** `acquire_lock()` BEGIN IMMEDIATE race fix; `dangerous` flag truthiness fix; dangerous terms scan both `title` and `description` with field-named error messages; `end_session()` accepts `idle`; `abandon_session()` rowcount check.
+- **Adversary:** `_has_pytest_evidence()` wired; continuous penalty score (`1.0 - 0.4·crit - 0.15·high - 0.05·med - 0.01·low`); token list imports from canonical `domdata_pkg/forbidden_tokens.py`.
+- **Forbidden tokens:** `domdata/domdata_pkg/forbidden_tokens.py` is the single source of truth; `check_no_trading.py` and `safety.py` import from it; `adversary.py` does conditional import with inline fallback.
+- **Offline doctor:** `--offline` skips `ragd_reachable`, `dominion_health`, `domdata_notice`; exit code consistent with JSON mode.
+- **CLI root:** `ROOT` inferred from `Path(__file__).resolve().parents[1]`; `DOMINION_ROOT` still overrides.
+- **Integration gating:** pytest.ini `addopts = -m "not integration"` — RAGD-requiring tests excluded from default run.
+- **Test portability:** `test_unreadable_directory` skips under root/WSL; `test_doctor` uses `--offline`.
+- **CMake:** `URL_HASH SHA256=…` pinned for both FetchContent deps; SQLite discovery via pkg-config (multiarch-aware).
+- **Complexity:** test credit capped at `file_count + public_symbol_count` contribution; cannot erase TODO/except/TEMP_ADAPTER penalties.
+- **TEMP_ADAPTER(agent-1) cleared:** `ragd_client.py` adapters removed; `content_hash`/`document_id` fallbacks retained silently.
+
+### Open items
+
+- Vault: 281 broken links from stale committed notes. Run `dominion vault rebuild` after RAGD is stable.
+- `dominion_agent` complexity: 430.2/350.0 over budget — technical debt, not a release blocker.
+- RAGD embed key not set — hybrid retrieval falls back to BM25 only (intentional, documented).
+- RAGD WebSocket not implemented — REST polling only (documented upstream gap).
+
+---
+
 ## Phase 5 — Consolidation + Cockpit (2026-05-14)
 
 **Status: COMPLETE.** Phase 5 turned the Dominion loader + AI + Agent OS stack into a human-usable cockpit.

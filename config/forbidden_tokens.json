@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "groups": {
+    "mt5_execution_api": [
+      "order_send",
+      "order_check"
+    ],
+    "trade_action_constants": [
+      "TRADE_ACTION_DEAL",
+      "TRADE_ACTION_PENDING",
+      "POSITION_CLOSE"
+    ],
+    "legacy_execution_wrappers": [
+      "position_close",
+      "OrderOpen",
+      "OrderSend",
+      "PositionOpen",
+      "PositionClose",
+      "TradeOpen",
+      "execute_trade"
+    ]
+  },
+  "allowlist_files": [
+    "safety.py",
+    "check_no_trading.py",
+    "forbidden_tokens.py",
+    "test_safety.py"
+  ],
+  "skip_parts": [
+    "__pycache__",
+    "backups",
+    ".git",
+    ".venv",
+    "data",
+    "logs",
+    "build",
+    "vendor"
+  ]
+}
+

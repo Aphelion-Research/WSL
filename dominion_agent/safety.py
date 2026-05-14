@@ -172,14 +172,14 @@ def validate_task_payload(payload: dict[str, Any]) -> SafetyResult:
             redacted_files.append(f)
 
     # Check dangerous terms in title and description
-    for text in (title, description):
+    for field_name, text in [("title", title), ("description", description)]:
         if not isinstance(text, str):
             continue
         lower_text = text.lower()
         for term in _DANGEROUS_TERMS:
             if term in lower_text and not payload.get("dangerous"):
                 violations.append(
-                    f"SAFETY: task contains destructive term '{term}' "
+                    f"SAFETY: '{field_name}' contains destructive term '{term}' "
                     "without --dangerous flag. Add 'dangerous: true' to payload if intentional."
                 )
 
