@@ -436,253 +436,141 @@ def cmd_next_prompt(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_scan(args: argparse.Namespace) -> int:
-    """Run dominion_loader scan over the repo."""
-    from dominion_loader.scan import scan
-    from dominion_loader.manifest import Manifest
-    from dominion_loader.obs import _NullTracer, set_tracer
+def cmd_truth(args: argparse.Namespace) -> int:
+    """Truth report: doctor --deep + complexity + ignore + RAGD + LLM governor."""
+    import time
+    sections: dict = {}
 
-    set_tracer(_NullTracer())  # CLI: no trace file noise by default
-    repo = Path(getattr(args, "repo", None) or ROOT)
-    dry_run = getattr(args, "dry_run", False)
-
-    manifest = Manifest()
+    # 1. Deep doctor (may take a moment)
     try:
-        stats = scan(
-            repo,
-            dry_run=dry_run,
-            manifest=manifest,
+        from dominion_loader.truth_doctor import run_deep_doctor
+        sections["doctor"] = run_deep_doctor(
+            offline=getattr(args, "offline", False),
+            max_sample=getattr(args, "max_sample", 200),
         )
-    finally:
-        manifest.close()
+    except Exception as exc:
+        sections["doctor"] = {"overall": "error", "error": str(exc)}
 
-    data = {
-        "trace_id": stats.trace_id,
-        "repo_root": stats.repo_root,
-        "files_seen": stats.files_seen,
-        "files_new": stats.files_new,
-        "files_changed": stats.files_changed,
-        "files_deleted": stats.files_deleted,
-        "files_skipped": stats.files_skipped,
-        "files_error": stats.files_error,
-        "ragd_chunks_indexed": stats.ragd_chunks_indexed,
-        "ragd_errors": stats.ragd_errors,
-        "ragd_paths_deleted": stats.ragd_paths_deleted,
-        "ragd_chunks_deleted": stats.ragd_chunks_deleted,
-        "ragd_delete_errors": stats.ragd_delete_errors,
-        "duration_ms": round(stats.duration_ms, 1),
-        "dry_run": dry_run,
+    # 2. Complexity report
+    try:
+        from dominion_agent.complexity import all_packages_report
+        reports = []
+        for r in all_packages_report():
+            reports.append({
+                "package": r.package,
+                "score": r.score,
+                "budget": r.budget,
+                "over_budget": r.over_budget,
+                "warnings": r.warnings,
+            })
+        sections["complexity"] = {
+            "status": "warn" if any(r["over_budget"] for r in reports) else "ok",
+            "packages": reports,
+        }
+    except Exception as exc:
+        sections["complexity"] = {"status": "error", "error": str(exc)}
+
+    # 3. Ignore policy
+    try:
+        from dominion_loader.ignore import Ignore
+        ig = Ignore()
+        rules = ig.builtin_rules()
+        sections["ignore_policy"] = {
+            "status": "ok" if "secrets" in rules.get("dir_deny", set()) else "warn",
+            "secrets_blocked": "secrets" in rules.get("dir_deny", set()),
+            "policy_hash": ig.policy_hash() if hasattr(ig, "policy_hash") else "unavailable",
+        }
+    except Exception as exc:
+        sections["ignore_policy"] = {"status": "error", "error": str(exc)}
+
+    # 4. RAGD metadata
+    ragd = ragd_health()
+    sections["ragd"] = {
+        "status": "ok" if ragd.get("ok") else "warn",
+        "reachable": ragd.get("ok", False),
+        "data": ragd.get("data") or {},
     }
 
-    if getattr(args, "json", False):
-        print_json(data)
+    # 5. Local LLM governor
+    try:
+        from local_llm.governor import Governor
+        gov = Governor()
+        sections["local_llm"] = {
+            "status": "ok",
+            "provider": gov.provider_name(),
+            "model": gov.current_model(),
+            "can_generate": gov.can_generate(),
+            "retrieve_only": gov.retrieve_only(),
+        }
+    except Exception as exc:
+        sections["local_llm"] = {"status": "warn", "error": str(exc)}
+
+    # Overall
+    statuses = [s.get("status", "?") for s in sections.values() if isinstance(s, dict)]
+    if "error" in statuses or "fail" in statuses:
+        overall = "fail"
+    elif "warn" in statuses:
+        overall = "warn"
     else:
-        prefix = "[DRY RUN] " if dry_run else ""
-        print(f"{prefix}scan complete: seen={stats.files_seen} new={stats.files_new} "
-              f"changed={stats.files_changed} deleted={stats.files_deleted} "
-              f"skipped={stats.files_skipped} errors={stats.files_error} "
-              f"ragd_chunks={stats.ragd_chunks_indexed} "
-              f"ragd_deleted={stats.ragd_chunks_deleted} ({stats.duration_ms:.0f}ms)")
-    return 0
+        overall = "ok"
 
-
-def cmd_cache(args: argparse.Namespace) -> int:
-    """Manage the dominion_loader cache."""
-    from dominion_loader.cache import Cache, CacheCorruption
-
-    cache = Cache()
-    sub = getattr(args, "cache_command", "stats")
-
-    if sub == "stats":
-        stats = cache.stats()
-        if getattr(args, "json", False):
-            print_json(stats)
-        else:
-            print(f"cache entries={stats['entries']} bytes={stats['bytes']}")
-        return 0
-
-    elif sub == "verify":
-        results = cache.verify()
-        if getattr(args, "json", False):
-            print_json({"corrupt": results, "count": len(results)})
-        else:
-            if results:
-                print(f"WARN: {len(results)} corrupt cache entries:")
-                for r in results:
-                    print(f"  {r['path']}: {r['error']}")
-            else:
-                print("cache OK: no corrupt entries")
-        return 1 if results else 0
-
-    elif sub == "nuke":
-        count = cache.nuke()
-        if getattr(args, "json", False):
-            print_json({"deleted": count})
-        else:
-            print(f"cache nuke: deleted {count} entries")
-        return 0
-
-    return 0
-
-
-def cmd_manifest(args: argparse.Namespace) -> int:
-    """Inspect the dominion_loader manifest."""
-    from dominion_loader.manifest import Manifest
-    from dominion_loader.obs import _NullTracer, set_tracer
-    import datetime
-
-    set_tracer(_NullTracer())
-    manifest = Manifest()
-    sub = getattr(args, "manifest_command", "list")
-
-    try:
-        if sub == "list":
-            since_iso = getattr(args, "changed_since", None)
-            if since_iso:
-                try:
-                    epoch = int(datetime.datetime.fromisoformat(since_iso).timestamp())
-                    entries = list(manifest.list_changed_since(epoch))
-                except ValueError:
-                    print(f"Invalid ISO timestamp: {since_iso}", file=sys.stderr)
-                    return 1
-            else:
-                entries = list(manifest.list_active())
-
-            if getattr(args, "json", False):
-                print_json([{
-                    "document_id": e.document_id,
-                    "relative_path": e.relative_path,
-                    "file_class": e.file_class,
-                    "language": e.language,
-                    "content_hash": e.content_hash[:8] + "...",
-                    "status": e.status,
-                    "ragd_ingested": bool(e.ragd_ingested),
-                } for e in entries])
-            else:
-                print(f"Manifest entries: {len(entries)}")
-                for e in entries[:50]:
-                    print(f"  [{e.file_class}/{e.language}] {e.relative_path}")
-                if len(entries) > 50:
-                    print(f"  ... ({len(entries) - 50} more)")
-
-        elif sub == "stats":
-            stats = manifest.stats()
-            if getattr(args, "json", False):
-                print_json(stats)
-            else:
-                for k, v in stats.items():
-                    print(f"  {k}: {v}")
-
-    finally:
-        manifest.close()
-
-    return 0
-
-
-def cmd_loader_bench(args: argparse.Namespace) -> int:
-    """Run dominion_loader benchmark suite."""
-    from dominion_loader.bench import run_suite, list_suites
-
-    suite_name = getattr(args, "suite", "foundation")
-    runs = getattr(args, "runs", 3)
-    out_dir_str = getattr(args, "out", None)
-    out_dir = Path(out_dir_str) if out_dir_str else None
-
-    try:
-        result = run_suite(suite_name, runs=runs, out_dir=out_dir)
-    except KeyError as exc:
-        available = list_suites()
-        print(f"Unknown suite: {exc}. Available: {available}", file=sys.stderr)
-        return 1
+    result = {
+        "overall": overall,
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "sections": sections,
+    }
 
     if getattr(args, "json", False):
         print_json(result)
     else:
-        print(f"Benchmark: {result['suite']} ({result['runs']} runs)")
-        for name, m in result["metrics"].items():
-            print(f"  {name}: p50={m['p50']:.3f} p95={m['p95']:.3f} {m['unit']}")
-    return 0
+        print(f"=== Dominion Truth Report  {result['generated_at']} ===")
+        print(f"Overall: {overall.upper()}")
+        print()
+        for name, sec in sections.items():
+            if isinstance(sec, dict):
+                status = sec.get("overall") or sec.get("status", "?")
+                mark = "PASS" if status == "ok" else "WARN" if status == "warn" else "FAIL"
+                print(f"  {mark}  {name}")
+                if name == "complexity":
+                    for pkg in sec.get("packages", []):
+                        if pkg["over_budget"]:
+                            print(f"         OVER  {pkg['package']}  {pkg['score']:.1f}/{pkg['budget']:.1f}")
+                elif name == "doctor":
+                    for check_name, check_val in sec.get("checks", {}).items():
+                        cs = check_val.get("status", "?") if isinstance(check_val, dict) else str(check_val)
+                        if cs != "ok":
+                            print(f"         WARN  {check_name}: {cs}")
+    return 0 if overall != "fail" else 1
+
+
+def cmd_scan(args: argparse.Namespace) -> int:
+    from dominion_loader.cli import cmd_scan as _cmd
+    return _cmd(args)
+
+
+def cmd_cache(args: argparse.Namespace) -> int:
+    from dominion_loader.cli import cmd_cache as _cmd
+    return _cmd(args)
+
+
+def cmd_manifest(args: argparse.Namespace) -> int:
+    from dominion_loader.cli import cmd_manifest as _cmd
+    return _cmd(args)
+
+
+def cmd_loader_bench(args: argparse.Namespace) -> int:
+    from dominion_loader.cli import cmd_loader_bench as _cmd
+    return _cmd(args)
 
 
 def cmd_loader_ledger(args: argparse.Namespace) -> int:
-    """Append an entry to the multi-agent memory ledger."""
-    from dominion_loader.ledger import Ledger, VALID_KINDS
-
-    sub = getattr(args, "loader_ledger_command", "append")
-
-    if sub == "append":
-        kind = getattr(args, "kind", None)
-        payload_str = getattr(args, "payload", "{}")
-
-        if not kind:
-            print("--kind is required", file=sys.stderr)
-            return 1
-
-        try:
-            payload = json.loads(payload_str)
-        except json.JSONDecodeError as exc:
-            print(f"Invalid JSON payload: {exc}", file=sys.stderr)
-            return 1
-
-        ledger = Ledger()
-        try:
-            eid = ledger.append(kind, payload)
-        except ValueError as exc:
-            print(str(exc), file=sys.stderr)
-            return 1
-        finally:
-            ledger.close()
-
-        if getattr(args, "json", False):
-            print_json({"entry_id": eid, "kind": kind})
-        else:
-            print(f"ledger append: kind={kind} entry_id={eid}")
-
-    elif sub == "stats":
-        ledger = Ledger()
-        try:
-            stats = ledger.stats()
-        finally:
-            ledger.close()
-        if getattr(args, "json", False):
-            print_json(stats)
-        else:
-            for k, v in stats.items():
-                print(f"  {k}: {v}")
-
-    return 0
+    from dominion_loader.cli import cmd_loader_ledger as _cmd
+    return _cmd(args)
 
 
 def cmd_graph_foundation(args: argparse.Namespace) -> int:
-    """Foundation graph commands: stats, build."""
-    from dominion_loader.graph import KnowledgeGraph
-
-    sub = getattr(args, "graph_foundation_command", "stats")
-    kg = KnowledgeGraph()
-
-    try:
-        if sub == "stats":
-            stats = kg.stats()
-            if getattr(args, "json", False):
-                print_json(stats)
-            else:
-                print(f"graph nodes={stats['nodes']} edges={stats['edges']}")
-                if stats.get("by_kind"):
-                    for kind, count in stats["by_kind"].items():
-                        print(f"  {kind}: {count}")
-
-        elif sub == "build":
-            from dominion_loader.graph import ingest_from_ragd
-            ragd_db = Path(os.environ.get("RAGD_DB", str(Path.home() / ".ragd" / "ragd.db")))
-            result = ingest_from_ragd(kg, ragd_db)
-            if getattr(args, "json", False):
-                print_json(result)
-            else:
-                print(f"graph build: nodes_added={result.get('nodes', 0)} edges_added={result.get('edges', 0)}")
-    finally:
-        kg.close()
-
-    return 0
+    from dominion_loader.cli import cmd_graph_foundation as _cmd
+    return _cmd(args)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -720,6 +608,12 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("next-prompt")
     p.add_argument("--focus", default="Continue Dominion V2.5 phase work")
     p.set_defaults(func=cmd_next_prompt)
+
+    p = sub.add_parser("truth", help="Full truth report: doctor+complexity+ignore+ragd+llm")
+    p.add_argument("--json", action="store_true")
+    p.add_argument("--offline", action="store_true")
+    p.add_argument("--max-sample", type=int, default=200)
+    p.set_defaults(func=cmd_truth)
 
     p = sub.add_parser("search")
     p.add_argument("query")

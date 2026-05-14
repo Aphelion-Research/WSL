@@ -352,6 +352,33 @@ def _cmd_sync_ragd(args: argparse.Namespace) -> int:
     return 0 if result["ok"] else 1
 
 
+def _cmd_dashboard(args: argparse.Namespace) -> int:
+    from dominion_agent.dashboard import build_dashboard, format_dashboard_human
+    d = build_dashboard()
+    if getattr(args, "json", False):
+        _out(d, True)
+    else:
+        print(format_dashboard_human(d))
+    return 0
+
+
+def _cmd_next(args: argparse.Namespace) -> int:
+    from dominion_agent.dashboard import build_next
+    result = build_next()
+    json_mode = getattr(args, "json", False)
+    if json_mode:
+        _out(result, True)
+    else:
+        print(f"Priority {result['priority']} [{result['category']}]  {result['item']}")
+        print(f"Command: {result['command']}")
+        all_items = result.get("all_items", [])
+        if len(all_items) > 1:
+            print(f"\nAll {len(all_items)} items:")
+            for item in all_items:
+                print(f"  [{item['priority']}] {item['item']}")
+    return 0
+
+
 # ---------------------------------------------------------------------------
 # Parser builder
 # ---------------------------------------------------------------------------
@@ -566,6 +593,16 @@ def build_agent_subparser(sub: argparse._SubParsersAction) -> None:  # type: ign
     p_sync = agent_sub.add_parser("sync-ragd", help="Check RAGD health and record event")
     p_sync.add_argument("--json", action="store_true")
     p_sync.set_defaults(agent_func=_cmd_sync_ragd)
+
+    # -- dashboard -----------------------------------------------------------
+    p_dash = agent_sub.add_parser("dashboard", help="Cockpit dashboard — full system snapshot")
+    p_dash.add_argument("--json", action="store_true")
+    p_dash.set_defaults(agent_func=_cmd_dashboard)
+
+    # -- next ----------------------------------------------------------------
+    p_next = agent_sub.add_parser("next", help="Next recommended action")
+    p_next.add_argument("--json", action="store_true")
+    p_next.set_defaults(agent_func=_cmd_next)
 
     agent_p.set_defaults(agent_func=_default_agent_help(agent_p), func=cmd_agent)
 

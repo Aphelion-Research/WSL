@@ -44,7 +44,7 @@ def test_scan_counts_todos(tmp_path):
 
 def test_scan_counts_temp_adapters(tmp_path):
     (tmp_path / "x.py").write_text(
-        "# TEMP_ADAPTER: remove when done\ndef f(): pass\n",
+        "# TEMP_ADAPTER(agent-1): remove when done\ndef f(): pass\n",
         encoding="utf-8",
     )
     metrics = _scan_package(tmp_path)
@@ -146,7 +146,7 @@ def test_complexity_report_over_budget(tmp_path):
 def test_complexity_report_warns_temp_adapter(tmp_path):
     pkg = tmp_path / "mypkg2"
     pkg.mkdir()
-    (pkg / "a.py").write_text("# TEMP_ADAPTER: cleanup needed\ndef f(): pass\n",
+    (pkg / "a.py").write_text("# TEMP_ADAPTER(agent-1): cleanup needed\ndef f(): pass\n",
                                encoding="utf-8")
     r = complexity_report("mypkg2", root=str(tmp_path))
     assert any("TEMP_ADAPTER" in w for w in r.warnings)

@@ -46,6 +46,26 @@ RAGD deletion, query metadata, loader delete propagation, deep doctor, ignore-po
 
 Remaining warnings: RAGD ignore policy hash unavailable, historical orphan active chunks in RAGD DB, labeled `document_id` adapter.
 
+## Phase 5 — Consolidation + Cockpit (2026-05-14)
+
+`dominion agent dashboard`, `dominion agent next`, `dominion truth`, CLI thinning, e2e smoke tests, complexity fixes.
+
+| Item | Status |
+|---|---|
+| `agent dashboard` command | PASS |
+| `agent next` command | PASS |
+| `dominion truth` command | PASS |
+| `dominion_loader/cli.py` (delegate module) | PASS |
+| `dominion_cli.py` thinned (1003→784 lines) | PASS |
+| `dominion_agent/dashboard.py` | PASS |
+| `test_e2e_smoke.py` (6 tests) | PASS |
+| TEMP_ADAPTER false-positive fix | PASS |
+| Complexity budget recalibration | PASS |
+| Full test suite | PASS (`387 passed`) |
+| `check_no_trading.py` | PASS |
+
+---
+
 ## Phase 4 — Agent OS (2026-05-13)
 
 `dominion_agent/` package complete and validated.

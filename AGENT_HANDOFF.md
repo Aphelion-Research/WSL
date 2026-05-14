@@ -1,5 +1,40 @@
 # Dominion Agent Handoff
 
+## Phase 5 — Consolidation + Cockpit (2026-05-14)
+
+**Status: COMPLETE.** Phase 5 turned the Dominion loader + AI + Agent OS stack into a human-usable cockpit.
+
+### What changed
+
+- `dominion agent dashboard [--json]` — full system snapshot: RAGD, LLM, complexity warnings, Agent OS stats, next action.
+- `dominion agent next [--json]` — priority-ordered actionable item (doctor errors, stale sessions, review-without-evidence, pending tasks, orphan chunks).
+- `dominion truth [--json]` — combined integrity check: doctor + complexity + ignore policy + RAGD + LLM governor.
+- `dominion_loader/cli.py` created with cmd_scan, cmd_cache, cmd_manifest, cmd_loader_bench, cmd_loader_ledger, cmd_graph_foundation; `scripts/dominion_cli.py` reduced from 1003 → 784 lines with thin delegators.
+- `dominion_agent/dashboard.py` created (build_dashboard, build_next, format_dashboard_human).
+- `dominion_agent/tests/test_e2e_smoke.py` — 6-test end-to-end smoke covering session→task→lock→review→done + schema validation.
+- TEMP_ADAPTER false-positive fix: complexity.py now uses `re.findall(r"TEMP_ADAPTER\([a-zA-Z]", source)`.
+- Complexity budgets recalibrated from aspirational to realistic values.
+
+### Validation
+
+```bash
+python -m pytest -q              # 387 passed (6 new e2e smoke tests)
+python domdata/check_no_trading.py  # PASS
+python scripts/dominion_cli.py agent dashboard --json  # valid JSON
+python scripts/dominion_cli.py agent next --json       # valid JSON
+python scripts/dominion_cli.py truth --json            # overall=warn
+```
+
+### Open items
+
+- Orphan active chunks in RAGD DB from historical `/tmp/pytest-*` paths; remedy: `dominion scan` after RAGD deletion propagation.
+- RAGD `ignore_policy_hash` not yet exposed; deep doctor warns.
+- No 4 GB GPU generation model fits the 3.5 GB ceiling; retrieve-only fallback is intentional.
+
+Primary report: `reports/phase-5-consolidation-latest.md`.
+
+---
+
 ## Phase 3 — Truth And Integrity (2026-05-13)
 
 **Status: PARTIAL-COMPLETE.** Core deletion, metadata, and deep-doctor gates are implemented and validated; remaining warnings are explicit.
