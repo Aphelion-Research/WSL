@@ -201,18 +201,31 @@ def _scan_package(path: Path) -> ComplexityMetrics:
 
 
 def _compute_score(m: ComplexityMetrics) -> float:
-    """Compute complexity score from metrics."""
-    score = 0.0
-    score += m.file_count * _W["file_count"]
-    score += m.public_symbol_count * _W["public_symbol_count"]
-    score += m.cli_command_count * _W["cli_command_count"]
-    score += m.test_count * _W["test_count"]  # negative weight
-    score += m.todo_count * _W["todo_count"]
-    score += m.temp_adapter_count * _W["temp_adapter_count"]
-    score += m.broad_except_count * _W["broad_except_count"]
-    score += m.untested_module_count * _W["untested_module_count"]
-    score += m.large_file_penalty * _W["large_file_penalty"]
-    return max(0.0, round(score, 2))
+    """Compute complexity score from metrics.
+
+    Test count reduces the score (encouraging testing) but is capped so that
+    a high test count cannot hide real structural debt (TODOs, broad excepts,
+    untested modules, TEMP_ADAPTERs).  Test credit is limited to at most the
+    combined file/symbol contribution — it cannot offset penalty terms.
+    """
+    # Positive (debt) terms
+    debt = (
+        m.file_count * _W["file_count"]
+        + m.public_symbol_count * _W["public_symbol_count"]
+        + m.cli_command_count * _W["cli_command_count"]
+        + m.todo_count * _W["todo_count"]
+        + m.temp_adapter_count * _W["temp_adapter_count"]
+        + m.broad_except_count * _W["broad_except_count"]
+        + m.untested_module_count * _W["untested_module_count"]
+        + m.large_file_penalty * _W["large_file_penalty"]
+    )
+    # Test credit: can only offset file_count + public_symbol_count contribution
+    max_test_credit = (
+        m.file_count * _W["file_count"]
+        + m.public_symbol_count * _W["public_symbol_count"]
+    )
+    test_credit = min(m.test_count * abs(_W["test_count"]), max_test_credit)
+    return max(0.0, round(debt - test_credit, 2))
 
 
 def complexity_report(

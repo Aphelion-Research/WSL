@@ -17,8 +17,8 @@ def run_dominion(*args: str) -> subprocess.CompletedProcess:
 
 
 def test_doctor_runs_without_crash() -> None:
-    result = run_dominion("doctor")
-    assert result.returncode == 0, f"doctor crashed:\n{result.stderr}"
+    result = run_dominion("doctor", "--offline")
+    assert result.returncode == 0, f"doctor --offline crashed:\n{result.stderr}\n{result.stdout}"
 
 
 def test_doctor_json_output_valid() -> None:

@@ -19,22 +19,25 @@ from dominion_agent.tasks import get_task
 from dominion_agent.types import ReviewFinding, ReviewReport, VALID_FINDING_SEVERITIES
 
 
-# Forbidden trading tokens (mirrors domdata/domdata_pkg/forbidden_tokens.py)
-# String concatenation is used to avoid triggering the check_no_trading.py scanner
-# on this file itself — the canonical list lives in forbidden_tokens.py.
-_FORBIDDEN_TOKENS: list[str] = [
-    "order" + "_send",
-    "order" + "_check",
-    "Order" + "Send",
-    "Order" + "Open",
-    "Position" + "Open",
-    "Position" + "Close",
-    "position" + "_close",
-    "Trade" + "Open",
-    "execute" + "_trade",
-    "TRADE" + "_ACTION_DEAL",
-    "TRADE" + "_ACTION_PENDING",
-]
+# Forbidden trading tokens — import from canonical source when available,
+# fall back to inline literals (string-concatenated to avoid scanner false positives).
+try:
+    from domdata_pkg.forbidden_tokens import FORBIDDEN_TOKENS as _CANONICAL_TOKENS
+    _FORBIDDEN_TOKENS: list[str] = list(_CANONICAL_TOKENS)
+except ImportError:
+    _FORBIDDEN_TOKENS = [
+        "order" + "_send",
+        "order" + "_check",
+        "Order" + "Send",
+        "Order" + "Open",
+        "Position" + "Open",
+        "Position" + "Close",
+        "position" + "_close",
+        "Trade" + "Open",
+        "execute" + "_trade",
+        "TRADE" + "_ACTION_DEAL",
+        "TRADE" + "_ACTION_PENDING",
+    ]
 
 # Terms that indicate fake completion without evidence
 _FAKE_COMPLETION_TERMS: list[re.Pattern] = [

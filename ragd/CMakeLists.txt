@@ -11,6 +11,7 @@ set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/vendor" CACHE PATH "FetchContent 
 FetchContent_Declare(
   nlohmann_json
   URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+  URL_HASH SHA256=4499d69450302b11565e31f4791e84dfcc5c1fd0585f6756616492d52f6c91d8
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(nlohmann_json)
@@ -18,16 +19,23 @@ FetchContent_MakeAvailable(nlohmann_json)
 FetchContent_Declare(
   cpp_httplib
   URL https://github.com/yhirose/cpp-httplib/archive/refs/tags/v0.18.6.tar.gz
+  URL_HASH SHA256=93d40cc1112423bc548ba3a0ce0f69aae2ad590b1713d80d238cb05490795493
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(cpp_httplib)
 
-find_library(SQLITE3_LIBRARY NAMES sqlite3 libsqlite3.so.0)
-if(NOT SQLITE3_LIBRARY AND EXISTS "/lib/x86_64-linux-gnu/libsqlite3.so.0")
-  set(SQLITE3_LIBRARY "/lib/x86_64-linux-gnu/libsqlite3.so.0")
+# Use pkg-config or find_library for multiarch-aware SQLite discovery
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+  pkg_check_modules(SQLITE3 QUIET sqlite3)
 endif()
-if(NOT SQLITE3_LIBRARY)
-  message(FATAL_ERROR "Could not find libsqlite3 runtime library")
+if(SQLITE3_FOUND)
+  set(SQLITE3_LIBRARY ${SQLITE3_LINK_LIBRARIES})
+else()
+  find_library(SQLITE3_LIBRARY NAMES sqlite3)
+  if(NOT SQLITE3_LIBRARY)
+    message(FATAL_ERROR "Could not find libsqlite3. Install libsqlite3-dev.")
+  endif()
 endif()
 
 add_library(ragd_lib

@@ -13,7 +13,10 @@ from urllib.error import URLError
 from urllib.request import Request, urlopen
 
 
-ROOT = Path(os.environ.get("DOMINION_ROOT", str(Path.home() / "Dominion"))).expanduser()
+ROOT = Path(
+    os.environ.get("DOMINION_ROOT")
+    or str(Path(__file__).resolve().parents[1])
+).expanduser()
 RAGD = os.environ.get("RAGD_URL", "http://127.0.0.1:7474").rstrip("/")
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -255,12 +258,21 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     except Exception as exc:
         foundation_checks["ragd_vault"] = {"status": "error", "error": str(exc)}
 
-    # Existing platform checks (best-effort)
-    platform_checks: dict[str, object] = {
-        "ragd_reachable": ragd_health().get("ok", False),
-        "dominion_health": run(["dominion-health"], timeout=30)[0] == 0,
-        "domdata_notice": run(["domdata", "notice"], timeout=30)[0] == 0,
-    }
+    # Existing platform checks (best-effort, skipped in offline mode)
+    offline = getattr(args, "offline", False)
+    platform_checks: dict[str, object] = {}
+    if offline:
+        platform_checks = {
+            "ragd_reachable": "skipped (offline)",
+            "dominion_health": "skipped (offline)",
+            "domdata_notice": "skipped (offline)",
+        }
+    else:
+        platform_checks = {
+            "ragd_reachable": ragd_health().get("ok", False),
+            "dominion_health": run(["dominion-health"], timeout=30)[0] == 0,
+            "domdata_notice": run(["domdata", "notice"], timeout=30)[0] == 0,
+        }
 
     # Optional AI checks (may not exist in Phase 1)
     ai_checks: dict[str, object] = {}
