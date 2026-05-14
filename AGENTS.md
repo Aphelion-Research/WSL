@@ -38,7 +38,7 @@ domdata doctor
 domdata xautick
 domdata xaurates --count 5
 domdata xauticks --start 2026-05-11T00:00:00Z --count 5
-dominion-health
+[ -z "$CODEX_SANDBOX" ] && dominion-health || echo "SKIP: health checks not available in sandbox"
 ```
 
 For RAGD changes:

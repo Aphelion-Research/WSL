@@ -92,40 +92,44 @@ def acquire_lock(
     now = int(time.time())
     expires_at = now + expires_in_seconds if expires_in_seconds else None
 
-    # Check for conflicting active locks
-    existing_rows = _store.conn.execute(
-        "SELECT lock_id, session_id, mode FROM agent_file_locks WHERE filepath=? AND status='active'",
-        (filepath,),
-    ).fetchall()
-
-    for existing in existing_rows:
-        # Same session, same mode — idempotent
-        if existing["session_id"] == session_id and existing["mode"] == mode:
-            if store is None:
-                _store.close()
-            return LockResult(
-                lock_id=existing["lock_id"],
-                filepath=filepath,
-                session_id=session_id,
-                acquired=True,
-                conflict_reason="",
-            )
-        if _conflicts_with(existing["mode"], mode):
-            if store is None:
-                _store.close()
-            return LockResult(
-                lock_id="",
-                filepath=filepath,
-                session_id=session_id,
-                acquired=False,
-                conflict_reason=(
-                    f"filepath {filepath!r} already has active {existing['mode']!r} lock "
-                    f"by session {existing['session_id']!r}"
-                ),
-            )
-
-    # Acquire lock — UNIQUE(filepath, status) constraint handles race
+    # BEGIN IMMEDIATE serializes concurrent lockers: only one can proceed past
+    # this point at a time, preventing the SELECT-then-INSERT race condition.
+    _store.conn.execute("BEGIN IMMEDIATE")
     try:
+        # Check for conflicting active locks
+        existing_rows = _store.conn.execute(
+            "SELECT lock_id, session_id, mode FROM agent_file_locks WHERE filepath=? AND status='active'",
+            (filepath,),
+        ).fetchall()
+
+        for existing in existing_rows:
+            # Same session, same mode — idempotent
+            if existing["session_id"] == session_id and existing["mode"] == mode:
+                _store.conn.execute("COMMIT")
+                if store is None:
+                    _store.close()
+                return LockResult(
+                    lock_id=existing["lock_id"],
+                    filepath=filepath,
+                    session_id=session_id,
+                    acquired=True,
+                    conflict_reason="",
+                )
+            if _conflicts_with(existing["mode"], mode):
+                _store.conn.execute("ROLLBACK")
+                if store is None:
+                    _store.close()
+                return LockResult(
+                    lock_id="",
+                    filepath=filepath,
+                    session_id=session_id,
+                    acquired=False,
+                    conflict_reason=(
+                        f"filepath {filepath!r} already has active {existing['mode']!r} lock "
+                        f"by session {existing['session_id']!r}"
+                    ),
+                )
+
         _store.conn.execute(
             """INSERT INTO agent_file_locks(
                    lock_id, filepath, session_id, task_id, mode, status,
@@ -134,7 +138,12 @@ def acquire_lock(
             (lock_id, filepath, session_id, task_id, mode, "active",
              now, expires_at, note),
         )
+        _store.conn.execute("COMMIT")
     except Exception as exc:
+        try:
+            _store.conn.execute("ROLLBACK")
+        except Exception:
+            pass
         if store is None:
             _store.close()
         return LockResult(
@@ -142,7 +151,7 @@ def acquire_lock(
             filepath=filepath,
             session_id=session_id,
             acquired=False,
-            conflict_reason=f"DB constraint violation (concurrent lock): {exc}",
+            conflict_reason=f"DB error acquiring lock: {exc}",
         )
 
     if store is None:

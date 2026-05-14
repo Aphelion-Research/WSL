@@ -4,14 +4,9 @@ import sys
 from typing import Any
 
 
+from .forbidden_tokens import FORBIDDEN_TOKENS
+
 BLOCKED_COMMANDS = {"order-send", "order-check", "buy", "sell", "close", "modify"}
-FORBIDDEN_TOKENS = {
-    "order_send",
-    "order_check",
-    "TRADE_ACTION_DEAL",
-    "TRADE_ACTION_PENDING",
-    "POSITION_CLOSE",
-}
 
 
 def _blocked_trade(*args: Any, **kwargs: Any) -> None:

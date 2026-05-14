@@ -4,17 +4,12 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-FORBIDDEN = {
-    "order_send",
-    "order_check",
-    "TRADE_ACTION_DEAL",
-    "TRADE_ACTION_PENDING",
-    "POSITION_CLOSE",
-}
+from domdata_pkg.forbidden_tokens import FORBIDDEN_TOKENS as FORBIDDEN
 
 ALLOWLIST = {
     "safety.py",
     "check_no_trading.py",
+    "forbidden_tokens.py",
     "test_safety.py",
 }
 

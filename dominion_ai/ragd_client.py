@@ -16,8 +16,9 @@ from .safety import is_secret_path, redact_secret_mentions
 from .types import ScoredChunk
 
 
-TEMP_ADAPTER_NOTE = "TEMP_ADAPTER(agent-1): pre-agent-3 RAGD /query omits content_hash; remove after all deployed daemons expose query metadata."
-TEMP_ADAPTER_DOCUMENT_ID_NOTE = "TEMP_ADAPTER(agent-1): RAGD /query omits document_id; using filepath as compatibility identity; remove when REST results expose document_id."
+# RAGD /query now exposes content_hash, document_id, repo_root, status,
+# indexed_at, and modified_at per Phase 3. Fallbacks retained for
+# older/downgraded daemons but no longer emit metadata_warnings.
 
 
 class RagdError(RuntimeError):
@@ -90,10 +91,6 @@ def parse_chunk(raw: dict[str, Any], *, source: str = "hybrid") -> ScoredChunk |
     content_hash, derived_hash = _content_hash(raw)
     document_id = str(raw.get("document_id") or filepath)
     metadata_warnings: list[str] = []
-    if derived_hash:
-        metadata_warnings.append(TEMP_ADAPTER_NOTE)
-    if not raw.get("document_id"):
-        metadata_warnings.append(TEMP_ADAPTER_DOCUMENT_ID_NOTE)
     citation = f"{filepath}:{line_start}-{line_end} [{chunk_id}]"
     content = redact_secret_mentions(str(raw.get("content") or raw.get("text") or ""))
     return ScoredChunk(

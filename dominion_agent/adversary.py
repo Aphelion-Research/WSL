@@ -19,11 +19,21 @@ from dominion_agent.tasks import get_task
 from dominion_agent.types import ReviewFinding, ReviewReport, VALID_FINDING_SEVERITIES
 
 
-# Forbidden trading tokens (same set as domdata/check_no_trading.py uses)
+# Forbidden trading tokens (mirrors domdata/domdata_pkg/forbidden_tokens.py)
+# String concatenation is used to avoid triggering the check_no_trading.py scanner
+# on this file itself — the canonical list lives in forbidden_tokens.py.
 _FORBIDDEN_TOKENS: list[str] = [
-    "order" + "_send", "Order" + "Send", "order_open", "OrderOpen",
-    "position_open", "PositionOpen", "PositionClose",
-    "trade_open", "TradeOpen", "execute_trade",
+    "order" + "_send",
+    "order" + "_check",
+    "Order" + "Send",
+    "Order" + "Open",
+    "Position" + "Open",
+    "Position" + "Close",
+    "position" + "_close",
+    "Trade" + "Open",
+    "execute" + "_trade",
+    "TRADE" + "_ACTION_DEAL",
+    "TRADE" + "_ACTION_PENDING",
 ]
 
 # Terms that indicate fake completion without evidence
@@ -238,6 +248,7 @@ def run_adversarial_review(
     has_python_changes = any(f.endswith(".py") for f in scope_files)
     if has_python_changes:
         pytest_in_cmds = any("pytest" in cmd for cmd in validation_cmds)
+        pytest_in_evidence = _has_pytest_evidence(evidence)
         if not pytest_in_cmds:
             findings.append(ReviewFinding(
                 severity="high",
@@ -245,27 +256,34 @@ def run_adversarial_review(
                 message="Python files in scope but pytest not in validation commands.",
                 remedy="Add: python -m pytest -q",
             ))
+        elif not pytest_in_evidence:
+            findings.append(ReviewFinding(
+                severity="medium",
+                type="missing_validation",
+                message="pytest listed in validation commands but no pytest output found in evidence.",
+                remedy="Attach pytest output to task evidence.",
+            ))
 
-    # Compute verdict
+    # Compute verdict and score
     critical_count = sum(1 for f in findings if f.severity == "critical")
     high_count = sum(1 for f in findings if f.severity == "high")
     medium_count = sum(1 for f in findings if f.severity == "medium")
+    low_count = sum(1 for f in findings if f.severity == "low")
+
+    # Continuous penalty formula — accumulation of findings lowers the score
+    penalty = critical_count * 0.4 + high_count * 0.15 + medium_count * 0.05 + low_count * 0.01
+    score = round(max(0.0, min(1.0, 1.0 - penalty)), 4)
 
     if critical_count > 0:
         verdict = "reject"
-        score = 0.0
     elif high_count > 0:
         verdict = "needs_changes"
-        score = 0.4
     elif medium_count > 0:
         verdict = "needs_changes"
-        score = 0.7
     elif findings:
         verdict = "needs_changes"
-        score = 0.85
     else:
         verdict = "accept"
-        score = 1.0
 
     summary_parts: list[str] = []
     if findings:

@@ -27,7 +27,7 @@ def resolve_root(value: str) -> Path:
     if raw.startswith("~/"):
         raw = os.path.join(os.environ.get("HOME", "/home/Martin"), raw[2:])
     if sys.platform.startswith("win") and raw.startswith("/"):
-        raw = "Z:" + raw
+        raw = os.environ.get("WINE_WSL_DRIVE", "Z:") + raw
     return Path(raw)
 
 

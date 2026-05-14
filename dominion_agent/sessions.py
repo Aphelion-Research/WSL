@@ -127,10 +127,10 @@ def end_session(
         if store is None:
             _store.close()
         raise ValueError(f"session not found: {session_id}")
-    if existing["status"] != "active":
+    if existing["status"] not in ("active", "idle"):
         if store is None:
             _store.close()
-        raise ValueError(f"session not active: {session_id}")
+        raise ValueError(f"session not endable from status {existing['status']!r}: {session_id}")
     now = int(time.time())
     commit = _git_commit()
     _store.conn.execute(
@@ -197,18 +197,20 @@ def abandon_session(
     """Force-abandon a session (for stale/orphaned sessions)."""
     _store = store or AgentStore()
     now = int(time.time())
-    _store.conn.execute(
+    cursor = _store.conn.execute(
         """UPDATE agent_sessions_v2
               SET status='abandoned', ended_at=?,
                   metadata_json=json_patch(metadata_json, ?)
            WHERE session_id=?""",
         (now, json.dumps({"abandon_reason": reason}), session_id),
     )
+    if cursor.rowcount == 0:
+        if store is None:
+            _store.close()
+        raise ValueError(f"session not found: {session_id}")
     row = _store.conn.execute(
         "SELECT * FROM agent_sessions_v2 WHERE session_id=?", (session_id,)
     ).fetchone()
-    if row is None:
-        raise ValueError(f"session not found: {session_id}")
     if store is None:
         _store.close()
     return _row_to_session(row)

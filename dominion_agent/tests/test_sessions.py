@@ -91,7 +91,7 @@ def test_end_session_already_ended(tmp_path):
     store = _store(tmp_path)
     s = start_session("agent-1", "test", store=store)
     end_session(s.session_id, status="completed", store=store)
-    with pytest.raises(ValueError, match="not active"):
+    with pytest.raises(ValueError, match="not endable"):
         end_session(s.session_id, status="completed", store=store)
 
 

@@ -162,21 +162,18 @@ def _scan_package(path: Path) -> ComplexityMetrics:
                 name = m[0] or m[1]
                 tested_names.add(name.split(".")[0])
         else:
-            # Non-test: count public symbols
+            # Non-test: count public symbols and CLI commands
             try:
                 tree = ast.parse(source)
                 public_symbols += _count_public_symbols(tree)
-                # Count CLI commands (add_parser, add_subparsers, add_argument calls)
+                # Count CLI commands (add_argument and add_parser calls)
                 cli_commands += source.count("add_argument(")
+                cli_commands += source.count("add_parser(")
             except SyntaxError:
                 pass
             module_names.add(fp.stem)
 
-        # Count argparse subcommand additions
-        cli_commands += source.count("add_parser(")
-
-    # Remove double-counting of add_argument
-    cli_commands = max(0, cli_commands // 2)  # rough dedup
+        # (add_parser formerly counted outside branch and double-deduplicated; now fixed)
 
     # Untested modules: modules with no corresponding test
     untested = len(module_names - {"__init__", "__main__"} - tested_names)
