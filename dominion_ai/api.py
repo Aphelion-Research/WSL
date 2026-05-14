@@ -39,30 +39,9 @@ def _retrieve_only_answer(query: str, context: AssembledContext, confidence: Con
 
 def ask(query: str, *, generate: bool = False, budget: int | None = None) -> AskResult:
     retrieval_plan, chunks, context, confidence = _retrieve_pipeline(query, {"top_k": 10}, budget or 4096)
-    generation_status: dict = {"requested": generate, "used": False}
+    generation_note = "Generation is handled by your agent (Claude Code, Codex, Cursor). RAGD provides retrieval context only."
+    generation_status: dict = {"requested": generate, "used": False, "reason": generation_note} if generate else {"requested": False, "used": False}
     answer = _retrieve_only_answer(query, context, confidence)
-    generated = False
-    if generate and confidence.decision != "refuse":
-        from local_llm.governor import Governor
-        from local_llm.registry import GenerateRequest, provider_for_plan
-
-        governor = Governor.default()
-        execution = governor.choose(Governor.probe(), "ask")
-        generation_status = {"requested": True, "used": False, "plan": execution.to_dict()}
-        if execution.mode == "generate":
-            provider = provider_for_plan(execution)
-            health = provider.health()
-            generation_status["provider_health"] = health.to_dict()
-            if health.ok:
-                prompt = f"Answer only from this evidence. Cite chunk ids. If insufficient, refuse.\n\n{context.text}\n\nQuestion: {query}\nAnswer:"
-                tokens = provider.generate(GenerateRequest(prompt=prompt, model_id=execution.model_id, timeout_s=execution.timeout_s, stream=True))
-                answer = "".join(token.text for token in tokens).strip() or answer
-                generated = True
-                generation_status["used"] = True
-            else:
-                generation_status["reason"] = health.message
-        else:
-            generation_status["reason"] = execution.reason
     return AskResult(
         ok=confidence.decision != "refuse",
         query=query,
@@ -71,6 +50,6 @@ def ask(query: str, *, generate: bool = False, budget: int | None = None) -> Ask
         confidence=confidence,
         citations=context.citations,
         chunks=chunks,
-        generated=generated,
+        generated=False,
         generation_status=generation_status,
     )

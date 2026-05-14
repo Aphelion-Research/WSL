@@ -61,9 +61,8 @@ void apply_env(Config &cfg) {
   if (auto v = env("RAGD_INDEXING_WATCH_PATHS")) cfg.index_paths = split_env_list(v);
   if (auto v = env("RAGD_WATCH_PATHS")) cfg.index_paths = split_env_list(v);
   if (auto v = env("RAGD_INDEXING_MAX_FILE_SIZE_MB")) cfg.max_file_bytes = static_cast<std::size_t>(std::stoll(v)) * 1024 * 1024;
-  if (auto v = env("RAGD_EMBEDDING_BACKEND")) cfg.embedding_backend = v;
-  if (auto v = env("RAGD_EMBED_URL")) cfg.openai_url = v;
-  if (auto v = env("RAGD_EMBED_MODEL")) cfg.openai_model = v;
+  if (auto v = env("RAGD_EMBED_PROVIDER")) cfg.embedding_provider = v;
+  if (auto v = env("RAGD_EMBED_MODEL")) cfg.embedding_model = v;
   if (auto v = env("RAGD_LOGGING_LEVEL")) cfg.log_level = v;
 }
 
@@ -72,7 +71,7 @@ void apply_env(Config &cfg) {
 Config Config::defaults() {
   Config cfg;
   cfg.db_path = home() + "/.ragd/ragd.db";
-  cfg.vector_index_path = home() + "/.ragd/hnsw.bin";
+  cfg.vector_index_path = home() + "/.ragd/hnsw_voyage_voyage-code-2_3072.bin";
   cfg.log_file = home() + "/.ragd/ragd.log";
   cfg.index_paths = {home() + "/Dominion"};
   cfg.ignore_patterns = {"*.pyc", "__pycache__", "node_modules", ".git", "*.egg-info", "dist/", "build/", "secrets", ".venv", "vendor"};
@@ -108,13 +107,10 @@ Config Config::from_file(const std::string &path) {
   }
   if (j.contains("embedding")) {
     const auto &e = j["embedding"];
-    set_if_json(e, "backend", cfg.embedding_backend);
-    set_if_json(e, "ollama_url", cfg.ollama_url);
-    set_if_json(e, "ollama_model", cfg.ollama_model);
-    set_if_json(e, "openai_url", cfg.openai_url);
-    set_if_json(e, "openai_model", cfg.openai_model);
-    set_if_json(e, "openai_key_env", cfg.openai_key_env);
-    set_if_json(e, "fallback_to_tfidf", cfg.fallback_to_tfidf);
+    set_if_json(e, "provider", cfg.embedding_provider);
+    set_if_json(e, "model", cfg.embedding_model);
+    set_if_json(e, "api_key_env", cfg.embedding_api_key_env);
+    set_if_json(e, "cache_embeddings", cfg.cache_embeddings);
   }
   if (j.contains("indexing")) {
     const auto &i = j["indexing"];
@@ -201,14 +197,11 @@ std::string Config::to_json() const {
       {"hnsw_ef_construction", 200},
   };
   j["embedding"] = {
-      {"backend", embedding_backend},
-      {"ollama_url", ollama_url},
-      {"ollama_model", ollama_model},
-      {"openai_url", openai_url},
-      {"openai_model", openai_model},
-      {"openai_key_env", openai_key_env},
-      {"batch_size", 32},
-      {"fallback_to_tfidf", fallback_to_tfidf},
+      {"provider", embedding_provider},
+      {"model", embedding_model},
+      {"api_key_env", embedding_api_key_env},
+      {"batch_size", 128},
+      {"cache_embeddings", cache_embeddings},
   };
   j["indexing"] = {
       {"watch_paths", index_paths},

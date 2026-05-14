@@ -15,7 +15,11 @@ Dominion V2 is organized as a local operating environment, not a loose script di
 ├── prompts/
 ├── research/
 ├── research_os/
-├── local_llm/
+├── ragd_embed/
+├── ragd_hnsw/
+├── ragd_chunker/
+├── ragd_graph/
+├── ragd_vault/
 ├── ragd/
 ├── domdata/
 ├── tests/
@@ -35,7 +39,11 @@ Dominion V2 is organized as a local operating environment, not a loose script di
 - `prompts/`: reusable prompts and workflow templates.
 - `research/`: Research OS runtime state, database, fetched documents, extracted markdown, logs, cache, and reports.
 - `research_os/`: Python package for the approved-source crawler, document processing, and RAGD ingestion bridge.
-- `local_llm/`: Python package for Ollama-compatible local analyst helpers with offline-safe behavior.
+- `ragd_embed/`: external embedding provider wrappers, cache, and embedding pipeline.
+- `ragd_hnsw/`: persistent semantic index sync and query service.
+- `ragd_chunker/`: AST-aware source chunking service consumed by RAGD.
+- `ragd_graph/`: symbol/import/call graph derived from RAGD chunks.
+- `ragd_vault/`: Obsidian vault generator and vault doctor.
 - `ragd/`: C++ RAGD daemon, MCP bridge, docs, and tests.
 - `domdata/`: read-only MT5/XAUUSD data CLI and safety scanner.
 - `tests/`: top-level platform smoke tests when a test does not belong to a package.

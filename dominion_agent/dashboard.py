@@ -33,17 +33,7 @@ def _ragd_status() -> dict:
 
 
 def _llm_status() -> dict:
-    try:
-        from local_llm.governor import Governor
-        gov = Governor()
-        return {
-            "provider": gov.provider_name(),
-            "model": gov.current_model(),
-            "can_generate": gov.can_generate(),
-            "retrieve_only": gov.retrieve_only(),
-        }
-    except Exception as exc:
-        return {"provider": "unavailable", "error": str(exc)}
+    return {"status": "not_applicable", "note": "agents are frontier models"}
 
 
 def _doctor_quick() -> dict:
@@ -159,7 +149,7 @@ def _next_action(
     over_budget: list[dict],
     ragd_reachable: bool,
     doctor_overall: str,
-    llm_provider: str,
+    agent_generation_status: str,
 ) -> str:
     """Determine the single most important next action."""
     # Priority order: safety > broken infra > stale work > debt
@@ -190,8 +180,6 @@ def _next_action(
             f"Package '{pkg}' is over complexity budget — run: "
             f"dominion agent complexity budget --package {pkg}"
         )
-    if llm_provider == "unavailable":
-        return "Local LLM unavailable — check: dominion llm"
     return "System nominal — run dominion truth to verify full integrity"
 
 
@@ -207,7 +195,7 @@ def build_dashboard(store: Optional[AgentStore] = None) -> dict:
     _store = store or AgentStore()
 
     ragd = _ragd_status()
-    llm = _llm_status()
+    agent_generation = _llm_status()
     doctor = _doctor_quick()
     complexity_warnings = _complexity_warnings()
     agent_os = _agent_os_summary(_store)
@@ -221,7 +209,7 @@ def build_dashboard(store: Optional[AgentStore] = None) -> dict:
         over_budget=complexity_warnings,
         ragd_reachable=ragd.get("reachable", False),
         doctor_overall=doctor.get("overall", "unknown"),
-        llm_provider=llm.get("provider", "unavailable"),
+        agent_generation_status=agent_generation.get("status", "unknown"),
     )
 
     return {
@@ -234,7 +222,7 @@ def build_dashboard(store: Optional[AgentStore] = None) -> dict:
         "complexity_warnings": complexity_warnings,
         "ragd": ragd,
         "doctor": doctor,
-        "local_llm": llm,
+        "agent_generation": agent_generation,
         "next_action": next_action,
     }
 
@@ -385,12 +373,8 @@ def format_dashboard_human(d: dict) -> str:
             lines.append(f"  RAGD      : WARN  {ragd['orphan_hint']} orphan chunk(s)")
     else:
         lines.append(f"  RAGD      : UNREACHABLE  {ragd.get('error','')}")
-    llm = d["local_llm"]
-    if llm.get("provider") != "unavailable":
-        can_gen = "generate" if llm.get("can_generate") else "retrieve-only"
-        lines.append(f"  Local LLM : {llm['provider']} / {llm.get('model','')} ({can_gen})")
-    else:
-        lines.append(f"  Local LLM : unavailable  {llm.get('error','')}")
+    generation = d["agent_generation"]
+    lines.append(f"  Generation: {generation.get('status', 'unknown')}  {generation.get('note', '')}")
     doc = d["doctor"]
     lines.append(f"  Doctor    : {doc.get('overall','?').upper()}")
     lines.append("")

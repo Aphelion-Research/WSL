@@ -32,8 +32,8 @@
 | F11 Hybrid retrieval strategy | Complete | `dominion search "agent handoff" --top-k 3 --json`; `dominion_ai/tests/test_retrieval.py` | Composes RAGD BM25 + vector, no duplicate index |
 | F12 Reranking pipeline | Complete | `dominion_ai/tests/test_rerank.py` | Heuristic default only; embedding/LLM rerank deferred |
 | F13 Context assembly | Complete | `dominion_ai/tests/test_context.py`; `dominion_ai/tests/test_budget.py` | Budget-aware section packer with citations |
-| F14 Local LLM provider abstraction | Complete | `local_llm/tests/test_providers.py`; `llm doctor --json` | Mock + Ollama providers |
-| F15 4 GB VRAM governor | Complete | `local_llm/tests/test_governor.py`; `llm doctor --json` | Current 4 GB class GPU refuses 3.8 GB model load |
+| F14 Local generation provider abstraction | Retired by Agent 6 | `scripts/bin/llm`; `dominion ask --generate --json` | Frontier agents handle generation; RAGD provides retrieval context |
+| F15 4 GB VRAM governor | Retired by Agent 6 | `dominion embed stats --json` | Hardware governor removed with local generation subsystem |
 | F16 Developer CLI | Complete | `dominion_ai/tests/test_cli.py`; live `dominion ask/search/trace/eval/ledger` | Additive only |
 | F17 Trace UX | Complete | `dominion trace ad51518679964fab8b78802762e7d5bd` | A2 spans emitted under `~/.dominion/traces` |
 | F18 Bench suites | Partial | `dominion bench --suite retrieval/e2e/generation` | Lightweight suite, not Agent 1 harness registration |
@@ -49,7 +49,7 @@
 | D03 `dominion_ai` temp identity adapter | Partial | `dominion_ai/tests/test_ragd_client.py` | `content_hash` now producer-owned; `document_id` fallback remains labeled |
 | D04 Deep doctor real consistency | Complete | `dominion_loader/tests/test_truth_doctor.py`; `dominion doctor --deep --json` | Actual manifest/cache/RAGD DB checks |
 | D05 Ignore policy split | Partial | `dominion_loader/tests/test_ignore.py`; `dominion ignore policy --json` | Python policy hash exported; RAGD hash still unavailable so doctor warns |
-| D06 Unsafe safe LLM profile | Complete | `local_llm/tests/test_governor.py`; `llm doctor --json` | `gpu_4gb_safe` removed; risky profile manual-only |
+| D06 Unsafe safe LLM profile | Retired by Agent 6 | `scripts/bin/llm`; `dominion ask --generate --json` | Local generation profiles removed |
 | D07 Report evidence schema | Complete | `docs/agents/TRUTH_CONTRACT.md`; final report | Evidence tables and pass/warn/fail reporting |
 | D08 Cache integrity in doctor | Complete | `dominion_loader/tests/test_truth_doctor.py::test_deep_doctor_reports_cache_corruption` | Actual cache verify wired into deep doctor |
 | D09 Orphan chunks surfaced | Complete | `dominion doctor --deep --json` | Reports orphan active chunks with sample cap |

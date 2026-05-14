@@ -17,7 +17,7 @@ struct Config {
   int port = 7474;
   int max_connections = 64;
   int request_timeout_ms = 30000;
-  int embed_dim = 768;
+  int embed_dim = 3072;
   int bm25_candidates = 50;
   int vector_candidates = 50;
   int rrf_k = 60;
@@ -25,18 +25,15 @@ struct Config {
   int temporal_commits = 50;
   int dead_zone_scan_hours = 6;
   std::size_t max_file_bytes = 10 * 1024 * 1024;
-  std::string embedding_backend = "auto";
-  std::string embed_backend_selected = "tfidf";
-  std::string ollama_url = "http://localhost:11434/api/embeddings";
-  std::string ollama_model = "nomic-embed-text";
-  std::string openai_url = "https://api.openai.com/v1/embeddings";
-  std::string openai_model = "text-embedding-3-small";
-  std::string openai_key_env = "RAGD_EMBED_KEY";
+  std::string embedding_provider = "voyage";
+  std::string embed_backend_selected = "external";
+  std::string embedding_model = "voyage-code-2";
+  std::string embedding_api_key_env = "RAGD_EMBED_API_KEY";
   std::string log_level = "info";
   std::string log_file;
   bool temporal_enabled = true;
   bool dead_zone_auto_scan = true;
-  bool fallback_to_tfidf = true;
+  bool cache_embeddings = true;
   bool watch = false;
 
   static Config defaults();

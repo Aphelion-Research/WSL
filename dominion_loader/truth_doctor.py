@@ -22,9 +22,8 @@ from dominion_loader.cache import Cache
 from dominion_loader.ignore import policy_hash
 
 STATUS_ORDER = {"pass": 0, "skip": 1, "warn": 2, "fail": 3}
-VRAM_SAFE_CEILING = 3_500_000_000
 QUERY_METADATA_FIELDS = {"chunk_id", "filepath", "content_hash", "repo_root", "status", "indexed_at", "modified_at"}
-TEMP_ADAPTER_DIRS = ("dominion_ai", "local_llm", "dominion_loader", "scripts")
+TEMP_ADAPTER_DIRS = ("dominion_ai", "ragd_embed", "ragd_hnsw", "ragd_chunker", "ragd_graph", "ragd_vault", "dominion_loader", "scripts")
 TEMP_ADAPTER_PATTERN = re.compile(r"TEMP_ADAPTER\([^)]+\):")
 
 
@@ -59,7 +58,7 @@ def run_deep_doctor(*, deps: DoctorDeps | None = None, offline: bool = False, ma
     checks["cache_integrity"] = _check_cache_integrity(deps.cache_path)
     checks["ignore_policy_alignment"] = _check_ignore_policy_alignment(deps, checks["ragd_reachable"], offline)
     checks["domdata_guard"] = _check_domdata_guard(deps, root)
-    checks["llm_governor_truth"] = _check_llm_governor_truth()
+    checks["rag_retrieval_infra"] = _check_rag_retrieval_infra(deps)
     checks["temp_adapters"] = _check_temp_adapters(root)
     checks["duplicate_active_chunks"] = _check_duplicate_active_chunks(deps.ragd_db_path)
     checks["orphan_active_chunks"] = _check_orphan_active_chunks(deps.ragd_db_path, max_sample)
@@ -237,18 +236,26 @@ def _check_domdata_guard(deps: DoctorDeps, root: Path) -> dict[str, Any]:
     return _check("fail", "critical", "domdata forbidden-token scanner failed", remedy="Remove forbidden trading tokens outside allowlisted safety tests.", evidence={"command": " ".join(cmd), "returncode": result.returncode, "output": result.output[:2000]})
 
 
-def _check_llm_governor_truth() -> dict[str, Any]:
+def _check_rag_retrieval_infra(deps: DoctorDeps) -> dict[str, Any]:
+    evidence: dict[str, Any] = {}
     try:
-        from local_llm.registry import MODEL_REGISTRY
-        from local_llm.governor import registry_truth
+        from ragd_embed.config import load_config
+        from ragd_embed.cache import EmbeddingCache
+        from ragd_hnsw.config import default_index_path
+        from ragd_vault.doctor import inspect_vault
+
+        cfg = load_config(require_key=False)
+        cache = EmbeddingCache()
+        evidence["embed"] = {"provider": cfg.provider, "model": cfg.model, "api_key_present": bool(cfg.api_key), "stats": cache.stats()}
+        index_path = default_index_path(cfg.provider, cfg.model, cfg.dim)
+        evidence["hnsw"] = {"path": str(index_path), "exists": index_path.exists()}
+        vault_report = inspect_vault(deps.root / "vault")
+        evidence["vault"] = {"exists": (deps.root / "vault").exists(), "notes": vault_report.total_notes, "broken_links": len(vault_report.broken_links)}
     except Exception as exc:
-        return _check("skip", "medium", "local_llm registry is unavailable", evidence={"error": str(exc)})
-    truth = registry_truth(MODEL_REGISTRY)
-    if truth["status"] == "fail":
-        return _check("fail", "high", "a local LLM profile named safe exceeds the 3.5 GB VRAM ceiling", remedy="Rename risky profiles or make 4 GB default retrieve-only.", evidence=truth)
-    if truth["status"] == "warn":
-        return _check("warn", "medium", "no automatic generation profile is available under the 3.5 GB VRAM ceiling; retrieve-only fallback is explicit", evidence=truth)
-    return _check("pass", "medium", "local LLM registry has no unsafe safe profiles", evidence=truth)
+        return _check("warn", "medium", "RAG retrieval infrastructure checks are unavailable", remedy="Run dominion embed doctor and dominion vault doctor.", evidence={"error": str(exc)})
+    if not evidence["embed"]["api_key_present"]:
+        return _check("warn", "medium", "embedding API key is not configured; semantic embedding runs will fail closed", remedy="Set RAGD_EMBED_API_KEY before dominion embed run.", evidence=evidence)
+    return _check("pass", "medium", "RAG retrieval infrastructure is inspectable", evidence=evidence)
 
 
 def _check_temp_adapters(root: Path) -> dict[str, Any]:

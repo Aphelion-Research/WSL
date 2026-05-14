@@ -21,7 +21,11 @@ COMPLEXITY_BUDGETS: dict[str, float] = {
     "dominion_loader": 50.0,      # target: well under (score ~0 with good test coverage)
     "dominion_ai": 130.0,         # target: reduce to 100 (currently ~105)
     "dominion_agent": 350.0,      # large CLI package (59 cmds); target reduction in Phase 6
-    "local_llm": 75.0,            # target: reduce to 60 (currently ~63)
+    "ragd_embed": 75.0,           # external embedding pipeline
+    "ragd_hnsw": 75.0,            # persistent semantic index
+    "ragd_chunker": 90.0,         # AST chunking service
+    "ragd_graph": 75.0,           # symbol/import/call graph
+    "ragd_vault": 100.0,          # Obsidian vault generation
     "ragd": 80.0,                 # C++ core; Python wrappers only (currently ~44)
     "domdata": 155.0,             # target: reduce to 100 (currently ~138)
     "research_os": 175.0,         # target: reduce to 120 (currently ~157)

@@ -23,7 +23,7 @@ Upgraded `ragd` from the prior MVP into a broader working C++17 daemon surface:
 ## What I Intentionally Left Unfinished (and Why)
 
 - Native WebSocket transport on `ws://localhost:7474/bus` is not implemented. `cpp-httplib` in this tree does not expose WebSocket upgrade handling; current bus functionality is persisted and available over REST plus MCP broadcast.
-- HNSW, tree-sitter grammar compilation, libgit2 in-memory commit backfill, and Ollama/OpenAI embedding calls are not wired. The shipped path is pure C++ structured chunking and TF cosine retrieval so the daemon works without external model services.
+- HNSW/external embedding infrastructure and the AST chunker service are wired at the Python/RAGD boundary. Semantic querying fails closed until `RAGD_EMBED_API_KEY` is configured.
 - `systemctl --user status ragd` was not active because `install.sh` was not run in this session.
 - `valgrind` was not run because it is not installed on this WSL image.
 
@@ -38,7 +38,7 @@ Decide whether native WebSocket same-port support is mandatory. If yes, replace 
 ## TODOs I Created This Session
 
 - [ ] Add production WebSocket transport for `/bus`.
-- [ ] Replace TF cosine fallback with HNSW plus pluggable embedding calls when Ollama/OpenAI endpoints are available.
+- [ ] Configure `RAGD_EMBED_API_KEY`, run `dominion embed run`, and validate `/query/semantic` against an eval bundle.
 - [ ] Replace regex chunking with tree-sitter grammars for the requested languages.
 - [ ] Add libgit2 deep history backfill for the last N commits.
 - [ ] Run valgrind after installing it.
@@ -67,5 +67,5 @@ Decide whether native WebSocket same-port support is mandatory. If yes, replace 
 ## Open Questions (things I don't know)
 
 - Whether the deployment should prefer same-port WebSocket support or a separate bus port.
-- Whether the target host will have Ollama available by default.
+- Which external embedding provider should be configured on the target host.
 - Whether `install.sh` should be run now or left to the human because it uses `sudo apt-get` and writes `/usr/local/bin` plus `/etc/profile.d`.

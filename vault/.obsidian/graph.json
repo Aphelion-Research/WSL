@@ -1,0 +1,27 @@
+{
+  "showTags": true,
+  "showAttachments": false,
+  "colorGroups": [
+    {
+      "query": "tag:#python",
+      "color": {
+        "a": 1,
+        "rgb": 255
+      }
+    },
+    {
+      "query": "tag:#cpp",
+      "color": {
+        "a": 1,
+        "rgb": 16753920
+      }
+    },
+    {
+      "query": "tag:#daily",
+      "color": {
+        "a": 1,
+        "rgb": 8421504
+      }
+    }
+  ]
+}

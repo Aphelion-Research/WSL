@@ -29,7 +29,7 @@ ctest --test-dir build --output-on-failure
 filesystem -> watcher -> indexer/chunker -> sqlite chunks + FTS
                          |              -> TODO engine
                          |              -> chunk history
-query API -> intent router -> BM25 + TF cosine vector fallback -> RRF results
+query API -> intent router -> BM25 + keyword fallback + external HNSW service -> RRF results
 agents -> sessions/decisions/touches -> handoff context -> MCP tools
 agents -> bus messages/locks -> warnings and coordination
 ```
@@ -40,8 +40,8 @@ Implemented surfaces:
 - MCP JSON-RPC endpoint at `/mcp`
 - SQLite WAL storage with chunks, FTS, sessions, decisions, TODOs, bus messages, locks, dead zones, and chunk history
 - Inotify watcher on Linux with polling fallback
-- Structured regex chunking for code, Markdown sections, and config blocks
-- Hybrid retrieval with BM25, TF cosine vector fallback, and reciprocal-rank fusion
+- AST chunking service for code, with Markdown sections and config blocks as built-in fallbacks
+- Hybrid retrieval with BM25, keyword fallback, external HNSW semantic service, and reciprocal-rank fusion
 - Agent handoff/session protocol
 - Semantic-ish TODO search through the same retrieval pipeline
 

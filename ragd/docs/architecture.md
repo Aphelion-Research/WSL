@@ -17,7 +17,7 @@
       v                        v                      v        v
 +-----+------+       +---------+---------+        +---+---+ +--+------+
 | Indexer    |------>| SQLite WAL store  |<-------| BM25 | | Vector  |
-| chunker    |       | chunks/FTS/memory |        | FTS5 | | TF-IDF  |
+| chunker    |       | chunks/FTS/HNSW metadata |        | FTS5 | | external embeddings |
 +-----+------+       +---------+---------+        +-------+ +---------+
       |                        |
       v                        v
@@ -60,4 +60,4 @@ The schema is created and migrated at daemon startup. Existing MVP databases are
 
 ## Embedding Pipeline
 
-The production interface is pluggable. This build always has a zero-dependency TF cosine vector fallback, so retrieval still works without Ollama or an OpenAI-compatible endpoint. The config keeps the Ollama/OpenAI fields for deployment parity and future model-backed embeddings.
+The production interface is pluggable. This build keeps BM25/keyword retrieval available without external credentials, while semantic retrieval is served through `ragd_hnsw` after embeddings are generated with an explicitly configured provider key.

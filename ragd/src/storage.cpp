@@ -73,16 +73,22 @@ Chunk read_chunk_row(Statement &stmt) {
   c.lang = stmt.column_text(3);
   c.chunk_type = stmt.column_text(4);
   c.symbol_name = stmt.column_text(5);
-  c.line_start = stmt.column_int(6);
-  c.line_end = stmt.column_int(7);
-  c.content_hash = stmt.column_text(8);
-  c.metadata_json = stmt.column_text(9);
-  c.status = stmt.column_text(10);
-  c.summary = stmt.column_text(11);
-  c.repo_root = stmt.column_text(12);
-  c.git_commit = stmt.column_text(13);
-  c.indexed_at = stmt.column_int64(14);
-  c.modified_at = stmt.column_int64(15);
+  c.qualified_name = stmt.column_text(6);
+  c.parent_symbol = stmt.column_text(7);
+  c.docstring = stmt.column_text(8);
+  c.imports_json = stmt.column_text(9);
+  c.calls_json = stmt.column_text(10);
+  c.is_public = stmt.column_int(11);
+  c.line_start = stmt.column_int(12);
+  c.line_end = stmt.column_int(13);
+  c.content_hash = stmt.column_text(14);
+  c.metadata_json = stmt.column_text(15);
+  c.status = stmt.column_text(16);
+  c.summary = stmt.column_text(17);
+  c.repo_root = stmt.column_text(18);
+  c.git_commit = stmt.column_text(19);
+  c.indexed_at = stmt.column_int64(20);
+  c.modified_at = stmt.column_int64(21);
   return c;
 }
 
@@ -213,14 +219,20 @@ void Storage::initialize() {
   exec("CREATE TABLE IF NOT EXISTS kv_store(key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL DEFAULT 0);");
   add_column_if_missing(*this, db_, "kv_store", "updated_at", "updated_at INTEGER NOT NULL DEFAULT 0");
 
-  exec("CREATE TABLE IF NOT EXISTS chunks(id INTEGER PRIMARY KEY AUTOINCREMENT, filepath TEXT NOT NULL, content TEXT NOT NULL, lang TEXT, chunk_type TEXT, symbol_name TEXT, line_start INTEGER, line_end INTEGER, content_hash TEXT, metadata_json TEXT DEFAULT '{}', status TEXT DEFAULT 'active', updated_at TEXT DEFAULT CURRENT_TIMESTAMP, summary TEXT DEFAULT '', repo_root TEXT DEFAULT '', git_commit TEXT DEFAULT '', indexed_at INTEGER DEFAULT 0, modified_at INTEGER DEFAULT 0, embedding BLOB, embed_model TEXT DEFAULT 'tfidf', fts_rowid INTEGER);");
+  exec("CREATE TABLE IF NOT EXISTS chunks(id INTEGER PRIMARY KEY AUTOINCREMENT, filepath TEXT NOT NULL, content TEXT NOT NULL, lang TEXT, chunk_type TEXT, symbol_name TEXT, qualified_name TEXT DEFAULT '', parent_symbol TEXT DEFAULT '', docstring TEXT DEFAULT '', imports_json TEXT DEFAULT '[]', calls_json TEXT DEFAULT '[]', is_public INTEGER DEFAULT 1, line_start INTEGER, line_end INTEGER, content_hash TEXT, metadata_json TEXT DEFAULT '{}', status TEXT DEFAULT 'active', updated_at TEXT DEFAULT CURRENT_TIMESTAMP, summary TEXT DEFAULT '', repo_root TEXT DEFAULT '', git_commit TEXT DEFAULT '', indexed_at INTEGER DEFAULT 0, modified_at INTEGER DEFAULT 0, embedding BLOB, embed_model TEXT DEFAULT 'external', fts_rowid INTEGER);");
+  add_column_if_missing(*this, db_, "chunks", "qualified_name", "qualified_name TEXT DEFAULT ''");
+  add_column_if_missing(*this, db_, "chunks", "parent_symbol", "parent_symbol TEXT DEFAULT ''");
+  add_column_if_missing(*this, db_, "chunks", "docstring", "docstring TEXT DEFAULT ''");
+  add_column_if_missing(*this, db_, "chunks", "imports_json", "imports_json TEXT DEFAULT '[]'");
+  add_column_if_missing(*this, db_, "chunks", "calls_json", "calls_json TEXT DEFAULT '[]'");
+  add_column_if_missing(*this, db_, "chunks", "is_public", "is_public INTEGER DEFAULT 1");
   add_column_if_missing(*this, db_, "chunks", "summary", "summary TEXT DEFAULT ''");
   add_column_if_missing(*this, db_, "chunks", "repo_root", "repo_root TEXT DEFAULT ''");
   add_column_if_missing(*this, db_, "chunks", "git_commit", "git_commit TEXT DEFAULT ''");
   add_column_if_missing(*this, db_, "chunks", "indexed_at", "indexed_at INTEGER DEFAULT 0");
   add_column_if_missing(*this, db_, "chunks", "modified_at", "modified_at INTEGER DEFAULT 0");
   add_column_if_missing(*this, db_, "chunks", "embedding", "embedding BLOB");
-  add_column_if_missing(*this, db_, "chunks", "embed_model", "embed_model TEXT DEFAULT 'tfidf'");
+  add_column_if_missing(*this, db_, "chunks", "embed_model", "embed_model TEXT DEFAULT 'external'");
   add_column_if_missing(*this, db_, "chunks", "fts_rowid", "fts_rowid INTEGER");
   exec("CREATE INDEX IF NOT EXISTS idx_chunks_identity ON chunks(filepath,line_start,line_end,content_hash);");
   exec("CREATE VIRTUAL TABLE IF NOT EXISTS fts_chunks USING fts5(content, filepath, chunk_id UNINDEXED);");
@@ -300,41 +312,53 @@ int64_t Storage::upsert_chunk(const Chunk &chunk) {
   if (existing.step_row()) id = existing.column_int64(0);
 
   if (id > 0) {
-    Statement upd(db_, "UPDATE chunks SET content=?,lang=?,chunk_type=?,symbol_name=?,metadata_json=?,status=?,updated_at=?,summary=?,repo_root=?,git_commit=?,indexed_at=?,modified_at=?,embed_model=? WHERE id=?");
+    Statement upd(db_, "UPDATE chunks SET content=?,lang=?,chunk_type=?,symbol_name=?,qualified_name=?,parent_symbol=?,docstring=?,imports_json=?,calls_json=?,is_public=?,metadata_json=?,status=?,updated_at=?,summary=?,repo_root=?,git_commit=?,indexed_at=?,modified_at=?,embed_model=? WHERE id=?");
     upd.bind(1, chunk.content);
     upd.bind(2, chunk.lang);
     upd.bind(3, chunk.chunk_type);
     upd.bind(4, chunk.symbol_name);
-    upd.bind(5, chunk.metadata_json.empty() ? "{}" : chunk.metadata_json);
-    upd.bind(6, chunk.status.empty() ? "active" : chunk.status);
-    upd.bind(7, now_utc());
-    upd.bind(8, chunk.summary);
-    upd.bind(9, chunk.repo_root);
-    upd.bind(10, chunk.git_commit);
-    upd.bind(11, chunk.indexed_at ? chunk.indexed_at : now_epoch());
-    upd.bind(12, chunk.modified_at);
-    upd.bind(13, "tfidf");
-    upd.bind(14, id);
+    upd.bind(5, chunk.qualified_name);
+    upd.bind(6, chunk.parent_symbol);
+    upd.bind(7, chunk.docstring);
+    upd.bind(8, chunk.imports_json.empty() ? "[]" : chunk.imports_json);
+    upd.bind(9, chunk.calls_json.empty() ? "[]" : chunk.calls_json);
+    upd.bind(10, chunk.is_public);
+    upd.bind(11, chunk.metadata_json.empty() ? "{}" : chunk.metadata_json);
+    upd.bind(12, chunk.status.empty() ? "active" : chunk.status);
+    upd.bind(13, now_utc());
+    upd.bind(14, chunk.summary);
+    upd.bind(15, chunk.repo_root);
+    upd.bind(16, chunk.git_commit);
+    upd.bind(17, chunk.indexed_at ? chunk.indexed_at : now_epoch());
+    upd.bind(18, chunk.modified_at);
+    upd.bind(19, "external");
+    upd.bind(20, id);
     upd.step_done();
   } else {
-    Statement stmt(db_, "INSERT INTO chunks(filepath,content,lang,chunk_type,symbol_name,line_start,line_end,content_hash,metadata_json,status,updated_at,summary,repo_root,git_commit,indexed_at,modified_at,embed_model) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    Statement stmt(db_, "INSERT INTO chunks(filepath,content,lang,chunk_type,symbol_name,qualified_name,parent_symbol,docstring,imports_json,calls_json,is_public,line_start,line_end,content_hash,metadata_json,status,updated_at,summary,repo_root,git_commit,indexed_at,modified_at,embed_model) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
     stmt.bind(1, chunk.filepath);
     stmt.bind(2, chunk.content);
     stmt.bind(3, chunk.lang);
     stmt.bind(4, chunk.chunk_type);
     stmt.bind(5, chunk.symbol_name);
-    stmt.bind(6, chunk.line_start);
-    stmt.bind(7, chunk.line_end);
-    stmt.bind(8, chunk.content_hash);
-    stmt.bind(9, chunk.metadata_json.empty() ? "{}" : chunk.metadata_json);
-    stmt.bind(10, chunk.status.empty() ? "active" : chunk.status);
-    stmt.bind(11, now_utc());
-    stmt.bind(12, chunk.summary);
-    stmt.bind(13, chunk.repo_root);
-    stmt.bind(14, chunk.git_commit);
-    stmt.bind(15, chunk.indexed_at ? chunk.indexed_at : now_epoch());
-    stmt.bind(16, chunk.modified_at);
-    stmt.bind(17, "tfidf");
+    stmt.bind(6, chunk.qualified_name);
+    stmt.bind(7, chunk.parent_symbol);
+    stmt.bind(8, chunk.docstring);
+    stmt.bind(9, chunk.imports_json.empty() ? "[]" : chunk.imports_json);
+    stmt.bind(10, chunk.calls_json.empty() ? "[]" : chunk.calls_json);
+    stmt.bind(11, chunk.is_public);
+    stmt.bind(12, chunk.line_start);
+    stmt.bind(13, chunk.line_end);
+    stmt.bind(14, chunk.content_hash);
+    stmt.bind(15, chunk.metadata_json.empty() ? "{}" : chunk.metadata_json);
+    stmt.bind(16, chunk.status.empty() ? "active" : chunk.status);
+    stmt.bind(17, now_utc());
+    stmt.bind(18, chunk.summary);
+    stmt.bind(19, chunk.repo_root);
+    stmt.bind(20, chunk.git_commit);
+    stmt.bind(21, chunk.indexed_at ? chunk.indexed_at : now_epoch());
+    stmt.bind(22, chunk.modified_at);
+    stmt.bind(23, "external");
     stmt.step_done();
     id = sqlite3_last_insert_rowid(db_);
 
@@ -364,7 +388,7 @@ std::vector<QueryResult> Storage::search_fts(const std::string &query, int limit
   std::vector<QueryResult> out;
   auto fts_query = sanitize_fts_query(query);
   if (fts_query.empty()) return out;
-  Statement stmt(db_, "SELECT c.id,c.filepath,c.content,-bm25(fts_chunks),c.lang,c.chunk_type,c.symbol_name,c.line_start,c.line_end,c.summary,c.git_commit,c.content_hash,c.repo_root,c.status,c.indexed_at,c.modified_at FROM fts_chunks JOIN chunks c ON c.id=fts_chunks.chunk_id WHERE fts_chunks MATCH ? AND c.status='active' ORDER BY bm25(fts_chunks) LIMIT ?");
+  Statement stmt(db_, "SELECT c.id,c.filepath,c.content,-bm25(fts_chunks),c.lang,c.chunk_type,c.symbol_name,c.qualified_name,c.parent_symbol,c.docstring,c.imports_json,c.calls_json,c.is_public,c.line_start,c.line_end,c.summary,c.git_commit,c.content_hash,c.repo_root,c.status,c.indexed_at,c.modified_at FROM fts_chunks JOIN chunks c ON c.id=fts_chunks.chunk_id WHERE fts_chunks MATCH ? AND c.status='active' ORDER BY bm25(fts_chunks) LIMIT ?");
   stmt.bind(1, fts_query);
   stmt.bind(2, limit);
   while (stmt.step_row()) {
@@ -377,15 +401,21 @@ std::vector<QueryResult> Storage::search_fts(const std::string &query, int limit
     r.lang = stmt.column_text(4);
     r.chunk_type = stmt.column_text(5);
     r.symbol_name = stmt.column_text(6);
-    r.line_start = stmt.column_int(7);
-    r.line_end = stmt.column_int(8);
-    r.summary = stmt.column_text(9);
-    r.git_commit = stmt.column_text(10);
-    r.content_hash = stmt.column_text(11);
-    r.repo_root = stmt.column_text(12);
-    r.status = stmt.column_text(13);
-    r.indexed_at = stmt.column_int64(14);
-    r.modified_at = stmt.column_int64(15);
+    r.qualified_name = stmt.column_text(7);
+    r.parent_symbol = stmt.column_text(8);
+    r.docstring = stmt.column_text(9);
+    r.imports_json = stmt.column_text(10);
+    r.calls_json = stmt.column_text(11);
+    r.is_public = stmt.column_int(12);
+    r.line_start = stmt.column_int(13);
+    r.line_end = stmt.column_int(14);
+    r.summary = stmt.column_text(15);
+    r.git_commit = stmt.column_text(16);
+    r.content_hash = stmt.column_text(17);
+    r.repo_root = stmt.column_text(18);
+    r.status = stmt.column_text(19);
+    r.indexed_at = stmt.column_int64(20);
+    r.modified_at = stmt.column_int64(21);
     out.push_back(std::move(r));
   }
   return out;
@@ -393,12 +423,13 @@ std::vector<QueryResult> Storage::search_fts(const std::string &query, int limit
 
 std::vector<QueryResult> Storage::search_like(const std::string &query, int limit) {
   std::vector<QueryResult> out;
-  Statement stmt(db_, "SELECT id,filepath,content,lang,chunk_type,symbol_name,line_start,line_end,summary,git_commit,content_hash,repo_root,status,indexed_at,modified_at FROM chunks WHERE status='active' AND (content LIKE ? OR filepath LIKE ? OR symbol_name LIKE ?) ORDER BY id DESC LIMIT ?");
+  Statement stmt(db_, "SELECT id,filepath,content,lang,chunk_type,symbol_name,qualified_name,parent_symbol,docstring,imports_json,calls_json,is_public,line_start,line_end,summary,git_commit,content_hash,repo_root,status,indexed_at,modified_at FROM chunks WHERE status='active' AND (content LIKE ? OR filepath LIKE ? OR symbol_name LIKE ? OR qualified_name LIKE ?) ORDER BY id DESC LIMIT ?");
   std::string needle = "%" + query + "%";
   stmt.bind(1, needle);
   stmt.bind(2, needle);
   stmt.bind(3, needle);
-  stmt.bind(4, limit);
+  stmt.bind(4, needle);
+  stmt.bind(5, limit);
   while (stmt.step_row()) {
     QueryResult r;
     r.chunk_id = stmt.column_int64(0);
@@ -407,15 +438,21 @@ std::vector<QueryResult> Storage::search_like(const std::string &query, int limi
     r.lang = stmt.column_text(3);
     r.chunk_type = stmt.column_text(4);
     r.symbol_name = stmt.column_text(5);
-    r.line_start = stmt.column_int(6);
-    r.line_end = stmt.column_int(7);
-    r.summary = stmt.column_text(8);
-    r.git_commit = stmt.column_text(9);
-    r.content_hash = stmt.column_text(10);
-    r.repo_root = stmt.column_text(11);
-    r.status = stmt.column_text(12);
-    r.indexed_at = stmt.column_int64(13);
-    r.modified_at = stmt.column_int64(14);
+    r.qualified_name = stmt.column_text(6);
+    r.parent_symbol = stmt.column_text(7);
+    r.docstring = stmt.column_text(8);
+    r.imports_json = stmt.column_text(9);
+    r.calls_json = stmt.column_text(10);
+    r.is_public = stmt.column_int(11);
+    r.line_start = stmt.column_int(12);
+    r.line_end = stmt.column_int(13);
+    r.summary = stmt.column_text(14);
+    r.git_commit = stmt.column_text(15);
+    r.content_hash = stmt.column_text(16);
+    r.repo_root = stmt.column_text(17);
+    r.status = stmt.column_text(18);
+    r.indexed_at = stmt.column_int64(19);
+    r.modified_at = stmt.column_int64(20);
     r.score = 1.0;
     out.push_back(std::move(r));
   }
@@ -424,14 +461,14 @@ std::vector<QueryResult> Storage::search_like(const std::string &query, int limi
 
 std::vector<Chunk> Storage::recent_chunks(int limit) {
   std::vector<Chunk> out;
-  Statement stmt(db_, "SELECT id,filepath,content,lang,chunk_type,symbol_name,line_start,line_end,content_hash,metadata_json,status,summary,repo_root,git_commit,indexed_at,modified_at FROM chunks WHERE status='active' ORDER BY id DESC LIMIT ?");
+  Statement stmt(db_, "SELECT id,filepath,content,lang,chunk_type,symbol_name,qualified_name,parent_symbol,docstring,imports_json,calls_json,is_public,line_start,line_end,content_hash,metadata_json,status,summary,repo_root,git_commit,indexed_at,modified_at FROM chunks WHERE status='active' ORDER BY id DESC LIMIT ?");
   stmt.bind(1, limit);
   while (stmt.step_row()) out.push_back(read_chunk_row(stmt));
   return out;
 }
 
 Chunk Storage::get_chunk(int64_t id) {
-  Statement stmt(db_, "SELECT id,filepath,content,lang,chunk_type,symbol_name,line_start,line_end,content_hash,metadata_json,status,summary,repo_root,git_commit,indexed_at,modified_at FROM chunks WHERE id=?");
+  Statement stmt(db_, "SELECT id,filepath,content,lang,chunk_type,symbol_name,qualified_name,parent_symbol,docstring,imports_json,calls_json,is_public,line_start,line_end,content_hash,metadata_json,status,summary,repo_root,git_commit,indexed_at,modified_at FROM chunks WHERE id=?");
   stmt.bind(1, id);
   if (stmt.step_row()) return read_chunk_row(stmt);
   return {};
@@ -800,7 +837,7 @@ std::string Storage::handoff_json() {
   j["ragd_version"] = "1.0.0";
   j["version"] = "1.0.0";
   j["generated_at_utc"] = now_utc();
-  j["embed_backend"] = "tfidf";
+  j["embed_backend"] = "external_hnsw";
   j["active_todos"] = nlohmann::json::array();
   for (const auto &todo : list_todos_filtered("open", 99, "", 20)) j["active_todos"].push_back(todo_to_json(todo));
   j["recent_decisions"] = nlohmann::json::array();
@@ -840,7 +877,7 @@ std::string Storage::metrics_json() {
   j["decisions"] = count("decisions");
   j["bus_messages"] = count("bus_messages");
   j["dead_zones"] = count("dead_zones");
-  j["embed_backend"] = "tfidf";
+  j["embed_backend"] = "external_hnsw";
   j["ragd_version"] = "1.0.0";
   j["retrieval_latency_ms"] = {{"p50", 0}, {"p95", 0}, {"p99", 0}};
   return j.dump();

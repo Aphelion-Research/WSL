@@ -2,7 +2,6 @@
 
 #include "ragd/bm25.h"
 #include "ragd/storage.h"
-#include "ragd/vector_store.h"
 
 #include <string>
 
@@ -13,10 +12,12 @@ class RagEngine {
   explicit RagEngine(Storage &storage);
   std::string query_json(const std::string &query, const std::string &mode, int limit);
 
+  // Preserved for API compatibility; semantic indexes are managed by ragd_hnsw.
+  void rebuild_vector();
+
  private:
   Storage &storage_;
   BM25Engine bm25_;
-  VectorStore vector_;
 };
 
 }  // namespace ragd

@@ -11,7 +11,7 @@ INTENT_RULES: list[tuple[str, str, list[str], float]] = [
     ("handoff", "handoff_protocol", ["handoff", "agent handoff", "AGENT_HANDOFF", "RAGD handoff"], 0.9),
     ("trace|why.*chunk|provenance", "trace_explain", ["trace_id", "chunk provenance", "span"], 0.86),
     ("ledger|decision|memory", "agent_memory", ["decisions", "agent memory", "ledger"], 0.84),
-    ("llm|ollama|model|vram|gpu", "local_llm", ["local_llm", "governor", "Ollama"], 0.82),
+    ("embedding|semantic|hnsw|vault|obsidian", "rag_infrastructure", ["ragd_embed", "ragd_hnsw", "ragd_vault"], 0.82),
     ("test|pytest|ctest|validation", "validation", ["tests", "validation", "pytest", "ctest"], 0.8),
     ("domdata|mt5|trading|xau", "data_safety", ["domdata", "read-only", "check_no_trading"], 0.9),
     ("cli|command|dominion", "cli", ["scripts/dominion_cli.py", "command center"], 0.78),

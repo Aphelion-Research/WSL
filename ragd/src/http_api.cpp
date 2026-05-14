@@ -8,6 +8,7 @@
 #include <httplib.h>
 #include <nlohmann/json.hpp>
 
+#include <cstdlib>
 #include <filesystem>
 
 namespace ragd {
@@ -107,6 +108,7 @@ void HttpApi::run() {
     if (body.contains("paths") && body["paths"].is_array()) paths = body["paths"].get<std::vector<std::string>>();
     if (body.contains("path") && body["path"].is_string()) paths = {body["path"].get<std::string>()};
     int chunks = indexer_.index_paths(paths, config_.max_file_bytes);
+    rag_.rebuild_vector();
     json_response(res, nlohmann::json{{"queued", chunks}, {"chunks_indexed", chunks}, {"already_current", 0}});
   });
 
@@ -142,6 +144,7 @@ void HttpApi::run() {
                            {"errors", errors},
                        },
                   errors.empty() ? 200 : 400);
+    if (chunks_marked_deleted > 0) rag_.rebuild_vector();
   });
 
   server.Post("/query", [&](const httplib::Request &req, httplib::Response &res) {
@@ -150,6 +153,36 @@ void HttpApi::run() {
     std::string mode = body.value("mode", "hybrid");
     int top_k = body.value("top_k", body.value("limit", config_.default_top_k));
     json_response(res, rag_.query_json(q, mode, top_k));
+  });
+
+  server.Post("/query/semantic", [&](const httplib::Request &req, httplib::Response &res) {
+    const char *host_env = std::getenv("RAGD_SEMANTIC_HOST");
+    const char *port_env = std::getenv("RAGD_SEMANTIC_PORT");
+    std::string host = host_env ? host_env : "127.0.0.1";
+    int port = port_env ? std::atoi(port_env) : 7476;
+    httplib::Client client(host, port);
+    client.set_connection_timeout(0, 200000);
+    client.set_read_timeout(10, 0);
+    auto upstream = client.Post("/query/semantic", req.body, "application/json");
+    if (!upstream) {
+      json_response(res, nlohmann::json{
+                             {"ok", false},
+                             {"error", "semantic query service unavailable"},
+                             {"remedy", "Start python -m ragd_hnsw.semantic_server after embeddings and HNSW sync are available."},
+                         },
+                    503);
+      return;
+    }
+    res.status = upstream->status;
+    res.set_content(upstream->body, upstream->get_header_value("Content-Type").empty() ? "application/json" : upstream->get_header_value("Content-Type"));
+  });
+
+  server.Post("/query/hybrid", [&](const httplib::Request &req, httplib::Response &res) {
+    auto body = parse_body(req);
+    std::string q = body.value("q", body.value("query", ""));
+    int top_k = body.value("top_k", body.value("limit", config_.default_top_k));
+    res.set_header("X-RAGD-Semantic-Note", "BM25+keyword served by RAGD; HNSW semantic results are available through /query/semantic when ragd_hnsw service and embeddings are configured.");
+    json_response(res, rag_.query_json(q, "hybrid", top_k));
   });
 
   server.Get("/handoff", [&](const httplib::Request &, httplib::Response &res) { json_response(res, storage_.handoff_json()); });

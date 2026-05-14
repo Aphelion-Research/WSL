@@ -32,7 +32,7 @@ Results captured 2026-05-13T21:49Z:
 | `dominion ask` retrieve-only p50 | n/a | 52.01 ms | n/a | `dominion bench --suite retrieval --iterations 3` |
 | `dominion ask` retrieve-only p95 | n/a | 55.25 ms | n/a | `dominion bench --suite retrieval --iterations 3` |
 | `dominion ask` e2e p50 | n/a | 50.86 ms | n/a | `dominion bench --suite e2e --iterations 3` |
-| `dominion ask --generate` gated p50 | n/a | 152.79 ms | n/a | Governor refused model load on 4 GB class GPU |
+| `dominion ask --generate` p50 | n/a | retrieve-only | n/a | Generation retired; frontier agents handle answer generation |
 | Model calls avoided | n/a | 3 | n/a | Retrieve-only suite |
 
 No speedup claim is made. The after numbers measure added cockpit overhead plus confidence, trace, rerank, and context assembly.

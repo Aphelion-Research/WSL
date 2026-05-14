@@ -1,34 +1,14 @@
-# Local LLM Layer
+# Local Generation Retired
 
-Dominion V2 uses `local_llm` as an optional Ollama-compatible analyst layer. It is safe to run when Ollama is missing; commands return a disabled status instead of crashing.
+Dominion no longer ships a local generation subsystem. Claude Code, Codex, and Cursor handle generation; RAGD provides retrieval context.
 
-## Commands
-
-```bash
-llm doctor
-llm list
-llm summarize FILE_OR_TEXT
-llm tag FILE_OR_TEXT
-llm claims FILE_OR_TEXT
-llm query-expand "research query"
-```
-
-## Environment
-
-- `OLLAMA_HOST`: defaults to `http://127.0.0.1:11434`.
-- `DOMINION_LLM_MODEL`: defaults to `qwen2.5:3b`.
-- `DOMINION_EMBED_MODEL`: defaults to `nomic-embed-text`.
-
-## Manual Model Setup
-
-Dominion does not install large models automatically.
+Use:
 
 ```bash
-ollama pull qwen2.5:3b
-ollama pull llama3.2:3b
-ollama pull nomic-embed-text
+dominion search "query"
+dominion ask "query" --json
+dominion embed stats
+dominion vault status
 ```
 
-## Safety
-
-Local LLM output is advisory. It should summarize, tag, extract claims, and expand queries, but it should not authorize trading, expose secrets, or replace provenance-backed research.
+The `llm` wrapper remains only as a compatibility note and does not load models or send code anywhere.

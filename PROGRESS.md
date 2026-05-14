@@ -7,7 +7,7 @@ RUN_ID: `20260511-221153`
 Status: COMPLETE for Dominion V2 MVP superbuild.
 
 - Pytest stabilized: added repo-root `pytest.ini` so `python -m pytest -q` runs all Python tests without `--import-mode=importlib`.
-- Added minimal Python bootstrap: `requirements.txt` (only in-repo third-party imports) and `scripts/bootstrap_python.sh` to create `.venv`, install deps, and run the validation set (`research doctor`, `llm doctor`, pytest, `domdata/check_no_trading.py`).
+- Added minimal Python bootstrap: `requirements.txt` (only in-repo third-party imports) and `scripts/bootstrap_python.sh` to create `.venv`, install deps, and run the validation set (`research doctor`, `dominion embed stats`, pytest, `domdata/check_no_trading.py`).
 - Removed accidental root junk: deleted empty `ssh` file.
 - De-hardcoded Tailscale IP output: `scripts/bin/connectinfo` and `scripts/bin/domshare` now use `tailscale ip -4` instead of printing a fixed IP.
 
@@ -18,9 +18,9 @@ Status: COMPLETE for Dominion V2 MVP superbuild.
 - RAGD decisions stored for the RAGD-first workflow and platform layout.
 - `dominion` command was missing at baseline and remains a target for the command center phase.
 - Added Research OS package, runtime source registry, CLI wrapper, docs, and tests.
-- Added optional Ollama-compatible local LLM package, CLI wrapper, docs, and offline-safe tests.
+- Added an optional local generation package in an earlier phase; Phase 6 retires that path in favor of frontier-agent generation with RAGD retrieval context.
 - Research validation passed: `research init`, `research status`, `research list-sources`, `research add-url`, `research run --limit 1`, `research list`, `research doctor`.
-- Local LLM validation passed in disabled mode: `llm doctor`, local LLM pytest.
+- Historical local generation validation passed in disabled mode; Phase 6 replaces it with embedding/vault checks.
 - RAGD research ingest passed and RAGD MCP query can retrieve the new context.
 - RAGD unchanged-content reindex idempotency fixed in storage and validated with CMake/ctest.
 - Added `dominion`, `dominion-ui`, `codexrag`, `codexstatus`, `codexstart`, `codexprompt`, and `warp` wrappers.
@@ -193,15 +193,15 @@ Baseline audit, git init/config/commit, shell validation, helper validation, dom
 - REST bus persistence/locks: PASS.
 - Temporal chunk-history surfaces: PASS.
 - Dead-zone heuristic report: PASS.
-- Native WebSocket/HNSW/tree-sitter/libgit2 deep history: deferred and documented.
+- Native WebSocket/libgit2 deep history: deferred and documented.
 
 ## Remaining Risks
 
 - Persistent collector service is not installed yet.
 - RAGD systemd user service is written but not enabled because user systemd/sudo flow was not validated.
 - RAGD native WebSocket bus is not implemented; REST/MCP bus persistence is working.
-- RAGD vector store is TF cosine fallback, not HNSW.
-- RAGD chunking is structured regex fallback, not tree-sitter.
+- Semantic HNSW query requires `RAGD_EMBED_API_KEY` and an embedding run before it can return results.
+- RAGD chunking uses the AST service when it is running and falls back for unsupported languages.
 - GitHub push may require credentials/token.
 
 ## Dominion V2.5 Phase Start - 2026-05-12
@@ -302,7 +302,7 @@ Results:
 - IP scan: PASS (no matches).
 - Pytest: PASS (16 passed).
 - domdata forbidden-token scan: PASS.
-- bootstrap: PASS (pip showed DNS warnings; continued using installed deps; `llm doctor` reports localhost unreachable as expected).
+- bootstrap: PASS (pip showed DNS warnings; continued using installed deps; embedding stats are offline-safe).
 
 ## Dominion V2 Final Polish - 2026-05-12
 
@@ -338,14 +338,14 @@ Completed:
 
 - Added `dominion_ai/` with RAGD REST client, query planner, BM25/vector RRF composition, heuristic rerank, confidence scoring, budgeted context assembly, trace explorer, eval harness, ledger query layer, lightweight bench runner, and CLI handlers.
 - Added additive commands: `dominion ask`, `dominion search`, `dominion explain`, `dominion trace`, `dominion eval`, `dominion ledger`, `dominion graph`, `dominion bench`, and `dominion hw probe`.
-- Extended `local_llm/` with provider registry, mock/Ollama providers, and a 4 GB class governor.
+- Retired the local generation package; RAGD now focuses on retrieval infrastructure for frontier agents.
 - Extended `dominion-ui --once` with Latest queries and Latest decisions panels.
 - Wrote Agent 2 docs under `docs/agents/` and final report `reports/agent-2-phase-2-20260513-214949.md`.
 
 Evidence captured:
 
 ```bash
-python -m pytest -q dominion_ai/tests local_llm/tests
+python -m pytest -q dominion_ai/tests ragd_embed/tests ragd_hnsw/tests ragd_chunker/tests ragd_graph/tests ragd_vault/tests
 python -m pytest -q
 dominion search "agent handoff" --top-k 3 --json
 dominion ask "how does the handoff protocol work" --json
@@ -353,7 +353,8 @@ dominion ask "how does the handoff protocol work" --generate --json
 dominion trace ad51518679964fab8b78802762e7d5bd
 dominion eval --bundle dominion_ai/tests/eval_fixtures/tiny --top-k 10 --json
 dominion ledger list --kind decision --since 7d --json
-llm doctor --json
+dominion embed stats --json
+dominion vault status --json
 dominion-ui --once
 ```
 
@@ -363,7 +364,7 @@ Results:
 - Full configured pytest: PASS (`42 passed`).
 - Trading guard: PASS (`python ~/Dominion/domdata/check_no_trading.py`).
 - Tiny eval: PASS (`recall@10=1.0`, `MRR=1.0`, `nDCG@10=1.0`, `citation_accuracy=1.0`).
-- Governor: PASS; current 4 GB class GPU refuses the installed ~3.8 GB Ollama model because it exceeds the 3.5 GB safety ceiling, so `--generate` falls back retrieve-only.
+- Generation: retired from Dominion; `--generate` now returns retrieve-only context and tells the caller that Claude Code, Codex, or Cursor handles generation.
 - Existing smoke: PASS for `dominion status`, `research status`, `domdata notice`, `warp list`, and `codexrag "agent handoff"`.
 
 Deferred honestly:
@@ -371,3 +372,40 @@ Deferred honestly:
 - Full Agent 1 benchmark harness registration is not implemented; `dominion bench` is a lightweight local suite.
 - RAGD `/query` does not expose `content_hash`; Agent 2 uses `TEMP_ADAPTER(agent-1)` until Agent 1 adds the field.
 - Agent 2 consumes `dominion_loader.api.hw_probe` for `dominion hw probe --json`; a `TEMP_ADAPTER(agent-1)` fallback remains for older checkouts.
+
+## Agent 6 Phase 6 RAG Intelligence Overhaul - 2026-05-14
+
+Status: PARTIAL-COMPLETE. The local generation subsystem is removed, RAGD no longer rebuilds a per-query vector corpus, retrieval metadata/AST/vault infrastructure is wired and tested, and semantic embedding runs fail closed until an explicit external API key is configured.
+
+Completed:
+
+- Deleted the retired local generation package and removed Python imports from `scripts/`, `dominion_ai/`, `dominion_agent/`, `dominion_loader/`, and `research_os/`.
+- Added `ragd_embed/`, `ragd_hnsw/`, `ragd_chunker/`, `ragd_graph/`, and `ragd_vault/` with tests.
+- Updated RAGD C++ storage/query results with AST metadata fields and removed the old per-query vector rebuild from `RagEngine`.
+- Added `/query/semantic` proxy and `/query/hybrid`; semantic service returns a clear error when `RAGD_EMBED_API_KEY` is missing.
+- Built the Obsidian vault at `vault/` from the live RAGD index: 1,418 notes, 0 broken links, 0 invalid frontmatter.
+- Rebuilt graph stats: 1,025 nodes, 1,174 edges (`defines`, `imports`, `calls`).
+
+Evidence:
+
+```bash
+python -m pytest -q                                      # 389 passed
+cmake --build ragd/build -j$(nproc)                      # PASS
+ctest --test-dir ragd/build --output-on-failure           # 13/13 passed
+python domdata/check_no_trading.py                        # PASS
+domdata notice                                            # READ-ONLY
+domdata order-send || true                                # BLOCKED
+dominion embed run --changed-only --json                  # fails closed without RAGD_EMBED_API_KEY
+dominion vault doctor --json                              # ok=true, broken_links=0, invalid_frontmatter=0
+dominion graph stats --json                               # nodes=1055, edges=1215
+dominion doctor --deep --json                             # overall=warn; no fail
+llm                                                       # compatibility note exits 0
+```
+
+Known warnings:
+
+- `RAGD_EMBED_API_KEY` is not set, so no external embeddings were generated and no semantic recall lift is claimed.
+- `dominion doctor --deep` warns on old orphan chunks under `/tmp/pytest-*`, missing RAGD ignore policy hash, and labeled TEMP_ADAPTER debt.
+- `hnswlib` and `tree_sitter` are listed in requirements but not installed in the current venv; code has tested fallbacks and the final report records this honestly.
+
+Report: see `reports/agent-6-phase-6-*.md` and validation log `reports/agent-6-validation-20260514-031442.log`.

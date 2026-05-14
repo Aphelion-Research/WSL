@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-set -euo pipefail
-exec "$HOME/Dominion/.venv/bin/python" -m local_llm.cli "$@"
+echo "LLM generation is handled by your agent (Claude Code, Codex, Cursor). RAGD provides retrieval. Run: dominion search <query>"

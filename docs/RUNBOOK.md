@@ -48,14 +48,15 @@ research ingest-ragd
 
 Fetch only approved sources. Do not run unbounded crawlers.
 
-## Local LLM
+## Retrieval Context
 
 ```bash
-llm doctor
-llm summarize FILE_OR_TEXT
+dominion embed stats
+dominion vault status
+dominion search "query"
 ```
 
-Ollama is optional. If unavailable, local LLM commands return disabled status.
+External embedding runs require explicit `RAGD_EMBED_API_KEY`. Without it, `dominion embed run` fails closed and does not send code externally.
 
 ## Collaboration
 

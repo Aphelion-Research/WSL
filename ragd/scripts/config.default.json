@@ -8,20 +8,17 @@
   },
   "storage": {
     "db_path": "~/.ragd/ragd.db",
-    "vector_index_path": "~/.ragd/hnsw.bin",
-    "embed_dim": 768,
+    "vector_index_path": "~/.ragd/hnsw_voyage_voyage-code-2_3072.bin",
+    "embed_dim": 3072,
     "hnsw_M": 16,
     "hnsw_ef_construction": 200
   },
   "embedding": {
-    "backend": "auto",
-    "ollama_url": "http://localhost:11434/api/embeddings",
-    "ollama_model": "nomic-embed-text",
-    "openai_url": "https://api.openai.com/v1/embeddings",
-    "openai_model": "text-embedding-3-small",
-    "openai_key_env": "RAGD_EMBED_KEY",
-    "batch_size": 32,
-    "fallback_to_tfidf": true
+    "provider": "voyage",
+    "model": "voyage-code-2",
+    "api_key_env": "RAGD_EMBED_API_KEY",
+    "batch_size": 128,
+    "cache_embeddings": true
   },
   "indexing": {
     "watch_paths": ["~/Dominion"],

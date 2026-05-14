@@ -14,6 +14,12 @@ struct Chunk {
   std::string lang;
   std::string chunk_type;
   std::string symbol_name;
+  std::string qualified_name;
+  std::string parent_symbol;
+  std::string docstring;
+  std::string imports_json = "[]";
+  std::string calls_json = "[]";
+  int is_public = 1;
   std::string repo_root;
   std::string git_commit;
   int line_start = 1;
@@ -37,6 +43,12 @@ struct QueryResult {
   std::string lang;
   std::string chunk_type;
   std::string symbol_name;
+  std::string qualified_name;
+  std::string parent_symbol;
+  std::string docstring;
+  std::string imports_json = "[]";
+  std::string calls_json = "[]";
+  int is_public = 1;
   std::string git_commit;
   std::string content_hash;
   std::string repo_root;

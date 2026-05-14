@@ -23,7 +23,11 @@ score = (file_count × 1.5)
 | `dominion_loader` | 40    |
 | `dominion_ai`     | 50    |
 | `dominion_agent`  | 60    |
-| `local_llm`       | 45    |
+| `ragd_embed`      | 45    |
+| `ragd_hnsw`       | 45    |
+| `ragd_chunker`    | 45    |
+| `ragd_graph`      | 45    |
+| `ragd_vault`      | 45    |
 | `ragd`            | 80    |
 | `domdata`         | 35    |
 | `research_os`     | 50    |

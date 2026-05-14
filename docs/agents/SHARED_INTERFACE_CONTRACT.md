@@ -76,7 +76,7 @@ Version: `agent-2.20260513`
 ### Temporary Adapters
 
 - `TEMP_ADAPTER(agent-1)` in `dominion_ai/ragd_client.py`: RAGD `/query` now returns `content_hash`, `repo_root`, `status`, `indexed_at`, and `modified_at`; only `document_id` remains a labeled compatibility fallback. Remove when RAGD REST returns loader-compatible `document_id`.
-- `local_llm/governor.py` consumes `dominion_loader.api.hw_probe` when available. A labeled `TEMP_ADAPTER(agent-1)` fallback remains only for environments where that interface is absent.
+- Local generation governor adapters were removed by Agent 6. Retrieval infrastructure now exposes `ragd_embed`, `ragd_hnsw`, `ragd_chunker`, `ragd_graph`, and `ragd_vault` interfaces.
 
 ### CLI
 

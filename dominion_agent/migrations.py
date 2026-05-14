@@ -170,6 +170,8 @@ CREATE INDEX IF NOT EXISTS idx_events_synced
 # UNIQUE(filepath, status) wrongly blocks multiple read locks on the same file.
 # Replaced with UNIQUE(filepath, session_id) which prevents double-locking by same session.
 _MIGRATION_2_SQL = """
+BEGIN;
+
 CREATE TABLE IF NOT EXISTS agent_file_locks_v2(
     lock_id TEXT PRIMARY KEY,
     filepath TEXT NOT NULL,
@@ -195,6 +197,8 @@ ALTER TABLE agent_file_locks_v2 RENAME TO agent_file_locks;
 
 CREATE INDEX IF NOT EXISTS idx_locks_filepath
     ON agent_file_locks(filepath, status);
+
+COMMIT;
 """
 
 _MIGRATIONS: list[tuple[int, str]] = [

@@ -37,7 +37,11 @@
 | `dominion_loader` | File manifest scanner and loader | ✅ present | `dominion_loader/api.py` | none |
 | `dominion_ai` | RAGD-backed AI query layer | ✅ present | `dominion_ai/api.py` | dominion_loader, ragd |
 | `dominion_agent` | Agent OS — session/task/lock/review control plane | ✅ present | `dominion_agent/api.py` | none |
-| `local_llm` | Local LLM adapter (Ollama) | ✅ present | `local_llm/__init__.py` | none |
+| `ragd_embed` | External embedding pipeline | ✅ present | `ragd_embed/__init__.py` | ragd |
+| `ragd_hnsw` | Persistent semantic index | ✅ present | `ragd_hnsw/__init__.py` | ragd_embed |
+| `ragd_chunker` | AST chunking service | ✅ present | `ragd_chunker/__init__.py` | ragd |
+| `ragd_graph` | Symbol/import/call graph | ✅ present | `ragd_graph/__init__.py` | ragd |
+| `ragd_vault` | Obsidian vault generator | ✅ present | `ragd_vault/__init__.py` | ragd |
 | `ragd` | Retrieval-Augmented Generation Daemon (C++/HTTP) | ✅ present | `ragd/include/ragd/api.h` | none |
 | `domdata` | Market data safety layer | ✅ present | `domdata/domdata.py` | none |
 | `research_os` | Research ingestion and RAG preparation pipeline | ✅ present | `research_os/cli.py` | ragd |
@@ -51,7 +55,11 @@
 | `dominion_loader` | 53.6 | 40.0 | ⚠️ |
 | `dominion_ai` | 135.6 | 50.0 | ⚠️ |
 | `dominion_agent` | 429.8 | 60.0 | ⚠️ |
-| `local_llm` | 63.3 | 45.0 | ⚠️ |
+| `ragd_embed` | n/a | 45.0 | ✅ |
+| `ragd_hnsw` | n/a | 45.0 | ✅ |
+| `ragd_chunker` | n/a | 45.0 | ✅ |
+| `ragd_graph` | n/a | 45.0 | ✅ |
+| `ragd_vault` | n/a | 45.0 | ✅ |
 | `ragd` | 43.9 | 80.0 | ✅ |
 | `domdata` | 138.7 | 35.0 | ⚠️ |
 | `research_os` | 157.7 | 50.0 | ⚠️ |
@@ -69,7 +77,10 @@ ragd/ ─────────────────────► HTTP AP
 dominion_ai/ ──────────────► RAGD queries ──► scripts/dominion_cli.py
 dominion_agent/ ───────────► control plane ─► all agents
 research_os/ ──────────────► ingestion ─────► ragd/
-local_llm/ ────────────────► Ollama adapter ► dominion_ai/ (optional)
+ragd_chunker/ ─────────────► AST chunks ────► ragd/
+ragd_embed/ ───────────────► embeddings ────► ragd_hnsw/
+ragd_graph/ ───────────────► graph edges ───► ragd_vault/
+ragd_vault/ ───────────────► Obsidian notes ◄ ragd/
 ```
 
 ---

@@ -6,7 +6,7 @@
 - [x] CMake updated to project version `1.0.0`, vendor FetchContent cache, install target, and warning-free FetchContent timestamps.
 - [x] Config loader expanded for `~/.ragd/config.json`, first-run default creation, `--config`, `--daemon`, and `RAGD_` environment overrides.
 - [x] SQLite storage migrated additively for chunks, FTS, sessions, touches, decisions, TODOs, bus messages, locks, dead zones, chunk history, symbol edges, and kv metrics.
-- [x] Hybrid retrieval upgraded with intent routing, BM25, TF cosine vector fallback, reciprocal-rank fusion, metadata enrichment, and query metrics.
+- [x] Hybrid retrieval upgraded with intent routing, BM25/keyword reciprocal-rank fusion, metadata enrichment, and query metrics.
 - [x] Indexer upgraded to mark prior chunks deleted, chunk Markdown/config/code structurally, record git/root metadata where available, and extract TODOs on every pass.
 - [x] Linux inotify watcher implemented with recursive directory registration, 300 ms debounce, delete handling, overflow rescan, and polling fallback.
 - [x] REST API expanded for query, index, sessions, decisions, TODOs, handoff, temporal, dead-zone, bus, graph, metrics, and MCP endpoints.
@@ -26,7 +26,7 @@
 ## Blocked
 
 - Native WebSocket transport on the same HTTP port is not implemented in this build because `cpp-httplib` does not expose WebSocket upgrade handling. Bus persistence, locks, replay, and REST publish/read endpoints are functional.
-- HNSW, tree-sitter grammars, libgit2 deep history backfill, and Ollama/OpenAI embedding calls remain pluggable design targets; the shipped fallback path is pure C++ structured chunking plus TF cosine vectors.
+- HNSW/external embedding infrastructure and the AST chunker service are now wired at the Python/RAGD boundary. Semantic querying fails closed until `RAGD_EMBED_API_KEY` is configured.
 - `valgrind` is not installed on this host, so leak checking was not run.
 - `install.sh` was not run, so the user systemd unit is not installed yet.
 
@@ -34,7 +34,7 @@
 
 1. Preserve the existing MVP API and tests while adding richer fields and endpoints additively.
 2. Keep SQLite IDs as integer primary keys for compatibility with the current codebase; expose them as `chunk_id`/`todo_id` in JSON.
-3. Use TF cosine as the always-available vector backend so ragd works on a fresh WSL host without model services.
+3. Use BM25/keyword retrieval as the always-available fallback so ragd works on a fresh WSL host without external embedding credentials.
 4. Use inotify directly on Linux and retain polling as a fallback.
 5. Keep session bus persistence and advisory locks in SQLite, with REST surfaces until a native WebSocket stack is selected.
 

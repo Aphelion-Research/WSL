@@ -114,6 +114,21 @@ def cmd_graph(args) -> int:
     client = RagdClient()
     if args.graph_command in {"neighbors", "query", "subgraph"}:
         payload = client.graph_symbols(root=getattr(args, "node", "") or getattr(args, "from_file", "") or getattr(args, "label", ""), depth=args.depth)
+    elif args.graph_command in {"build", "stats", "callers", "callees", "imports", "importers"}:
+        from ragd_graph.graph import build_graph, callees, callers, importers, imports, stats
+
+        if args.graph_command == "build":
+            payload = {"ok": True, "stats": asdict(build_graph())}
+        elif args.graph_command == "stats":
+            payload = {"ok": True, "stats": asdict(stats())}
+        elif args.graph_command == "callers":
+            payload = {"ok": True, "callers": callers(args.symbol or "")}
+        elif args.graph_command == "callees":
+            payload = {"ok": True, "callees": callees(args.symbol or "")}
+        elif args.graph_command == "imports":
+            payload = {"ok": True, "imports": imports(args.filepath or "")}
+        else:
+            payload = {"ok": True, "importers": importers(args.filepath or "")}
     else:
         payload = {"ok": False, "error": "unknown graph command"}
     print_json(payload) if args.json else print_json(payload)

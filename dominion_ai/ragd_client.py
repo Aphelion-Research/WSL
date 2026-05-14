@@ -65,6 +65,18 @@ def _content_hash(raw: dict[str, Any]) -> tuple[str, bool]:
     return hashlib.sha256(identity.encode("utf-8", errors="replace")).hexdigest()[:16], True
 
 
+def _string_list(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item) for item in value]
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return []
+        return [str(item) for item in parsed] if isinstance(parsed, list) else []
+    return []
+
+
 def parse_chunk(raw: dict[str, Any], *, source: str = "hybrid") -> ScoredChunk | None:
     filepath = str(raw.get("filepath") or "")
     if not filepath or is_secret_path(filepath):
@@ -102,6 +114,12 @@ def parse_chunk(raw: dict[str, Any], *, source: str = "hybrid") -> ScoredChunk |
         lang=str(raw.get("lang") or ""),
         chunk_type=str(raw.get("chunk_type") or ""),
         symbol_name=str(raw.get("symbol_name") or ""),
+        qualified_name=str(raw.get("qualified_name") or ""),
+        parent_symbol=str(raw.get("parent_symbol") or ""),
+        docstring=str(raw.get("docstring") or ""),
+        imports=_string_list(raw.get("imports", raw.get("imports_json"))),
+        calls=_string_list(raw.get("calls", raw.get("calls_json"))),
+        is_public=bool(raw.get("is_public", True)),
         repo_root=str(raw.get("repo_root") or ""),
         status=str(raw.get("status") or ""),
         indexed_at=int(raw.get("indexed_at") or 0),
@@ -129,7 +147,7 @@ def chunk_by_id(chunk_id: str, *, db_path: str | None = None) -> ScoredChunk | N
     conn.row_factory = sqlite3.Row
     try:
         row = conn.execute(
-            "SELECT id AS chunk_id, filepath, content, lang, chunk_type, symbol_name, line_start, line_end, content_hash, summary, git_commit, repo_root, status, indexed_at, modified_at FROM chunks WHERE id=? AND status='active'",
+            "SELECT id AS chunk_id, filepath, content, lang, chunk_type, symbol_name, qualified_name, parent_symbol, docstring, imports_json, calls_json, is_public, line_start, line_end, content_hash, summary, git_commit, repo_root, status, indexed_at, modified_at FROM chunks WHERE id=? AND status='active'",
             (chunk_id,),
         ).fetchone()
         if row is None:

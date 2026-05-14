@@ -21,6 +21,12 @@ void enrich(QueryResult &r, const std::unordered_map<int64_t, Chunk> &chunks) {
   r.lang = c.lang;
   r.chunk_type = c.chunk_type;
   r.symbol_name = c.symbol_name;
+  r.qualified_name = c.qualified_name;
+  r.parent_symbol = c.parent_symbol;
+  r.docstring = c.docstring;
+  r.imports_json = c.imports_json;
+  r.calls_json = c.calls_json;
+  r.is_public = c.is_public;
   r.line_start = c.line_start;
   r.line_end = c.line_end;
   r.git_commit = c.git_commit;
@@ -29,6 +35,11 @@ void enrich(QueryResult &r, const std::unordered_map<int64_t, Chunk> &chunks) {
   r.status = c.status;
   r.indexed_at = c.indexed_at;
   r.modified_at = c.modified_at;
+}
+
+nlohmann::json parse_array(const std::string &value) {
+  auto parsed = nlohmann::json::parse(value.empty() ? "[]" : value, nullptr, false);
+  return parsed.is_array() ? parsed : nlohmann::json::array();
 }
 
 nlohmann::json result_to_json(const QueryResult &r) {
@@ -44,6 +55,12 @@ nlohmann::json result_to_json(const QueryResult &r) {
       {"lang", r.lang},
       {"chunk_type", r.chunk_type},
       {"symbol_name", r.symbol_name},
+      {"qualified_name", r.qualified_name},
+      {"parent_symbol", r.parent_symbol},
+      {"docstring", r.docstring},
+      {"imports", parse_array(r.imports_json)},
+      {"calls", parse_array(r.calls_json)},
+      {"is_public", r.is_public != 0},
       {"line_start", r.line_start},
       {"line_end", r.line_end},
       {"content_hash", r.content_hash},
@@ -57,9 +74,9 @@ nlohmann::json result_to_json(const QueryResult &r) {
 
 }  // namespace
 
-RagEngine::RagEngine(Storage &storage) : storage_(storage), bm25_(storage) {
-  for (const auto &chunk : storage_.recent_chunks(50000)) vector_.add(chunk.id, chunk.content);
-}
+RagEngine::RagEngine(Storage &storage) : storage_(storage), bm25_(storage) {}
+
+void RagEngine::rebuild_vector() {}
 
 std::string RagEngine::query_json(const std::string &query, const std::string &mode, int limit) {
   auto started = std::chrono::steady_clock::now();
@@ -72,13 +89,11 @@ std::string RagEngine::query_json(const std::string &query, const std::string &m
     else effective_mode = "hybrid";
   }
 
+  // Build the id→chunk map for result enrichment. Semantic vector search is
+  // owned by ragd_hnsw; the C++ query hot path no longer rebuilds a per-query vector corpus.
   std::vector<Chunk> chunks = storage_.recent_chunks(50000);
   std::unordered_map<int64_t, Chunk> by_id;
-  VectorStore fresh_vector;
-  for (const auto &chunk : chunks) {
-    by_id.emplace(chunk.id, chunk);
-    fresh_vector.add(chunk.id, chunk.content);
-  }
+  for (const auto &chunk : chunks) by_id.emplace(chunk.id, chunk);
 
   std::vector<QueryResult> results;
   std::string strategy = effective_mode;
@@ -96,9 +111,12 @@ std::string RagEngine::query_json(const std::string &query, const std::string &m
   }
 
   if (effective_mode == "vector") {
-    results = fresh_vector.query(query, limit);
-    for (auto &r : results) enrich(r, by_id);
-    strategy = "vector_tfidf";
+    results = storage_.search_like(query, limit);
+    for (auto &r : results) {
+      r.vector_score = 0.0;
+      enrich(r, by_id);
+    }
+    strategy = "semantic_hnsw_external_required_keyword_fallback";
   } else if (effective_mode == "keyword") {
     results = storage_.search_like(query, limit);
     strategy = "keyword_like";
@@ -107,7 +125,7 @@ std::string RagEngine::query_json(const std::string &query, const std::string &m
     strategy = "bm25";
   } else {
     auto bm = bm25_.query(query, 50);
-    auto vc = fresh_vector.query(query, 50);
+    auto keyword = storage_.search_like(query, 50);
     std::unordered_map<int64_t, QueryResult> merged;
     int rank = 1;
     constexpr double k = 60.0;
@@ -117,12 +135,12 @@ std::string RagEngine::query_json(const std::string &query, const std::string &m
       merged[r.chunk_id] = r;
     }
     rank = 1;
-    for (auto &r : vc) {
+    for (auto &r : keyword) {
       auto &slot = merged[r.chunk_id];
       if (slot.chunk_id == 0) slot = r;
-      slot.vector_score = std::max(slot.vector_score, r.vector_score);
+      slot.vector_score = std::max(slot.vector_score, 0.0);
       slot.rrf_score += 1.0 / (k + rank++);
-      slot.score = slot.rrf_score + (slot.vector_score * 0.1);
+      slot.score = std::max(slot.score, slot.rrf_score);
     }
     for (auto &kv : merged) {
       enrich(kv.second, by_id);
@@ -130,7 +148,7 @@ std::string RagEngine::query_json(const std::string &query, const std::string &m
     }
     std::sort(results.begin(), results.end(), [](const auto &a, const auto &b) { return a.score > b.score; });
     if (static_cast<int>(results.size()) > limit) results.resize(limit);
-    strategy = "hybrid_rrf_tfidf_rerank";
+    strategy = "hybrid_rrf_bm25_keyword_hnsw_external";
   }
 
   nlohmann::json j;

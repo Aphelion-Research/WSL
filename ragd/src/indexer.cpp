@@ -2,9 +2,12 @@
 
 #include "ragd/storage.h"
 
+#include <httplib.h>
+
 #include <algorithm>
 #include <chrono>
 #include <cctype>
+#include <cstdlib>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <regex>
@@ -81,12 +84,63 @@ void emit_chunk(std::vector<Chunk> &chunks, const std::string &filepath, const s
   c.lang = lang;
   c.chunk_type = type;
   c.symbol_name = symbol;
+  c.qualified_name = symbol;
+  c.parent_symbol = parent;
   c.line_start = start;
   c.line_end = end;
   c.content_hash = sha256ish(filepath + ":" + std::to_string(start) + ":" + std::to_string(end) + ":" + text);
-  c.metadata_json = metadata_for(text, parent).dump();
+  auto meta = metadata_for(text, parent);
+  c.docstring = meta.value("docstring", "");
+  c.imports_json = meta["imports"].dump();
+  c.calls_json = meta["calls"].dump();
+  c.is_public = symbol.empty() || symbol[0] != '_';
+  c.metadata_json = meta.dump();
   c.status = "active";
   chunks.push_back(std::move(c));
+}
+
+std::vector<Chunk> chunk_with_service(const std::string &filepath, const std::string &content, const std::string &lang) {
+  const char *host_env = std::getenv("RAGD_CHUNKER_HOST");
+  const char *port_env = std::getenv("RAGD_CHUNKER_PORT");
+  std::string host = host_env ? host_env : "127.0.0.1";
+  int port = port_env ? std::atoi(port_env) : 7475;
+  httplib::Client client(host, port);
+  client.set_connection_timeout(0, 200000);
+  client.set_read_timeout(2, 0);
+  nlohmann::json body{{"filepath", filepath}, {"content", content}, {"lang", lang}};
+  auto response = client.Post("/chunk", body.dump(), "application/json");
+  if (!response || response->status != 200) return {};
+  auto parsed = nlohmann::json::parse(response->body, nullptr, false);
+  if (parsed.is_discarded() || !parsed.contains("chunks") || !parsed["chunks"].is_array()) return {};
+  std::vector<Chunk> chunks;
+  for (const auto &item : parsed["chunks"]) {
+    Chunk c;
+    c.filepath = filepath;
+    c.content = item.value("content", "");
+    c.lang = item.value("lang", lang);
+    c.chunk_type = item.value("chunk_type", "block");
+    c.symbol_name = item.value("symbol_name", "");
+    c.qualified_name = item.value("qualified_name", c.symbol_name);
+    c.parent_symbol = item.value("parent_symbol", "");
+    c.line_start = item.value("line_start", 1);
+    c.line_end = item.value("line_end", c.line_start);
+    c.docstring = item.value("docstring", "");
+    c.imports_json = item.contains("imports") ? item["imports"].dump() : "[]";
+    c.calls_json = item.contains("calls") ? item["calls"].dump() : "[]";
+    c.is_public = item.value("is_public", true) ? 1 : 0;
+    c.content_hash = item.value("content_hash", sha256ish(filepath + ":" + c.content));
+    c.metadata_json = nlohmann::json{
+        {"chunker", "ragd_chunker_service"},
+        {"qualified_name", c.qualified_name},
+        {"parent_symbol", c.parent_symbol},
+        {"docstring", c.docstring},
+        {"imports", nlohmann::json::parse(c.imports_json, nullptr, false)},
+        {"calls", nlohmann::json::parse(c.calls_json, nullptr, false)},
+    }.dump();
+    c.status = "active";
+    if (!trim(c.content).empty()) chunks.push_back(std::move(c));
+  }
+  return chunks;
 }
 
 std::vector<Chunk> chunk_markdown(const std::string &filepath, const std::string &content) {
@@ -264,9 +318,14 @@ int Indexer::index_file(const fs::path &path, std::size_t max_file_bytes) {
   auto filepath = fs::absolute(path).string();
 
   std::vector<Chunk> chunks;
-  if (lang == "markdown") chunks = chunk_markdown(filepath, content);
-  else if (lang == "json" || lang == "yaml" || lang == "toml") chunks = chunk_config(filepath, content, lang);
-  else chunks = chunk_code(filepath, content, lang);
+  if (lang == "python" || lang == "cpp" || lang == "typescript" || lang == "javascript" || lang == "rust" || lang == "go") {
+    chunks = chunk_with_service(filepath, content, lang);
+  }
+  if (chunks.empty()) {
+    if (lang == "markdown") chunks = chunk_markdown(filepath, content);
+    else if (lang == "json" || lang == "yaml" || lang == "toml") chunks = chunk_config(filepath, content, lang);
+    else chunks = chunk_code(filepath, content, lang);
+  }
 
   auto repo_root = git_root_for(path);
   auto git_head = git_head_for(repo_root);

@@ -1,0 +1,156 @@
+{
+  "nodes": [
+    {
+      "id": "dominion_loader",
+      "type": "text",
+      "text": "dominion_loader",
+      "x": 0,
+      "y": 0,
+      "width": 260,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "dominion_ai",
+      "type": "text",
+      "text": "dominion_ai",
+      "x": 320,
+      "y": 0,
+      "width": 260,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "dominion_agent",
+      "type": "text",
+      "text": "dominion_agent",
+      "x": 640,
+      "y": 0,
+      "width": 260,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "ragd",
+      "type": "text",
+      "text": "ragd",
+      "x": 960,
+      "y": 0,
+      "width": 260,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "domdata",
+      "type": "text",
+      "text": "domdata",
+      "x": 0,
+      "y": 180,
+      "width": 260,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "research_os",
+      "type": "text",
+      "text": "research_os",
+      "x": 320,
+      "y": 180,
+      "width": 260,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "ragd_embed",
+      "type": "text",
+      "text": "ragd_embed",
+      "x": 640,
+      "y": 180,
+      "width": 260,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "ragd_chunker",
+      "type": "text",
+      "text": "ragd_chunker",
+      "x": 960,
+      "y": 180,
+      "width": 260,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "ragd_hnsw",
+      "type": "text",
+      "text": "ragd_hnsw",
+      "x": 0,
+      "y": 360,
+      "width": 260,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "ragd_graph",
+      "type": "text",
+      "text": "ragd_graph",
+      "x": 320,
+      "y": 360,
+      "width": 260,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "ragd_vault",
+      "type": "text",
+      "text": "ragd_vault",
+      "x": 640,
+      "y": 360,
+      "width": 260,
+      "height": 80,
+      "color": "4"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "fromNode": "dominion_loader",
+      "toNode": "ragd",
+      "fromSide": "right",
+      "toSide": "left",
+      "label": "indexes"
+    },
+    {
+      "id": "e1",
+      "fromNode": "ragd_chunker",
+      "toNode": "ragd",
+      "fromSide": "right",
+      "toSide": "left",
+      "label": "chunks"
+    },
+    {
+      "id": "e2",
+      "fromNode": "ragd_embed",
+      "toNode": "ragd_hnsw",
+      "fromSide": "right",
+      "toSide": "left",
+      "label": "embeds"
+    },
+    {
+      "id": "e3",
+      "fromNode": "ragd",
+      "toNode": "ragd_vault",
+      "fromSide": "right",
+      "toSide": "left",
+      "label": "feeds"
+    },
+    {
+      "id": "e4",
+      "fromNode": "ragd_graph",
+      "toNode": "ragd_vault",
+      "fromSide": "right",
+      "toSide": "left",
+      "label": "links"
+    }
+  ]
+}

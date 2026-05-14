@@ -35,7 +35,8 @@ def render() -> str:
         ("Data", run(["domdata", "collect-status"], timeout=20)),
         ("Codex", run(["codexstatus"], timeout=10)),
         ("tmux", run(["tmux", "ls"], timeout=5)),
-        ("Local LLM", run(["llm", "doctor"], timeout=5)),
+        ("Embeddings", run(["dominion", "embed", "stats"], timeout=10)),
+        ("Obsidian Vault", run(["dominion", "vault", "status"], timeout=10)),
     ]
 
     # Agent OS panels

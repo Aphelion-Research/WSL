@@ -28,8 +28,8 @@ echo "Validate: research doctor"
 ./.venv/bin/python -m research_os.cli doctor
 
 echo
-echo "Validate: llm doctor"
-./.venv/bin/python -m local_llm.cli doctor
+echo "Validate: embedding stats"
+./.venv/bin/python -m ragd_embed.cli stats
 
 echo
 echo "Validate: pytest"

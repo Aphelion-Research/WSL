@@ -22,17 +22,21 @@ def cmd_scan(args) -> int:
     """Run dominion_loader scan over the repo."""
     from dominion_loader.scan import scan
     from dominion_loader.manifest import Manifest
-    from dominion_loader.obs import _NullTracer, set_tracer
+    from dominion_loader.obs import _NullTracer, get_tracer, set_tracer
 
+    previous_tracer = get_tracer()
     set_tracer(_NullTracer())
-    repo = Path(getattr(args, "repo", None) or ROOT)
-    dry_run = getattr(args, "dry_run", False)
-
-    manifest = Manifest()
     try:
-        stats = scan(repo, dry_run=dry_run, manifest=manifest)
+        repo = Path(getattr(args, "repo", None) or ROOT)
+        dry_run = getattr(args, "dry_run", False)
+
+        manifest = Manifest()
+        try:
+            stats = scan(repo, dry_run=dry_run, manifest=manifest)
+        finally:
+            manifest.close()
     finally:
-        manifest.close()
+        set_tracer(previous_tracer)
 
     data = {
         "trace_id": stats.trace_id,
@@ -109,8 +113,9 @@ def cmd_manifest(args) -> int:
     """Inspect the dominion_loader manifest."""
     import datetime
     from dominion_loader.manifest import Manifest
-    from dominion_loader.obs import _NullTracer, set_tracer
+    from dominion_loader.obs import _NullTracer, get_tracer, set_tracer
 
+    previous_tracer = get_tracer()
     set_tracer(_NullTracer())
     manifest = Manifest()
     sub = getattr(args, "manifest_command", "list")
@@ -155,6 +160,7 @@ def cmd_manifest(args) -> int:
 
     finally:
         manifest.close()
+        set_tracer(previous_tracer)
 
     return 0
 

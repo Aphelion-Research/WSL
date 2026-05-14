@@ -39,8 +39,14 @@ def run(limit: int, p: ResearchPaths | None = None) -> dict[str, int]:
     jobs = db.next_jobs(conn, limit)
     processed = succeeded = failed = 0
     last_fetch_by_source: dict[str, float] = {}
+    _MAX_JOB_ATTEMPTS = 5
 
     for job in jobs:
+        processed += 1
+        if job["attempts"] >= _MAX_JOB_ATTEMPTS:
+            db.mark_job(conn, job["id"], "failed", f"max attempts ({_MAX_JOB_ATTEMPTS}) reached")
+            failed += 1
+            continue
         processed += 1
         source_row = db.get_source(conn, job["source_name"])
         if not source_row:

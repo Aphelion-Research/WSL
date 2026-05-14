@@ -148,7 +148,7 @@ def test_dashboard_returns_valid_schema(store):
     required_keys = {
         "generated_at", "active_sessions", "stale_sessions",
         "tasks_by_status", "active_locks", "latest_events",
-        "complexity_warnings", "ragd", "doctor", "local_llm", "next_action",
+        "complexity_warnings", "ragd", "doctor", "agent_generation", "next_action",
     }
     assert required_keys <= set(d.keys()), f"Missing keys: {required_keys - set(d.keys())}"
     assert isinstance(d["next_action"], str)

@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import time
+from collections import deque
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -123,6 +124,10 @@ def collect_xau(args: Any) -> None:
     bar_interval = max(args.bar_interval_sec, 1)
     heartbeat = max(args.heartbeat_sec, 1)
     deadline = time.monotonic() + args.max_runtime_sec if args.max_runtime_sec else None
+    # Bounded deduplication: keep at most _TICK_DEDUP_MAXLEN recent tick keys.
+    # At 250ms intervals this covers ~8 minutes, enough to suppress any duplicate delivery.
+    _TICK_DEDUP_MAXLEN = 2000
+    tick_seen_buf: deque[tuple[Any, Any, Any]] = deque(maxlen=_TICK_DEDUP_MAXLEN)
     tick_seen: set[tuple[Any, Any, Any]] = set()
     bar_seen: set[Any] = set()
     tick_count = 0
@@ -152,6 +157,10 @@ def collect_xau(args: Any) -> None:
                     row = tick_row(symbol, tick, collected_at)
                     key = (row.get("time_msc"), row.get("bid"), row.get("ask"))
                     if key not in tick_seen:
+                        # Evict oldest entry if buffer is full
+                        if len(tick_seen_buf) == _TICK_DEDUP_MAXLEN:
+                            tick_seen.discard(tick_seen_buf[0])
+                        tick_seen_buf.append(key)
                         tick_seen.add(key)
                         append_jsonl(hour_path(root, "ticks", utc_now()), row)
                         tick_count += 1

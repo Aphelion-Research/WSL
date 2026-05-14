@@ -1,7 +1,7 @@
 """File lock management for Dominion Agent OS.
 
-Write lock: conflicts with write + exclusive
-Read lock: conflicts with exclusive only
+Write lock: conflicts with read + write + review + exclusive
+Read lock: conflicts with write + exclusive
 Review lock: conflicts with write + exclusive
 Exclusive lock: conflicts with everything
 """
@@ -20,10 +20,10 @@ from dominion_agent.validators import require_enum
 # Lock conflict matrix: (existing_mode, requested_mode) -> conflict
 _CONFLICTS: dict[tuple[str, str], bool] = {
     ("read",      "read"):      False,
-    ("read",      "write"):     False,
+    ("read",      "write"):     True,
     ("read",      "review"):    False,
     ("read",      "exclusive"): True,
-    ("write",     "read"):      False,
+    ("write",     "read"):      True,
     ("write",     "write"):     True,
     ("write",     "review"):    True,
     ("write",     "exclusive"): True,

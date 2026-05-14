@@ -7,7 +7,7 @@ Core layers:
 - Codex for engineering work.
 - RAGD for persistent project memory, retrieval, handoffs, TODOs, and MCP context.
 - Research OS for approved-source evidence collection and RAGD research ingestion.
-- Local LLM adapters for optional Ollama-based summarization, tagging, claim extraction, and query expansion.
+- RAGD embedding/HNSW/vault infrastructure for frontier-agent retrieval context.
 - `domdata` for read-only MT5/XAUUSD data access.
 - tmux, SSH, and Tailscale for Matin/Dan collaboration.
 
@@ -18,7 +18,8 @@ dominion status
 dominion doctor
 dominion-ui --once
 research status
-llm doctor
+dominion embed stats
+dominion vault status
 domdata notice
 domdata xautick
 ```

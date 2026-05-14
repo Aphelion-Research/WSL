@@ -50,6 +50,12 @@ class ScoredChunk:
     lang: str = ""
     chunk_type: str = ""
     symbol_name: str = ""
+    qualified_name: str = ""
+    parent_symbol: str = ""
+    docstring: str = ""
+    imports: list[str] = field(default_factory=list)
+    calls: list[str] = field(default_factory=list)
+    is_public: bool = True
     repo_root: str = ""
     status: str = ""
     indexed_at: int = 0

@@ -7,7 +7,7 @@ Dominion V2 is a local operating environment for agent-assisted engineering, res
 1. Codex codes.
 2. RAGD remembers code, docs, decisions, TODOs, handoffs, and research bundles.
 3. Research OS collects evidence from approved sources only.
-4. Local LLM adapters summarize and classify when Ollama is available.
+4. RAGD embedding, HNSW, graph, and vault tools provide retrieval context for frontier agents.
 5. `domdata` provides read-only MT5/XAUUSD data.
 6. `dominion` and `dominion-ui` expose operational status.
 7. tmux/SSH/Tailscale provide shared access for Matin and Dan.
@@ -17,7 +17,7 @@ Dominion V2 is a local operating environment for agent-assisted engineering, res
 - `research init` creates the SQLite schema and imports approved sources.
 - `research run --limit N` processes bounded queued jobs.
 - `research ingest-ragd` creates a markdown bundle and calls RAGD `/index`.
-- `dominion status` summarizes RAGD, tmux, Codex MCP config, Research OS, local LLM, and domdata safety.
+- `dominion status` summarizes RAGD, tmux, Codex MCP config, Research OS, retrieval infrastructure, and domdata safety.
 
 ## What Is Not Automatic
 
@@ -38,6 +38,6 @@ Dominion V2 is a local operating environment for agent-assisted engineering, res
 
 ## Current MVP Limits
 
-- Local LLM is optional and currently reports disabled if Ollama is not running.
-- RAGD uses TF-IDF fallback retrieval in the current environment.
+- Semantic embedding runs require explicit `RAGD_EMBED_API_KEY`; without it, retrieval fails closed before sending code externally.
+- RAGD keeps BM25/keyword retrieval available while semantic HNSW indexing waits for embeddings.
 - Research OS fetches static pages with `requests`; JavaScript-heavy sources may need a future Playwright/crawl4ai adapter.

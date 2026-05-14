@@ -1,0 +1,30 @@
+---
+title: file
+qualified_name: file
+symbol_type: block
+filepath: /home/Martin/Dominion/ragd/include/ragd/intent_router.h
+line_start: 1
+line_end: 3
+parent_symbol: ''
+is_public: true
+tags:
+- block
+- cpp
+- symbol
+---
+
+# `file`
+
+> **File**: [[files/ragd/include/ragd/intent_router|intent_router.h]] | **Lines**: 1-3 | **Type**: `block`
+
+## Docstring
+
+*(none indexed)*
+
+## Calls
+
+- *(none indexed)*
+
+## Imports In File
+
+- *(none indexed)*

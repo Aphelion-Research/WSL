@@ -40,11 +40,32 @@ _KNOWN_PACKAGES: list[dict] = [
         "depends": [],
     },
     {
-        "name": "local_llm",
-        "description": "Local LLM adapter (Ollama)",
-        "status_check": "python -m pytest -q local_llm/tests 2>&1 | tail -1",
-        "api": "local_llm/__init__.py",
-        "depends": [],
+        "name": "ragd_embed",
+        "description": "External-code embedding pipeline and cache",
+        "status_check": "python -m pytest -q ragd_embed/tests 2>&1 | tail -1",
+        "api": "ragd_embed/__init__.py",
+        "depends": ["ragd"],
+    },
+    {
+        "name": "ragd_hnsw",
+        "description": "Persistent semantic ANN index for RAGD chunks",
+        "status_check": "python -m pytest -q ragd_hnsw/tests 2>&1 | tail -1",
+        "api": "ragd_hnsw/__init__.py",
+        "depends": ["ragd_embed"],
+    },
+    {
+        "name": "ragd_chunker",
+        "description": "AST-aware source chunking service",
+        "status_check": "python -m pytest -q ragd_chunker/tests 2>&1 | tail -1",
+        "api": "ragd_chunker/__init__.py",
+        "depends": ["ragd"],
+    },
+    {
+        "name": "ragd_vault",
+        "description": "Obsidian vault generator backed by the RAGD index",
+        "status_check": "python -m pytest -q ragd_vault/tests 2>&1 | tail -1",
+        "api": "ragd_vault/__init__.py",
+        "depends": ["ragd", "ragd_graph"],
     },
     {
         "name": "ragd",
@@ -248,7 +269,9 @@ ragd/ ─────────────────────► HTTP AP
 dominion_ai/ ──────────────► RAGD queries ──► scripts/dominion_cli.py
 dominion_agent/ ───────────► control plane ─► all agents
 research_os/ ──────────────► ingestion ─────► ragd/
-local_llm/ ────────────────► Ollama adapter ► dominion_ai/ (optional)
+ragd_chunker/ ─────────────► AST chunks ────► ragd/
+ragd_embed/ ───────────────► embeddings ────► ragd_hnsw/
+ragd_vault/ ───────────────► Obsidian notes ◄ ragd/
 ```
 
 ---

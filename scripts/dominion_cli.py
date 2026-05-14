@@ -83,7 +83,10 @@ def cmd_status(args: argparse.Namespace) -> int:
         "codex_mcp_config": codex_config_status(),
         "domdata_read_only": "READ-ONLY" in domdata_notice and "Blocked forever" in domdata_notice,
         "research": research_counts(),
-        "local_llm": run(["llm", "doctor"], timeout=5)[1],
+        "rag_infra": {
+            "embed_cache": run([sys.executable, "-m", "ragd_embed.cli", "stats", "--json"], timeout=5)[1],
+            "vault": run([sys.executable, "-m", "ragd_vault.cli", "status", "--json"], timeout=5)[1],
+        },
     }
     if args.json:
         print_json(data)
@@ -98,7 +101,7 @@ def cmd_status(args: argparse.Namespace) -> int:
         print(f"Codex RAGD MCP config: {any(data['codex_mcp_config'].values())}")
         print(f"domdata read-only: {data['domdata_read_only']}")
         print(f"Research: {data['research']}")
-        print("Local LLM: disabled" if '"ok": false' in str(data["local_llm"]) else "Local LLM: see llm doctor")
+        print("RAG infra: see dominion embed stats and dominion vault status")
     return 0 if ragd.get("ok") else 1
 
 
@@ -117,6 +120,10 @@ def cmd_start(args: argparse.Namespace) -> int:
         # If you point `RAGD_URL` elsewhere, this start path does not manage that remote instance.
         command = f"cd {ROOT / 'ragd'}; ./build/ragd --db ~/.ragd/ragd.db --host 127.0.0.1 --port 7474 --path {ROOT}"
         run(["tmux", "new-session", "-d", "-s", "ragd", command], timeout=5)
+    if run(["tmux", "has-session", "-t", "ragd-chunker"], timeout=2)[0] != 0:
+        run(["tmux", "new-session", "-d", "-s", "ragd-chunker", f"cd {ROOT}; exec {sys.executable} -m ragd_chunker.service"], timeout=5)
+    if run(["tmux", "has-session", "-t", "ragd-semantic"], timeout=2)[0] != 0:
+        run(["tmux", "new-session", "-d", "-s", "ragd-semantic", f"cd {ROOT}; exec {sys.executable} -m ragd_hnsw.semantic_server"], timeout=5)
     print("Next commands:")
     print("  warp matin")
     print("  warp dan")
@@ -209,6 +216,45 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     except Exception as exc:
         foundation_checks["ledger_schema"] = {"status": "error", "error": str(exc)}
 
+    try:
+        from ragd_embed.config import load_config
+        from ragd_embed.cache import EmbeddingCache
+        cfg = load_config(require_key=False)
+        foundation_checks["ragd_embed"] = {"status": "ok" if cfg.api_key else "warn", "provider": cfg.provider, "model": cfg.model, "api_key_present": bool(cfg.api_key), "cache": EmbeddingCache(cfg.cache_path).stats()}
+    except Exception as exc:
+        foundation_checks["ragd_embed"] = {"status": "error", "error": str(exc)}
+
+    try:
+        import urllib.request
+        with urllib.request.urlopen("http://127.0.0.1:7475/health", timeout=1) as response:
+            chunker_ok = response.status == 200
+        foundation_checks["ragd_chunker"] = {"status": "ok" if chunker_ok else "warn", "reachable": chunker_ok}
+    except Exception as exc:
+        foundation_checks["ragd_chunker"] = {"status": "warn", "reachable": False, "error": str(exc)}
+
+    try:
+        from ragd_embed.config import load_config
+        from ragd_hnsw.config import default_index_path
+        cfg = load_config(require_key=False)
+        index_path = default_index_path(cfg.provider, cfg.model, cfg.dim)
+        foundation_checks["ragd_hnsw"] = {"status": "ok" if index_path.exists() else "warn", "path": str(index_path), "exists": index_path.exists()}
+    except Exception as exc:
+        foundation_checks["ragd_hnsw"] = {"status": "error", "error": str(exc)}
+
+    try:
+        from ragd_graph.graph import stats as graph_stats
+        gs = graph_stats()
+        foundation_checks["ragd_graph"] = {"status": "ok" if gs.nodes else "warn", "nodes": gs.nodes, "edges": gs.edges, "by_relation": gs.by_relation}
+    except Exception as exc:
+        foundation_checks["ragd_graph"] = {"status": "error", "error": str(exc)}
+
+    try:
+        from ragd_vault.doctor import inspect_vault
+        vr = inspect_vault(ROOT / "vault")
+        foundation_checks["ragd_vault"] = {"status": "ok" if vr.ok and vr.total_notes else "warn", "notes": vr.total_notes, "broken_links": len(vr.broken_links), "invalid_frontmatter": len(vr.invalid_frontmatter)}
+    except Exception as exc:
+        foundation_checks["ragd_vault"] = {"status": "error", "error": str(exc)}
+
     # Existing platform checks (best-effort)
     platform_checks: dict[str, object] = {
         "ragd_reachable": ragd_health().get("ok", False),
@@ -229,7 +275,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
 
     all_checks = {**foundation_checks, **platform_checks, **ai_checks}
     overall_ok = all(
-        v.get("status") == "ok" if isinstance(v, dict) and "status" in v else bool(v)
+        v.get("status") not in {"error", "fail"} if isinstance(v, dict) and "status" in v else bool(v)
         for v in all_checks.values()
     )
 
@@ -284,28 +330,6 @@ def cmd_data(args: argparse.Namespace) -> int:
     for cmd in (["domdata", "notice"], ["domdata", "collect-status"], ["domdata", "xautick"]):
         print(f"$ {' '.join(cmd)}")
         print(run(cmd, timeout=30)[1])
-    return 0
-
-
-def cmd_llm(args: argparse.Namespace) -> int:
-    print(run(["llm", "doctor"], timeout=10)[1])
-    return 0
-
-
-def cmd_hw(args: argparse.Namespace) -> int:
-    from dataclasses import asdict
-
-    from local_llm.governor import Governor
-
-    profile = Governor.probe()
-    note = "consumed dominion_loader.hw_probe" if profile.source == "dominion_loader.hw_probe" else "TEMP_ADAPTER(agent-1): remove after Agent 1 ships dominion hw probe."
-    payload = {"ok": True, "profile": asdict(profile), "note": note}
-    if args.json:
-        print_json(payload)
-    else:
-        print(f"gpu_vram_bytes: {profile.gpu_vram_bytes}")
-        print(f"ram_bytes: {profile.ram_bytes}")
-        print(f"source: {profile.source}")
     return 0
 
 
@@ -369,6 +393,26 @@ def cmd_ai_bench(args: argparse.Namespace) -> int:
     return cmd_bench(args)
 
 
+def cmd_embed(args: argparse.Namespace) -> int:
+    from ragd_embed.cli import main as embed_main
+
+    argv = [args.embed_command]
+    if getattr(args, "changed_only", False):
+        argv.append("--changed-only")
+    if getattr(args, "json", False):
+        argv.append("--json")
+    return embed_main(argv)
+
+
+def cmd_vault(args: argparse.Namespace) -> int:
+    from ragd_vault.cli import main as vault_main
+
+    argv = [args.vault_command]
+    if getattr(args, "json", False):
+        argv.append("--json")
+    return vault_main(argv)
+
+
 def _latest_report() -> str:
     reports = (ROOT / "reports").glob("dominion-*-latest.md")
     latest = sorted((p.name for p in reports))
@@ -383,7 +427,8 @@ def cmd_phase_report(args: argparse.Namespace) -> int:
         "git_dirty": bool(status.strip()),
         "git_status_short": status,
         "research_doctor": run(["research", "doctor", "--json"], timeout=10)[1],
-        "llm_doctor": run(["llm", "doctor"], timeout=10)[1],
+        "embed_stats": run([sys.executable, "-m", "ragd_embed.cli", "stats", "--json"], timeout=10)[1],
+        "vault_status": run([sys.executable, "-m", "ragd_vault.cli", "status", "--json"], timeout=10)[1],
         "ragd_health": ragd_health(),
         "latest_report": _latest_report(),
         "recommended_validation": [
@@ -437,7 +482,7 @@ def cmd_next_prompt(args: argparse.Namespace) -> int:
 
 
 def cmd_truth(args: argparse.Namespace) -> int:
-    """Truth report: doctor --deep + complexity + ignore + RAGD + LLM governor."""
+    """Truth report: doctor --deep + complexity + ignore + RAGD + retrieval infrastructure."""
     import time
     sections: dict = {}
 
@@ -491,19 +536,27 @@ def cmd_truth(args: argparse.Namespace) -> int:
         "data": ragd.get("data") or {},
     }
 
-    # 5. Local LLM governor
+    # 5. RAG retrieval infrastructure
     try:
-        from local_llm.governor import Governor
-        gov = Governor()
-        sections["local_llm"] = {
-            "status": "ok",
-            "provider": gov.provider_name(),
-            "model": gov.current_model(),
-            "can_generate": gov.can_generate(),
-            "retrieve_only": gov.retrieve_only(),
+        from ragd_embed.config import load_config
+        from ragd_embed.cache import EmbeddingCache
+        from ragd_hnsw.config import default_index_path
+        from ragd_vault.doctor import inspect_vault
+        cfg = load_config(require_key=False)
+        index_path = default_index_path(cfg.provider, cfg.model, cfg.dim)
+        vault_report = inspect_vault(ROOT / "vault")
+        sections["rag_infra"] = {
+            "status": "warn" if not cfg.api_key else "ok",
+            "embedding_provider": cfg.provider,
+            "embedding_model": cfg.model,
+            "api_key_present": bool(cfg.api_key),
+            "embed_cache": EmbeddingCache().stats(),
+            "hnsw_index_exists": index_path.exists(),
+            "vault_notes": vault_report.total_notes,
+            "vault_broken_links": len(vault_report.broken_links),
         }
     except Exception as exc:
-        sections["local_llm"] = {"status": "warn", "error": str(exc)}
+        sections["rag_infra"] = {"status": "warn", "error": str(exc)}
 
     # Overall
     statuses = [s.get("status", "?") for s in sections.values() if isinstance(s, dict)]
@@ -585,7 +638,6 @@ def build_parser() -> argparse.ArgumentParser:
         ("ragd", cmd_ragd),
         ("research", cmd_research),
         ("data", cmd_data),
-        ("llm", cmd_llm),
     ):
         p = sub.add_parser(name)
         p.add_argument("--json", action="store_true") if name in {"status", "health"} else None
@@ -609,7 +661,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--focus", default="Continue Dominion V2.5 phase work")
     p.set_defaults(func=cmd_next_prompt)
 
-    p = sub.add_parser("truth", help="Full truth report: doctor+complexity+ignore+ragd+llm")
+    p = sub.add_parser("truth", help="Full truth report: doctor+complexity+ignore+ragd+retrieval")
     p.add_argument("--json", action="store_true")
     p.add_argument("--offline", action="store_true")
     p.add_argument("--max-sample", type=int, default=200)
@@ -668,6 +720,26 @@ def build_parser() -> argparse.ArgumentParser:
     lp.add_argument("--json", action="store_true")
     lp.set_defaults(func=cmd_ai_ledger)
 
+    p = sub.add_parser("embed")
+    embed_sub = p.add_subparsers(dest="embed_command", required=True)
+    ep = embed_sub.add_parser("run")
+    ep.add_argument("--changed-only", action="store_true")
+    ep.add_argument("--json", action="store_true")
+    ep.set_defaults(func=cmd_embed)
+    ep = embed_sub.add_parser("stats")
+    ep.add_argument("--json", action="store_true")
+    ep.set_defaults(func=cmd_embed)
+    ep = embed_sub.add_parser("doctor")
+    ep.add_argument("--json", action="store_true")
+    ep.set_defaults(func=cmd_embed)
+
+    p = sub.add_parser("vault")
+    vault_sub = p.add_subparsers(dest="vault_command", required=True)
+    for name in ("build", "sync", "status", "doctor", "open"):
+        vp = vault_sub.add_parser(name)
+        vp.add_argument("--json", action="store_true") if name in {"status", "doctor"} else None
+        vp.set_defaults(func=cmd_vault)
+
     p = sub.add_parser("graph")
     graph_sub = p.add_subparsers(dest="graph_command", required=True)
     gp = graph_sub.add_parser("query")
@@ -687,16 +759,19 @@ def build_parser() -> argparse.ArgumentParser:
     gp.add_argument("--json", action="store_true")
     gp.set_defaults(func=cmd_ai_graph)
 
+    for name in ("build", "stats", "callers", "callees", "imports", "importers"):
+        gp = graph_sub.add_parser(name)
+        if name in {"callers", "callees"}:
+            gp.add_argument("symbol", nargs="?")
+        if name in {"imports", "importers"}:
+            gp.add_argument("filepath", nargs="?")
+        gp.add_argument("--json", action="store_true")
+        gp.set_defaults(func=cmd_ai_graph)
+
     p = sub.add_parser("bench")
-    p.add_argument("--suite", choices=["retrieval", "generation", "e2e"], default="retrieval")
+    p.add_argument("--suite", choices=["retrieval", "semantic", "hybrid", "e2e"], default="retrieval")
     p.add_argument("--iterations", type=int, default=3)
     p.set_defaults(func=cmd_ai_bench)
-
-    p = sub.add_parser("hw")
-    hw_sub = p.add_subparsers(dest="hw_command", required=True)
-    hp = hw_sub.add_parser("probe")
-    hp.add_argument("--json", action="store_true")
-    hp.set_defaults(func=cmd_hw)
 
     p = sub.add_parser("ignore")
     ignore_sub = p.add_subparsers(dest="ignore_command", required=True)
