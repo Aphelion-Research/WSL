@@ -173,30 +173,137 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0 if ragd.get("ok") else 1
 
 
+def _ragd_start_in_tmux() -> dict:
+    """Start RAGD in a tmux session and wait up to 8s for health.
+    Returns a dict with ok, method, and message fields.
+    """
+    import time
+    ragd_bin = ROOT / "ragd" / "build" / "ragd"
+    if not ragd_bin.exists():
+        return {"ok": False, "method": "none", "message": f"ragd binary missing: {ragd_bin}. Run: cmake --build ragd/build -j$(nproc)"}
+
+    # Check if already running
+    if ragd_health().get("ok"):
+        return {"ok": True, "method": "already_running", "message": "RAGD already healthy"}
+
+    tmux_ok = run(["tmux", "info"], timeout=2)[0] == 0
+    ragd_db = Path.home() / ".ragd" / "ragd.db"
+    ragd_db.parent.mkdir(parents=True, exist_ok=True)
+    ragd_cmd = f"./build/ragd --db {ragd_db} --host 127.0.0.1 --port 7474 --path {ROOT}"
+
+    if tmux_ok:
+        run(["tmux", "new-session", "-d", "-s", "ragd", f"cd {ROOT / 'ragd'}; {ragd_cmd} 2>&1 | tee /tmp/ragd.log"], timeout=5)
+        method = "tmux"
+    else:
+        # No tmux — print fallback command and return
+        return {
+            "ok": False,
+            "method": "tmux_unavailable",
+            "message": f"tmux not available. Start RAGD manually:\n  cd {ROOT / 'ragd'} && {ragd_cmd}",
+        }
+
+    # Poll for up to 8 seconds
+    for _ in range(16):
+        time.sleep(0.5)
+        if ragd_health().get("ok"):
+            return {"ok": True, "method": method, "message": "RAGD started and healthy"}
+
+    # Not healthy after wait — get last log lines
+    log_tail = run(["tail", "-5", "/tmp/ragd.log"], timeout=2)[1]
+    return {
+        "ok": False,
+        "method": method,
+        "message": f"RAGD started but health endpoint not responding after 8s. Last log:\n{log_tail}",
+    }
+
+
+def _ragd_diagnose() -> dict:
+    """Return a structured diagnosis for why RAGD might be unreachable."""
+    import socket
+    ragd_bin = ROOT / "ragd" / "build" / "ragd"
+    result: dict = {}
+
+    result["binary_exists"] = ragd_bin.exists()
+    if not result["binary_exists"]:
+        result["diagnosis"] = "binary_missing"
+        result["action"] = "cmake --build ragd/build -j$(nproc)"
+        return result
+
+    # Check port
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(1)
+        connected = s.connect_ex(("127.0.0.1", 7474)) == 0
+        s.close()
+    except OSError:
+        connected = False
+
+    result["port_open"] = connected
+    if not connected:
+        result["diagnosis"] = "process_not_running"
+        result["action"] = "python scripts/dominion_cli.py start"
+        return result
+
+    # Port open but health fails
+    health = ragd_health()
+    result["health_ok"] = health.get("ok", False)
+    if not result["health_ok"]:
+        result["diagnosis"] = "health_endpoint_unhealthy"
+        result["error"] = health.get("error", "unknown")
+        result["action"] = "check /tmp/ragd.log or restart ragd session"
+        return result
+
+    result["diagnosis"] = "healthy"
+    result["data"] = health.get("data", {})
+    return result
+
+
 def cmd_start(args: argparse.Namespace) -> int:
-    print("Dominion start")
+    result: dict = {"services": {}}
+
+    # SSH
     run(["service", "ssh", "start"], timeout=10)
-    for name, command in {
-        "matin": f"cd {ROOT}; export DOMINION_PERSON=matin; exec bash -l",
-        "dan": f"cd {ROOT}; export DOMINION_PERSON=dan; exec bash -l",
-        "dominion": f"cd {ROOT}; export DOMINION_PERSON=dominion; exec bash -l",
-    }.items():
-        if run(["tmux", "has-session", "-t", name], timeout=2)[0] != 0:
-            run(["tmux", "new-session", "-d", "-s", name, command], timeout=5)
-    if not ragd_health().get("ok") and (ROOT / "ragd" / "build" / "ragd").exists():
-        # Note: `dominion start` only manages the local default RAGD instance (127.0.0.1:7474).
-        # If you point `RAGD_URL` elsewhere, this start path does not manage that remote instance.
-        command = f"cd {ROOT / 'ragd'}; ./build/ragd --db ~/.ragd/ragd.db --host 127.0.0.1 --port 7474 --path {ROOT}"
-        run(["tmux", "new-session", "-d", "-s", "ragd", command], timeout=5)
-    if run(["tmux", "has-session", "-t", "ragd-chunker"], timeout=2)[0] != 0:
-        run(["tmux", "new-session", "-d", "-s", "ragd-chunker", f"cd {ROOT}; exec {sys.executable} -m ragd_chunker.service"], timeout=5)
-    if run(["tmux", "has-session", "-t", "ragd-semantic"], timeout=2)[0] != 0:
-        run(["tmux", "new-session", "-d", "-s", "ragd-semantic", f"cd {ROOT}; exec {sys.executable} -m ragd_hnsw.semantic_server"], timeout=5)
-    print("Next commands:")
-    print("  warp matin")
-    print("  warp dan")
-    print("  dominion status")
-    return 0
+
+    # tmux sessions
+    tmux_ok = run(["tmux", "info"], timeout=2)[0] == 0
+    if tmux_ok:
+        for name, command in {
+            "matin": f"cd {ROOT}; export DOMINION_PERSON=matin; exec bash -l",
+            "dan": f"cd {ROOT}; export DOMINION_PERSON=dan; exec bash -l",
+            "dominion": f"cd {ROOT}; export DOMINION_PERSON=dominion; exec bash -l",
+        }.items():
+            if run(["tmux", "has-session", "-t", name], timeout=2)[0] != 0:
+                run(["tmux", "new-session", "-d", "-s", name, command], timeout=5)
+        for name, cmd in {
+            "ragd-chunker": f"cd {ROOT}; exec {sys.executable} -m ragd_chunker.service",
+            "ragd-semantic": f"cd {ROOT}; exec {sys.executable} -m ragd_hnsw.semantic_server",
+        }.items():
+            if run(["tmux", "has-session", "-t", name], timeout=2)[0] != 0:
+                run(["tmux", "new-session", "-d", "-s", name, cmd], timeout=5)
+
+    # RAGD
+    ragd_result = _ragd_start_in_tmux()
+    result["services"]["ragd"] = ragd_result
+
+    overall_ok = ragd_result["ok"]
+
+    if getattr(args, "json", False):
+        result["overall"] = "ok" if overall_ok else "warn"
+        print_json(result)
+    else:
+        print("Dominion start")
+        ragd_status = "OK" if ragd_result["ok"] else "WARN"
+        print(f"  RAGD: [{ragd_status}] {ragd_result['message']}")
+        if not ragd_result["ok"]:
+            diag = _ragd_diagnose()
+            print(f"  RAGD diagnosis: {diag.get('diagnosis', 'unknown')}")
+            if diag.get("action"):
+                print(f"  Action: {diag['action']}")
+        print()
+        print("Next commands:")
+        print("  python scripts/dominion_cli.py status --json")
+        print("  python scripts/dominion_cli.py truth --live --json")
+    return 0 if overall_ok else 1
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
@@ -509,6 +616,8 @@ def cmd_vault(args: argparse.Namespace) -> int:
     argv = [args.vault_command]
     if getattr(args, "json", False):
         argv.append("--json")
+    if args.vault_command == "repair" and getattr(args, "apply", False):
+        argv.append("--apply")
     return vault_main(argv)
 
 
@@ -583,13 +692,16 @@ def cmd_next_prompt(args: argparse.Namespace) -> int:
 def cmd_truth(args: argparse.Namespace) -> int:
     """Truth report: doctor --deep + complexity + ignore + RAGD + retrieval infrastructure."""
     import time
+    live = getattr(args, "live", False)
+    offline = getattr(args, "offline", False) or (not live)
+    strict = getattr(args, "strict", False)
     sections: dict = {}
 
     # 1. Deep doctor (may take a moment)
     try:
         from dominion_loader.truth_doctor import run_deep_doctor
         sections["doctor"] = run_deep_doctor(
-            offline=getattr(args, "offline", False),
+            offline=offline,
             max_sample=getattr(args, "max_sample", 200),
         )
     except Exception as exc:
@@ -627,15 +739,68 @@ def cmd_truth(args: argparse.Namespace) -> int:
     except Exception as exc:
         sections["ignore_policy"] = {"status": "error", "error": str(exc)}
 
-    # 4. RAGD metadata
+    # 4. RAGD metadata + live checks
     ragd = ragd_health()
-    sections["ragd"] = {
-        "status": "ok" if ragd.get("ok") else "warn",
-        "reachable": ragd.get("ok", False),
+    ragd_ok = ragd.get("ok", False)
+    ragd_section: dict = {
+        "status": "ok" if ragd_ok else ("fail" if live else "warn"),
+        "reachable": ragd_ok,
         "data": ragd.get("data") or {},
     }
+    if live and ragd_ok:
+        # Smoke query
+        try:
+            smoke = http_json(f"{RAGD}/query", {"query": "dominion native manifest", "top_k": 3}, timeout=5)
+            smoke_data = smoke.get("data") or {}
+            results = smoke_data.get("results", [])
+            ragd_section["query_smoke"] = "ok" if smoke.get("ok") and results is not None else "warn"
+            ragd_section["query_chunks"] = len(results)
+        except Exception as exc:
+            ragd_section["query_smoke"] = "warn"
+            ragd_section["query_smoke_error"] = str(exc)
+    elif live and not ragd_ok:
+        diag = _ragd_diagnose()
+        ragd_section["diagnosis"] = diag.get("diagnosis", "unknown")
+        ragd_section["action"] = diag.get("action", "")
+    sections["ragd"] = ragd_section
 
-    # 5. RAG retrieval infrastructure
+    # 5. Native doctor (offline or live)
+    native_doctor_bin = native_binary("dominion-native-doctor")
+    if native_doctor_bin.exists():
+        native_mode = "--live" if live else "--offline"
+        native_cmd = [str(native_doctor_bin), "--root", str(ROOT), native_mode, "--json"]
+        _code, _native = run_native_json(native_cmd, timeout=90)
+        native_overall = _native.get("overall", "unknown")
+        native_status = "ok" if native_overall in ("ok", "pass") else "warn" if native_overall == "warn" else "fail"
+        native_checks = {
+            k: v for k, v in (_native.get("checks") or {}).items()
+            if isinstance(v, dict) and v.get("status") not in ("ok", "pass", "skip")
+        }
+        # Known bug: native vault doctor doesn't append .md when resolving wikilinks.
+        # Files that exist as <path>.md are falsely reported as missing_target.
+        vault_check = native_checks.get("native_vault", {})
+        if isinstance(vault_check, dict) and vault_check.get("status") == "warn":
+            examples = vault_check.get("details", {}).get("examples", [])
+            vault_root_dir = ROOT / "vault"
+            false_positives = sum(
+                1 for ex in examples
+                if (vault_root_dir / (ex.get("link", "") + ".md")).exists()
+            )
+            if false_positives == len(examples) and examples:
+                native_checks["native_vault"] = {
+                    "status": "warn",
+                    "known_issue": "native doctor .md extension bug - all targets exist",
+                    "false_positive_count": false_positives,
+                }
+        sections["native_doctor"] = {
+            "status": native_status,
+            "overall": native_overall,
+            "checks": native_checks,
+        }
+    else:
+        sections["native_doctor"] = {"status": "warn", "message": "native doctor binary missing"}
+
+    # 6. RAG retrieval infrastructure
     try:
         from ragd_embed.config import load_config
         from ragd_embed.cache import EmbeddingCache
@@ -668,6 +833,7 @@ def cmd_truth(args: argparse.Namespace) -> int:
 
     result = {
         "overall": overall,
+        "mode": "live" if live else "offline",
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "sections": sections,
     }
@@ -675,13 +841,13 @@ def cmd_truth(args: argparse.Namespace) -> int:
     if getattr(args, "json", False):
         print_json(result)
     else:
-        print(f"=== Dominion Truth Report  {result['generated_at']} ===")
+        print(f"=== Dominion Truth Report [{result['mode'].upper()}]  {result['generated_at']} ===")
         print(f"Overall: {overall.upper()}")
         print()
         for name, sec in sections.items():
             if isinstance(sec, dict):
                 status = sec.get("overall") or sec.get("status", "?")
-                mark = "PASS" if status == "ok" else "WARN" if status == "warn" else "FAIL"
+                mark = "PASS" if status in ("ok", "pass") else "SKIP" if status == "skip" else "WARN" if status == "warn" else "FAIL"
                 print(f"  {mark}  {name}")
                 if name == "complexity":
                     for pkg in sec.get("packages", []):
@@ -690,9 +856,19 @@ def cmd_truth(args: argparse.Namespace) -> int:
                 elif name == "doctor":
                     for check_name, check_val in sec.get("checks", {}).items():
                         cs = check_val.get("status", "?") if isinstance(check_val, dict) else str(check_val)
-                        if cs != "ok":
+                        if cs not in ("ok", "pass"):
                             print(f"         WARN  {check_name}: {cs}")
-    return 0 if overall != "fail" else 1
+                elif name in ("ragd", "native_doctor"):
+                    for k, v in sec.items():
+                        if k not in ("status", "data", "checks") and v not in (True, None, {}):
+                            print(f"         {k}: {v}")
+
+    # Exit code: strict mode exits 1 on warn
+    if overall == "fail":
+        return 1
+    if strict and overall == "warn":
+        return 1
+    return 0
 
 
 def cmd_scan(args: argparse.Namespace) -> int:
@@ -763,6 +939,8 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("truth", help="Full truth report: doctor+complexity+ignore+ragd+retrieval")
     p.add_argument("--json", action="store_true")
     p.add_argument("--offline", action="store_true")
+    p.add_argument("--live", action="store_true", help="Require live RAGD; fail if unreachable")
+    p.add_argument("--strict", action="store_true", help="Exit 1 on warn as well as fail")
     p.add_argument("--max-sample", type=int, default=200)
     p.set_defaults(func=cmd_truth)
 
@@ -838,6 +1016,11 @@ def build_parser() -> argparse.ArgumentParser:
         vp = vault_sub.add_parser(name)
         vp.add_argument("--json", action="store_true") if name in {"status", "doctor"} else None
         vp.set_defaults(func=cmd_vault)
+    vp = vault_sub.add_parser("repair")
+    vp.add_argument("--dry-run", action="store_true", default=True)
+    vp.add_argument("--apply", action="store_true")
+    vp.add_argument("--json", action="store_true")
+    vp.set_defaults(func=cmd_vault)
 
     p = sub.add_parser("graph")
     graph_sub = p.add_subparsers(dest="graph_command", required=True)

@@ -10,6 +10,7 @@ from pathlib import Path
 
 from .builder import build_vault
 from .doctor import inspect_vault
+from .repair import repair_vault
 from .sync import sync_vault
 
 
@@ -29,6 +30,12 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("status")
     p.add_argument("--json", action="store_true")
     p = sub.add_parser("doctor")
+    p.add_argument("--json", action="store_true")
+    p = sub.add_parser("repair")
+    p.add_argument("--dry-run", action="store_true", default=True,
+                   help="Report what would change without modifying files (default)")
+    p.add_argument("--apply", action="store_true",
+                   help="Actually apply the repair (remove stale generated links)")
     p.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
     root = default_vault()
@@ -53,6 +60,27 @@ def main(argv: list[str] | None = None) -> int:
             _json(payload)
         else:
             print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0 if report.ok else 1
+    if args.command == "repair":
+        dry_run = not getattr(args, "apply", False)
+        report = repair_vault(root, dry_run=dry_run)
+        payload = {
+            "ok": report.ok,
+            "dry_run": report.dry_run,
+            "stale_removed": report.stale_removed,
+            "stale_examples": report.stale_examples,
+            "files_modified": report.files_modified,
+            "message": report.message,
+        }
+        if args.json:
+            _json(payload)
+        else:
+            mode = "DRY-RUN" if dry_run else "APPLY"
+            print(f"vault repair [{mode}]: {report.message}")
+            if report.stale_examples:
+                print("  examples:")
+                for ex in report.stale_examples[:5]:
+                    print(f"    {ex}")
         return 0 if report.ok else 1
     opener = shutil.which("obsidian") or shutil.which("xdg-open")
     if opener:

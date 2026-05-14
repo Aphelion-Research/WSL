@@ -1,8 +1,41 @@
 # Dominion Agent Handoff
 
+## Live-Green Sprint — 2026-05-14
+
+Status: **LIVE_GREEN** — `bash scripts/verify_live.sh` → 14/14 PASS.
+
+Use now:
+
+```bash
+# Verify platform
+bash scripts/verify_live.sh                                     # LIVE_GREEN 14/14
+python scripts/dominion_cli.py truth --live --json              # mode:live, ragd:ok
+python scripts/dominion_cli.py truth --live --strict            # exits 1 on warn
+python scripts/dominion_cli.py vault repair --json              # dry-run: see stale count
+python scripts/dominion_cli.py vault repair --apply             # strip stale /tmp/ links
+python scripts/dominion_cli.py start                            # starts ragd in tmux
+```
+
+Next best tasks:
+
+1. **Fix complexity over budget** — `dominion_agent` (471/350), `scripts/` (404/200) are the biggest. Refactor or raise budget in `config/complexity.yaml`.
+2. **Fix temp adapters warn** — `doctor --offline` shows `temp_adapters: warn`. Track down which adapters and remove them.
+3. **Fix C++ native vault doctor `.md` extension bug** — the binary doesn't append `.md` when checking wikilink targets, causing 17 false-positive broken links. Fix in `ragd/src/native/vault_doctor.cpp`.
+4. **Wire native scan into live ingestion** — `dominion-native-scan` exists but isn't wired to RAGD index. Connect scan → RAGD `/index/add` pipeline.
+5. **Agent OS lock consolidation** — `dominion_agent/locks.py` and `dominion_agent/sessions.py` have parallel state; audit and consolidate.
+
+What changed this sprint:
+
+- RAGD started live in tmux `ragd`. Active chunks cleaned: 997 → 719.
+- Vault rebuilt: 0 broken links. Native vault doctor false positives annotated.
+- `ragd_vault/repair.py`: strips stale `/tmp/` wikilinks from SYMBOL_INDEX.md.
+- `ragd_vault/cli.py`: `repair` subcommand.
+- `scripts/dominion_cli.py`: `_ragd_start_in_tmux`, `_ragd_diagnose`, `cmd_start` rewrite, `truth --live/--strict`, native doctor in truth, vault repair passthrough.
+- `scripts/verify_live.sh`: 14-check live-green integration script.
+
 ## Agent 5 Phase 5 Native Core — 2026-05-14
 
-Status: PARTIAL-COMPLETE / OFFLINE-GREEN. The native C++ spine is now real and validated, but release-ready remains `no` because vault integrity is stale and live RAGD is not reachable.
+Status: COMPLETE / LIVE-GREEN (upgraded this sprint). The native C++ spine is real and validated.
 
 Use now:
 

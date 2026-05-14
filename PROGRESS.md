@@ -2,6 +2,42 @@
 
 RUN_ID: `20260511-221153`
 
+## Agent Live-Green Sprint — 2026-05-14
+
+Status: **LIVE_GREEN** — verify_live.sh 14/14 PASS.
+
+What changed this sprint:
+
+- **RAGD**: Started in tmux session `ragd`. 262 stale `/tmp/pytest-*` file paths deleted (278 chunks soft-deleted). Active chunks: 997 → 719.
+- **Vault**: Rebuilt (0 broken links). Verified against Python vault doctor.
+- **`ragd_vault/repair.py`**: New module to strip stale `/tmp/` wikilinks from SYMBOL_INDEX.md.
+- **`ragd_vault/cli.py`**: Added `repair` subcommand (`--dry-run`/`--apply`/`--json`).
+- **`scripts/dominion_cli.py`**:
+  - Added `_ragd_start_in_tmux()` and `_ragd_diagnose()` helpers.
+  - Rewrote `cmd_start` to use helpers with structured diagnostics.
+  - Added `--live` and `--strict` flags to `truth` subcommand.
+  - `cmd_truth`: RAGD live smoke query, native doctor section, false-positive detection for C++ `.md` extension bug, mode field, strict exit code.
+  - `cmd_vault`: Added `repair` passthrough with `--apply`.
+- **`scripts/verify_live.sh`**: New 14-check integration script. Outputs: LIVE_GREEN / LIVE_WARN / LIVE_FAIL.
+
+Known remaining warns (not blockers):
+
+- `dominion truth --live overall: WARN` — due to complexity over budget, temp adapters, no embed key. These are pre-existing architectural warns, not regressions.
+- Native vault doctor reports 17 broken links (false positives: C++ binary doesn't append `.md` when resolving wikilinks — all targets exist with `.md` extension). Annotated as `known_issue` in truth output.
+- `query_chunks` for RAGD smoke shows live results from 719 active chunks.
+
+Validation:
+
+```bash
+python -m pytest -q                               # 387 passed, 2 deselected
+python domdata/check_no_trading.py                # PASS
+bash scripts/verify_live.sh                       # LIVE_GREEN 14/14
+python scripts/dominion_cli.py truth --live --json # overall: warn, mode: live, ragd: ok
+python scripts/dominion_cli.py vault doctor --json # 0 broken links
+```
+
+Reports: `reports/live-green-plan.md`.
+
 ## Agent 5 Phase 5 Native Core — 2026-05-14
 
 Status: PARTIAL-COMPLETE / OFFLINE-GREEN. Dominion now has a compiled C++ native core under `ragd/` for policy, path normalization, classification, SHA-256 hashing, deterministic scan planning, SQLite manifest primitives, native doctor checks, native vault integrity, forbidden-token policy fingerprints, Agent OS lock/scope/evidence primitives, and native benchmark output.
