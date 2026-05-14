@@ -364,7 +364,7 @@ std::vector<QueryResult> Storage::search_fts(const std::string &query, int limit
   std::vector<QueryResult> out;
   auto fts_query = sanitize_fts_query(query);
   if (fts_query.empty()) return out;
-  Statement stmt(db_, "SELECT c.id,c.filepath,c.content,-bm25(fts_chunks),c.lang,c.chunk_type,c.symbol_name,c.line_start,c.line_end,c.summary,c.git_commit FROM fts_chunks JOIN chunks c ON c.id=fts_chunks.chunk_id WHERE fts_chunks MATCH ? AND c.status='active' ORDER BY bm25(fts_chunks) LIMIT ?");
+  Statement stmt(db_, "SELECT c.id,c.filepath,c.content,-bm25(fts_chunks),c.lang,c.chunk_type,c.symbol_name,c.line_start,c.line_end,c.summary,c.git_commit,c.content_hash,c.repo_root,c.status,c.indexed_at,c.modified_at FROM fts_chunks JOIN chunks c ON c.id=fts_chunks.chunk_id WHERE fts_chunks MATCH ? AND c.status='active' ORDER BY bm25(fts_chunks) LIMIT ?");
   stmt.bind(1, fts_query);
   stmt.bind(2, limit);
   while (stmt.step_row()) {
@@ -381,6 +381,11 @@ std::vector<QueryResult> Storage::search_fts(const std::string &query, int limit
     r.line_end = stmt.column_int(8);
     r.summary = stmt.column_text(9);
     r.git_commit = stmt.column_text(10);
+    r.content_hash = stmt.column_text(11);
+    r.repo_root = stmt.column_text(12);
+    r.status = stmt.column_text(13);
+    r.indexed_at = stmt.column_int64(14);
+    r.modified_at = stmt.column_int64(15);
     out.push_back(std::move(r));
   }
   return out;
@@ -388,7 +393,7 @@ std::vector<QueryResult> Storage::search_fts(const std::string &query, int limit
 
 std::vector<QueryResult> Storage::search_like(const std::string &query, int limit) {
   std::vector<QueryResult> out;
-  Statement stmt(db_, "SELECT id,filepath,content,lang,chunk_type,symbol_name,line_start,line_end,summary,git_commit FROM chunks WHERE status='active' AND (content LIKE ? OR filepath LIKE ? OR symbol_name LIKE ?) ORDER BY id DESC LIMIT ?");
+  Statement stmt(db_, "SELECT id,filepath,content,lang,chunk_type,symbol_name,line_start,line_end,summary,git_commit,content_hash,repo_root,status,indexed_at,modified_at FROM chunks WHERE status='active' AND (content LIKE ? OR filepath LIKE ? OR symbol_name LIKE ?) ORDER BY id DESC LIMIT ?");
   std::string needle = "%" + query + "%";
   stmt.bind(1, needle);
   stmt.bind(2, needle);
@@ -406,6 +411,11 @@ std::vector<QueryResult> Storage::search_like(const std::string &query, int limi
     r.line_end = stmt.column_int(7);
     r.summary = stmt.column_text(8);
     r.git_commit = stmt.column_text(9);
+    r.content_hash = stmt.column_text(10);
+    r.repo_root = stmt.column_text(11);
+    r.status = stmt.column_text(12);
+    r.indexed_at = stmt.column_int64(13);
+    r.modified_at = stmt.column_int64(14);
     r.score = 1.0;
     out.push_back(std::move(r));
   }
@@ -427,11 +437,18 @@ Chunk Storage::get_chunk(int64_t id) {
   return {};
 }
 
-void Storage::mark_file_deleted(const std::string &filepath) {
+int Storage::mark_file_deleted(const std::string &filepath) {
   Statement stmt(db_, "UPDATE chunks SET status='deleted', updated_at=? WHERE filepath=? AND status='active'");
   stmt.bind(1, now_utc());
   stmt.bind(2, filepath);
   stmt.step_done();
+  return sqlite3_changes(db_);
+}
+
+int Storage::active_chunks_for_file(const std::string &filepath) {
+  Statement stmt(db_, "SELECT COUNT(*) FROM chunks WHERE filepath=? AND status='active'");
+  stmt.bind(1, filepath);
+  return stmt.step_row() ? stmt.column_int(0) : 0;
 }
 
 int64_t Storage::add_todo(const Todo &todo) {

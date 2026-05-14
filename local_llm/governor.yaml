@@ -1,7 +1,9 @@
 models:
+  retrieve_only_4gb:
+    registry_key: retrieve_only_4gb
   cpu_safe:
     registry_key: cpu_safe
-  gpu_4gb_safe:
-    registry_key: gpu_4gb_safe
+  gpu_4gb_manual_risky:
+    registry_key: gpu_4gb_manual_risky
   embedding:
     registry_key: embedding

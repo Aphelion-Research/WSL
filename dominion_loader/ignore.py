@@ -8,6 +8,8 @@ INTERFACE(agent-1): Ignore.match(path) -> bool  (stable, consumed by Agent 2)
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import re
 from pathlib import Path
@@ -143,13 +145,25 @@ class Ignore:
 
         INTERFACE(agent-1): dict with 'dir_deny', 'path_deny', 'ext_deny'
         """
-        return {
-            "dir_deny": sorted(_BUILTIN_DIR_DENY),
-            "path_deny": [p.pattern for p in _BUILTIN_PATH_DENY],
-            "ext_deny": sorted(_BUILTIN_EXT_DENY),
-            "max_bytes": DEFAULT_MAX_BYTES,
-            "secrets_always_ignored": True,  # invariant assertion for tests
-        }
+        return export_policy()
+
+
+def export_policy() -> dict[str, object]:
+    """Export the canonical Python loader ignore policy."""
+    return {
+        "version": 1,
+        "dir_deny": sorted(_BUILTIN_DIR_DENY),
+        "path_deny": [p.pattern for p in _BUILTIN_PATH_DENY],
+        "ext_deny": sorted(_BUILTIN_EXT_DENY),
+        "max_bytes": DEFAULT_MAX_BYTES,
+        "secrets_always_ignored": True,
+    }
+
+
+def policy_hash() -> str:
+    """Stable hash of the canonical Python loader ignore policy."""
+    payload = json.dumps(export_policy(), sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 # ---------------------------------------------------------------------------

@@ -8,7 +8,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from .registry import MODEL_REGISTRY, default_model_id
+from .registry import MODEL_REGISTRY, ProviderHealth, default_model_id
+
+
+VRAM_SAFE_CEILING = 3_500_000_000
 
 
 @dataclass(frozen=True)
@@ -75,17 +78,31 @@ class Governor:
         manual = os.environ.get("DOMINION_GOVERNOR") == "manual"
         env_model = os.environ.get("DOMINION_LLM_MODEL")
         if self.oom_seen:
-            return ExecutionPlan("retrieve_only", "ollama", "", 0, 0, True, 30, True, "Prior OOM recorded; generation disabled for this session.")
+            return ExecutionPlan("retrieve_only", "none", "", 0, 0, True, 30, True, "Prior OOM recorded; generation disabled for this session.")
         if manual and env_model:
             return ExecutionPlan("generate", "ollama", env_model, 4096, 1, True, 30, True, "Manual governor override.")
         is_4gb_class = bool(profile.gpu_vram_bytes and profile.gpu_vram_bytes <= 4_500_000_000)
         if is_4gb_class and profile.gpu_busy:
-            return ExecutionPlan("retrieve_only", "ollama", "", 0, 0, True, 30, True, "4 GB GPU is busy; retrieve-only is safer.")
-        model = default_model_id("gpu_4gb_safe" if profile.gpu_vram_bytes else "cpu_safe")
-        max_vram = int(self.model_registry["gpu_4gb_safe"]["max_vram_bytes"])
-        if is_4gb_class and max_vram > 3_500_000_000:
-            return ExecutionPlan("retrieve_only", "ollama", "", 0, 0, True, 30, True, "No configured model fits the 3.5 GB ceiling for a 4 GB GPU.")
-        return ExecutionPlan("generate", "ollama", model, 4096 if profile.gpu_vram_bytes else 2048, 1, True, 30, True, f"Selected by {profile.source} for {query_kind}.")
+            return ExecutionPlan("retrieve_only", "none", "", 0, 0, True, 30, True, "4 GB GPU is busy; retrieve-only is safer.")
+        if is_4gb_class:
+            candidate = _automatic_gpu_candidate(self.model_registry)
+            if candidate is None:
+                fallback = self.model_registry.get("retrieve_only_4gb", {})
+                return ExecutionPlan(
+                    "retrieve_only",
+                    "none",
+                    "",
+                    0,
+                    0,
+                    True,
+                    30,
+                    True,
+                    str(fallback.get("reason") or "No configured model fits the 3.5 GB ceiling for a 4 GB GPU."),
+                )
+            model = str(candidate["model_id"])
+            return ExecutionPlan("generate", str(candidate.get("provider", "ollama")), model, 4096, 1, True, 30, True, f"Selected safe 4 GB profile by {profile.source} for {query_kind}.")
+        model = default_model_id("cpu_safe")
+        return ExecutionPlan("generate", "ollama", model, 2048 if not profile.gpu_vram_bytes else 4096, 1, True, 30, True, f"Selected by {profile.source} for {query_kind}.")
 
 
 def _ram_bytes() -> int:
@@ -99,15 +116,62 @@ def _ram_bytes() -> int:
     return 0
 
 
+def _automatic_gpu_candidate(model_registry: dict[str, dict[str, Any]]) -> dict[str, Any] | None:
+    candidates = [
+        profile
+        for name, profile in model_registry.items()
+        if profile.get("mode", "generate") == "generate"
+        and profile.get("provider") not in {"none", None}
+        and not profile.get("requires_manual")
+        and int(profile.get("max_vram_bytes", 0)) > 0
+        and int(profile.get("max_vram_bytes", 0)) <= VRAM_SAFE_CEILING
+    ]
+    if not candidates:
+        return None
+    return sorted(candidates, key=lambda item: int(item.get("max_vram_bytes", 0)))[0]
+
+
+def registry_truth(model_registry: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
+    registry = model_registry or MODEL_REGISTRY
+    unsafe_safe = [
+        {"profile": name, "max_vram_bytes": int(profile.get("max_vram_bytes", 0))}
+        for name, profile in registry.items()
+        if "safe" in name and int(profile.get("max_vram_bytes", 0)) > VRAM_SAFE_CEILING
+    ]
+    auto_gpu_candidate = _automatic_gpu_candidate(registry)
+    status = "pass"
+    detail = "registry has no unsafe safe profiles"
+    if unsafe_safe:
+        status = "fail"
+        detail = "a profile named safe exceeds the VRAM safety ceiling"
+    elif auto_gpu_candidate is None:
+        status = "warn"
+        detail = "no automatic 4 GB GPU generation profile is configured; retrieve-only fallback is explicit"
+    return {
+        "status": status,
+        "detail": detail,
+        "unsafe_safe_profiles": unsafe_safe,
+        "auto_gpu_candidate": auto_gpu_candidate,
+        "ceiling": VRAM_SAFE_CEILING,
+    }
+
+
 def doctor() -> dict[str, Any]:
     governor = Governor.default()
     profile = governor.probe()
     plan = governor.choose(profile)
     from .registry import provider
+    truth = registry_truth()
+    provider_health = (
+        ProviderHealth(False, "none", [], plan.reason).to_dict()
+        if plan.provider == "none"
+        else provider(plan.provider).health().to_dict()
+    )
 
     return {
         "ok": True,
         "profile": asdict(profile),
         "governor_plan": plan.to_dict(),
-        "provider_health": provider(plan.provider).health().to_dict(),
+        "provider_health": provider_health,
+        "registry_truth": truth,
     }

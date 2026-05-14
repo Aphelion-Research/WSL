@@ -6,9 +6,28 @@ from typing import Iterator, Protocol
 
 
 MODEL_REGISTRY = {
-    "cpu_safe": {"model_id": "qwen2.5-coder:7b-instruct-q3_K_M", "max_vram_bytes": 0, "provider": "ollama"},
-    "gpu_4gb_safe": {"model_id": "qwen2.5-coder:7b-instruct-q3_K_M", "max_vram_bytes": 3_808_405_193, "provider": "ollama"},
-    "embedding": {"model_id": "nomic-embed-text", "provider": "ollama"},
+    "retrieve_only_4gb": {
+        "model_id": "",
+        "max_vram_bytes": 0,
+        "provider": "none",
+        "mode": "retrieve_only",
+        "reason": "No configured local generation model fits the 3.5 GB safety ceiling for a 4 GB GPU.",
+    },
+    "cpu_safe": {
+        "model_id": "qwen2.5-coder:7b-instruct-q3_K_M",
+        "max_vram_bytes": 0,
+        "provider": "ollama",
+        "mode": "generate",
+    },
+    "gpu_4gb_manual_risky": {
+        "model_id": "qwen2.5-coder:7b-instruct-q3_K_M",
+        "max_vram_bytes": 3_808_405_193,
+        "provider": "ollama",
+        "mode": "generate",
+        "requires_manual": True,
+        "reason": "Manual-only: estimated VRAM exceeds the 3.5 GB safety ceiling.",
+    },
+    "embedding": {"model_id": "nomic-embed-text", "provider": "ollama", "mode": "embed", "max_vram_bytes": 0},
 }
 
 

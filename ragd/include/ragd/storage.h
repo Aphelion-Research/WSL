@@ -52,7 +52,8 @@ class Storage {
   std::vector<QueryResult> search_like(const std::string &query, int limit);
   std::vector<Chunk> recent_chunks(int limit);
   Chunk get_chunk(int64_t id);
-  void mark_file_deleted(const std::string &filepath);
+  int mark_file_deleted(const std::string &filepath);
+  int active_chunks_for_file(const std::string &filepath);
   int64_t add_todo(const Todo &todo);
   std::vector<Todo> list_todos(const std::string &status = "open", int limit = 100);
   std::vector<Todo> list_todos_filtered(const std::string &status, int priority_max, const std::string &kind, int limit);

@@ -8,6 +8,8 @@
 #include <httplib.h>
 #include <nlohmann/json.hpp>
 
+#include <filesystem>
+
 namespace ragd {
 
 namespace {
@@ -106,6 +108,40 @@ void HttpApi::run() {
     if (body.contains("path") && body["path"].is_string()) paths = {body["path"].get<std::string>()};
     int chunks = indexer_.index_paths(paths, config_.max_file_bytes);
     json_response(res, nlohmann::json{{"queued", chunks}, {"chunks_indexed", chunks}, {"already_current", 0}});
+  });
+
+  server.Post("/index/delete", [&](const httplib::Request &req, httplib::Response &res) {
+    auto body = parse_body(req);
+    std::vector<std::string> paths;
+    if (body.contains("paths") && body["paths"].is_array()) paths = body["paths"].get<std::vector<std::string>>();
+    if (body.contains("path") && body["path"].is_string()) paths = {body["path"].get<std::string>()};
+
+    int files_marked_deleted = 0;
+    int chunks_marked_deleted = 0;
+    nlohmann::json errors = nlohmann::json::array();
+    for (const auto &path : paths) {
+      if (path.empty()) {
+        errors.push_back({{"path", path}, {"error", "empty path"}});
+        continue;
+      }
+      try {
+        auto absolute = std::filesystem::absolute(path).string();
+        int deleted = storage_.mark_file_deleted(absolute);
+        if (deleted > 0) ++files_marked_deleted;
+        chunks_marked_deleted += deleted;
+      } catch (const std::exception &e) {
+        errors.push_back({{"path", path}, {"error", e.what()}});
+      }
+    }
+
+    json_response(res, nlohmann::json{
+                           {"ok", errors.empty()},
+                           {"paths_submitted", paths.size()},
+                           {"files_marked_deleted", files_marked_deleted},
+                           {"chunks_marked_deleted", chunks_marked_deleted},
+                           {"errors", errors},
+                       },
+                  errors.empty() ? 200 : 400);
   });
 
   server.Post("/query", [&](const httplib::Request &req, httplib::Response &res) {

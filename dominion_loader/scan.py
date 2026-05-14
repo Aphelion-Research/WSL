@@ -61,6 +61,9 @@ class ScanStats:
     files_error: int = 0
     ragd_chunks_indexed: int = 0
     ragd_errors: int = 0
+    ragd_paths_deleted: int = 0
+    ragd_chunks_deleted: int = 0
+    ragd_delete_errors: int = 0
     duration_ms: float = 0.0
 
 
@@ -108,6 +111,7 @@ def scan(
 
         # Batch paths to ingest into RAGD
         ingest_batch: list[str] = []
+        delete_batch: list[str] = []
 
         with tracer.span("scan_root", trace_id=tid, attrs={"repo_root": str(repo_root), "dry_run": dry_run}):
             for item in discover(repo_root, _ignore, trace_id=tid):
@@ -218,6 +222,9 @@ def scan(
             # Detect deletions: IDs we knew about but didn't see
             deleted_ids = known_ids - seen_ids
             for doc_id in deleted_ids:
+                entry = _manifest.get(doc_id)
+                if entry is not None:
+                    delete_batch.append(str((Path(entry.repo_root) / entry.relative_path).resolve()))
                 if not dry_run:
                     _manifest.mark_deleted(doc_id)
                 stats.files_deleted += 1
@@ -226,6 +233,25 @@ def scan(
                     trace_id=tid,
                     attrs={"document_id": doc_id},
                 )
+
+            if delete_batch and not dry_run:
+                with tracer.span("ragd_delete_batch", trace_id=tid, attrs={"count": len(delete_batch)}):
+                    delete_result = _bridge.delete_paths(delete_batch)
+                    stats.ragd_paths_deleted = delete_result.files_marked_deleted
+                    stats.ragd_chunks_deleted = delete_result.chunks_marked_deleted
+                    stats.ragd_delete_errors = len(delete_result.errors)
+                    if delete_result.skipped:
+                        tracer.event(
+                            "ragd_delete_skipped",
+                            trace_id=tid,
+                            attrs={"reason": delete_result.reason or "unknown", "paths": len(delete_batch)},
+                        )
+                    for error in delete_result.errors:
+                        tracer.event(
+                            "error",
+                            trace_id=tid,
+                            attrs={"class": "RagdDeleteError", "message": error.get("error", ""), "path": error.get("path", "")},
+                        )
 
             # Batch ingest into RAGD
             if ingest_batch and not dry_run:

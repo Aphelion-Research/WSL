@@ -1,5 +1,72 @@
 # Dominion Agent Handoff
 
+## Phase 3 — Truth And Integrity (2026-05-13)
+
+**Status: PARTIAL-COMPLETE.** Core deletion, metadata, and deep-doctor gates are implemented and validated; remaining warnings are explicit.
+
+### What changed
+
+- RAGD now exposes `POST /index/delete` and soft-deletes active chunks by path.
+- RAGD `/query` results include `content_hash`, `repo_root`, `status`, `indexed_at`, and `modified_at`.
+- `dominion_loader.scan` propagates deleted manifest entries to RAGD unless `DOMINION_RAGD_DELETE=off`.
+- `dominion doctor --deep --json` checks actual manifest, cache, RAGD DB, query metadata, deleted leaks, orphan chunks, TEMP_ADAPTER labels, domdata guard, and LLM governor truth.
+- `gpu_4gb_safe` was removed; 4 GB class GPU behavior is explicit retrieve-only unless manually overridden.
+
+### Evidence
+
+```bash
+python -m pytest -q dominion_loader/tests dominion_ai/tests local_llm/tests  # 262 passed
+python -m pytest -q                                                        # 381 passed
+python domdata/check_no_trading.py                                          # PASS
+ctest --test-dir ragd/build --output-on-failure                             # 13/13 passed
+dominion doctor --deep --json                                               # overall=warn
+```
+
+### Remaining warnings
+
+- RAGD does not yet expose `ignore_policy_hash`; deep doctor warns that ignore-policy alignment is not provable.
+- No automatic 4 GB GPU generation model fits the 3.5 GB ceiling; retrieve-only fallback is intentional.
+- Existing RAGD DB has orphan active chunks from historical `/tmp/pytest-*` paths; deep doctor surfaces them.
+- `document_id` still has a labeled `TEMP_ADAPTER(agent-1)` fallback until RAGD emits loader-compatible IDs.
+
+Primary report: `reports/phase-3-truth-final-20260513-232814.md`.
+
+---
+
+## Phase 4 — Agent OS Complete (2026-05-13)
+
+**Status: COMPLETE.** `dominion_agent/` package fully built, tested, and validated.
+
+### What is dominion_agent?
+
+A local SQLite-backed operating system that constrains, observes, and audits code-editing agents. It enforces session identity, task lifecycle, file locking, safety rules, adversarial review, and complexity budgets.
+
+### Validation
+
+```bash
+cd ~/Dominion
+python -m pytest -q              # 381 passed
+python domdata/check_no_trading.py  # PASS
+python scripts/dominion_cli.py agent init --name test --role orchestrator --json
+python scripts/dominion_cli.py agent complexity report --json
+python scripts/dominion_cli.py agent sync-ragd --json
+```
+
+### Key Docs
+
+- `docs/agents/AGENT_OS_CONTRACT.md` — API guarantees, mutation rules, invariants
+- `docs/agents/AGENT_OS_COMMANDS.md` — full CLI reference
+- `docs/agents/COMPLEXITY_BUDGETS.md` — scoring formula and package budgets
+- `docs/agents/LIVING_ARCHITECTURE.md` — auto-generated architecture snapshot
+- `reports/phase-4-agent-os-final-20260513-232541.md` — final build report
+
+### Open Items
+
+- `dominion_loader` is over complexity budget (score 53.6 vs budget 40) — 15 TEMP_ADAPTER comments, 18 untested modules to address
+- `complexity report --json` can drive automated CI gating
+
+---
+
 ## Dominion V2.5 Phase - 2026-05-12
 
 Current status: IN PROGRESS (foundation laid; validate on a normal host for daemon reachability).

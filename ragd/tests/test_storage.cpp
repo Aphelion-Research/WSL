@@ -4,6 +4,7 @@
 
 int main() {
   auto db = (std::filesystem::temp_directory_path() / "ragd-test-storage.sqlite").string();
+  std::filesystem::remove(db);
   ragd::Storage s; s.open(db); s.initialize();
   assert(s.health_check());
   ragd::Chunk c; c.filepath = "a.md"; c.content = "hello dominion memory"; c.lang = "markdown"; c.chunk_type = "heading"; c.content_hash = ragd::sha256ish(c.content);
@@ -11,6 +12,15 @@ int main() {
   assert(id > 0);
   auto r = s.search_fts("dominion", 5);
   assert(!r.empty());
+  auto delete_path = (std::filesystem::temp_directory_path() / "dominion-delete-test" / "unique_file.py").string();
+  ragd::Chunk deleted; deleted.filepath = delete_path; deleted.content = "UNIQUE_DELETION_SENTINEL_123"; deleted.lang = "python"; deleted.chunk_type = "module"; deleted.content_hash = "delete-hash";
+  s.upsert_chunk(deleted);
+  assert(s.active_chunks_for_file(delete_path) > 0);
+  assert(!s.search_fts("UNIQUE_DELETION_SENTINEL_123", 5).empty());
+  auto deleted_count = s.mark_file_deleted(delete_path);
+  assert(deleted_count > 0);
+  assert(s.active_chunks_for_file(delete_path) == 0);
+  assert(s.search_fts("UNIQUE_DELETION_SENTINEL_123", 5).empty());
   auto sid = s.start_session("codex");
   s.touch_file(sid, "a.md");
   s.add_decision(sid, "use sqlite fts");

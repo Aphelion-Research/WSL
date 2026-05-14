@@ -16,7 +16,8 @@ from .safety import is_secret_path, redact_secret_mentions
 from .types import ScoredChunk
 
 
-TEMP_ADAPTER_NOTE = "TEMP_ADAPTER(agent-1): RAGD /query omits content_hash and document_id; remove when REST results expose both fields."
+TEMP_ADAPTER_NOTE = "TEMP_ADAPTER(agent-1): pre-agent-3 RAGD /query omits content_hash; remove after all deployed daemons expose query metadata."
+TEMP_ADAPTER_DOCUMENT_ID_NOTE = "TEMP_ADAPTER(agent-1): RAGD /query omits document_id; using filepath as compatibility identity; remove when REST results expose document_id."
 
 
 class RagdError(RuntimeError):
@@ -57,11 +58,11 @@ class RagdClient:
         return self._request(f"/graph/symbols?{suffix}")
 
 
-def _content_hash(raw: dict[str, Any]) -> str:
+def _content_hash(raw: dict[str, Any]) -> tuple[str, bool]:
     if raw.get("content_hash"):
-        return str(raw["content_hash"])
+        return str(raw["content_hash"]), False
     identity = f"{raw.get('filepath','')}:{raw.get('line_start',1)}:{raw.get('line_end',1)}:{raw.get('content','')}"
-    return hashlib.sha256(identity.encode("utf-8", errors="replace")).hexdigest()[:16]
+    return hashlib.sha256(identity.encode("utf-8", errors="replace")).hexdigest()[:16], True
 
 
 def parse_chunk(raw: dict[str, Any], *, source: str = "hybrid") -> ScoredChunk | None:
@@ -74,12 +75,18 @@ def parse_chunk(raw: dict[str, Any], *, source: str = "hybrid") -> ScoredChunk |
     score = float(raw.get("score") or raw.get("rrf_score") or raw.get("bm25_score") or raw.get("vector_score") or 0.0)
     line_start = int(raw.get("line_start") or raw.get("line_number") or raw.get("line") or 1)
     line_end = int(raw.get("line_end") or line_start)
-    content_hash = _content_hash(raw)
+    content_hash, derived_hash = _content_hash(raw)
+    document_id = str(raw.get("document_id") or filepath)
+    metadata_warnings: list[str] = []
+    if derived_hash:
+        metadata_warnings.append(TEMP_ADAPTER_NOTE)
+    if not raw.get("document_id"):
+        metadata_warnings.append(TEMP_ADAPTER_DOCUMENT_ID_NOTE)
     citation = f"{filepath}:{line_start}-{line_end} [{chunk_id}]"
     content = redact_secret_mentions(str(raw.get("content") or raw.get("text") or ""))
     return ScoredChunk(
         chunk_id=chunk_id,
-        document_id=str(raw.get("document_id") or filepath),
+        document_id=document_id,
         filepath=filepath,
         line_start=line_start,
         line_end=line_end,
@@ -95,6 +102,12 @@ def parse_chunk(raw: dict[str, Any], *, source: str = "hybrid") -> ScoredChunk |
         lang=str(raw.get("lang") or ""),
         chunk_type=str(raw.get("chunk_type") or ""),
         symbol_name=str(raw.get("symbol_name") or ""),
+        repo_root=str(raw.get("repo_root") or ""),
+        status=str(raw.get("status") or ""),
+        indexed_at=int(raw.get("indexed_at") or 0),
+        modified_at=int(raw.get("modified_at") or 0),
+        metadata_source="fallback" if derived_hash else "ragd",
+        metadata_warnings=metadata_warnings,
     )
 
 
@@ -116,7 +129,7 @@ def chunk_by_id(chunk_id: str, *, db_path: str | None = None) -> ScoredChunk | N
     conn.row_factory = sqlite3.Row
     try:
         row = conn.execute(
-            "SELECT id AS chunk_id, filepath, content, lang, chunk_type, symbol_name, line_start, line_end, content_hash, summary, git_commit FROM chunks WHERE id=? AND status='active'",
+            "SELECT id AS chunk_id, filepath, content, lang, chunk_type, symbol_name, line_start, line_end, content_hash, summary, git_commit, repo_root, status, indexed_at, modified_at FROM chunks WHERE id=? AND status='active'",
             (chunk_id,),
         ).fetchone()
         if row is None:

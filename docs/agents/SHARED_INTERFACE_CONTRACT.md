@@ -75,7 +75,7 @@ Version: `agent-2.20260513`
 
 ### Temporary Adapters
 
-- `TEMP_ADAPTER(agent-1)` in `dominion_ai/ragd_client.py`: RAGD `/query` currently omits `content_hash` and `document_id`; Agent 2 derives a stable hash from filepath, lines, and content. Remove when RAGD REST returns these fields.
+- `TEMP_ADAPTER(agent-1)` in `dominion_ai/ragd_client.py`: RAGD `/query` now returns `content_hash`, `repo_root`, `status`, `indexed_at`, and `modified_at`; only `document_id` remains a labeled compatibility fallback. Remove when RAGD REST returns loader-compatible `document_id`.
 - `local_llm/governor.py` consumes `dominion_loader.api.hw_probe` when available. A labeled `TEMP_ADAPTER(agent-1)` fallback remains only for environments where that interface is absent.
 
 ### CLI
@@ -92,3 +92,89 @@ Agent 2 adds only additive commands:
 - `dominion bench`
 
 Existing commands are preserved.
+
+---
+
+## Agent 3 Additions
+
+Version: `agent-3.20260513`
+
+### RAGD Delete Endpoint
+
+`POST /index/delete`:
+
+```json
+{"paths":["/absolute/path.py"]}
+```
+
+Response:
+
+```json
+{
+  "ok": true,
+  "paths_submitted": 1,
+  "files_marked_deleted": 1,
+  "chunks_marked_deleted": 3,
+  "errors": []
+}
+```
+
+Semantics:
+
+- Soft delete only: sets active chunk rows to `status='deleted'`.
+- Query paths continue to filter `status='active'`.
+- Missing paths are non-fatal and return zero deleted chunks.
+
+### DeleteResult
+
+`dominion_loader.ragd_bridge.DeleteResult`:
+
+```python
+paths_submitted: int
+files_marked_deleted: int
+chunks_marked_deleted: int
+duration_ms: float
+errors: list[dict[str, str]]
+skipped: bool
+reason: str | None
+ok: bool
+```
+
+### Query Metadata
+
+RAGD `/query` result fields added:
+
+- `content_hash`
+- `repo_root`
+- `status`
+- `indexed_at`
+- `modified_at`
+
+### Deep Doctor
+
+`dominion doctor --deep [--json] [--offline] [--max-sample N]` returns:
+
+```json
+{
+  "overall": "ok|warn|fail",
+  "mode": "deep",
+  "timestamp": "...",
+  "root": "...",
+  "checks": {
+    "check_name": {
+      "status": "pass|warn|fail|skip",
+      "severity": "info|low|medium|high|critical",
+      "detail": "...",
+      "remedy": null,
+      "evidence": {}
+    }
+  }
+}
+```
+
+### Ignore Policy
+
+- `dominion_loader.ignore.export_policy() -> dict`
+- `dominion_loader.ignore.policy_hash() -> str`
+- `dominion ignore policy --json`
+- Generated snapshot: `config/dominion_ignore_policy.json`

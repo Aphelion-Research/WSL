@@ -39,3 +39,18 @@
 | F18 Bench suites | Partial | `dominion bench --suite retrieval/e2e/generation` | Lightweight suite, not Agent 1 harness registration |
 | F19 Retrieval eval harness | Complete | `reports/eval/tiny-20260513-215612.json` | Tiny bundle produced recall@10/MRR/nDCG/citation accuracy |
 | F20 Ledger query UX | Complete | `dominion ledger list --kind decision --since 7d --json` | Read/query over RAGD decisions; append delegated |
+
+## Agent 3 Scope (Truth And Integrity)
+
+| Defect | Status | Evidence | Notes |
+|---|---:|---|---|
+| D01 Deleted files remain active in RAGD | Complete | `ragd/tests/test_storage.cpp`; live delete smoke in `reports/phase-3-truth-final-20260513-232814.md` | `POST /index/delete`; loader scan propagation |
+| D02 RAGD query omits identity metadata | Complete | `ragd/tests/test_rag_engine.cpp`; live `/query` metadata sample | Adds `content_hash`, `repo_root`, `status`, `indexed_at`, `modified_at` |
+| D03 `dominion_ai` temp identity adapter | Partial | `dominion_ai/tests/test_ragd_client.py` | `content_hash` now producer-owned; `document_id` fallback remains labeled |
+| D04 Deep doctor real consistency | Complete | `dominion_loader/tests/test_truth_doctor.py`; `dominion doctor --deep --json` | Actual manifest/cache/RAGD DB checks |
+| D05 Ignore policy split | Partial | `dominion_loader/tests/test_ignore.py`; `dominion ignore policy --json` | Python policy hash exported; RAGD hash still unavailable so doctor warns |
+| D06 Unsafe safe LLM profile | Complete | `local_llm/tests/test_governor.py`; `llm doctor --json` | `gpu_4gb_safe` removed; risky profile manual-only |
+| D07 Report evidence schema | Complete | `docs/agents/TRUTH_CONTRACT.md`; final report | Evidence tables and pass/warn/fail reporting |
+| D08 Cache integrity in doctor | Complete | `dominion_loader/tests/test_truth_doctor.py::test_deep_doctor_reports_cache_corruption` | Actual cache verify wired into deep doctor |
+| D09 Orphan chunks surfaced | Complete | `dominion doctor --deep --json` | Reports orphan active chunks with sample cap |
+| D10 Stale result provenance incomplete | Complete | `dominion search "agent handoff" --top-k 1 --json` | Search JSON exposes RAGD metadata and adapter warnings |

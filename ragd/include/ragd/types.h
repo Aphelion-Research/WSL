@@ -38,6 +38,11 @@ struct QueryResult {
   std::string chunk_type;
   std::string symbol_name;
   std::string git_commit;
+  std::string content_hash;
+  std::string repo_root;
+  std::string status = "active";
+  int64_t indexed_at = 0;
+  int64_t modified_at = 0;
   int line_start = 1;
   int line_end = 1;
 };

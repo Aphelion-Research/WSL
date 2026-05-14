@@ -28,6 +28,41 @@ Status: COMPLETE for Dominion V2 MVP superbuild.
 
 Status: PASS with documented RAGD production-surface limitations.
 
+## Phase 3 — Truth And Integrity (2026-05-13)
+
+RAGD deletion, query metadata, loader delete propagation, deep doctor, ignore-policy hash export, and LLM registry truth are implemented.
+
+| Item | Status |
+|---|---|
+| RAGD `/index/delete` | PASS |
+| Deleted sentinel retrieval after delete | PASS |
+| RAGD query metadata | PASS |
+| Loader delete propagation tests | PASS |
+| Deep doctor | PASS with warnings |
+| LLM 4 GB truth | PASS; retrieve-only fallback explicit |
+| Ignore policy | PARTIAL; Python hash exported, RAGD hash unavailable |
+| Full pytest | PASS (`381 passed`) |
+| Trading guard | PASS |
+
+Remaining warnings: RAGD ignore policy hash unavailable, historical orphan active chunks in RAGD DB, labeled `document_id` adapter.
+
+## Phase 4 — Agent OS (2026-05-13)
+
+`dominion_agent/` package complete and validated.
+
+| Item | Status |
+|---|---|
+| 20 source modules | PASS |
+| 10 test files (103 tests) | PASS |
+| CLI (`dominion agent ...`) wired | PASS |
+| TUI panels wired | PASS |
+| Full test suite (381 tests) | PASS |
+| `check_no_trading.py` | PASS |
+| Docs (`docs/agents/`) | PASS |
+| Final report | `reports/phase-4-agent-os-final-20260513-232541.md` |
+
+---
+
 ## Executive Summary
 
 Dominion shell, helpers, domdata, collector, Parquet/DuckDB normalization, health dashboard, collaboration docs, Codex prompts, and an expanded/tested RAGD C++ daemon are in place. No secrets were read or printed. Trading remains blocked.

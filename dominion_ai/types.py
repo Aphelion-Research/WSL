@@ -50,6 +50,12 @@ class ScoredChunk:
     lang: str = ""
     chunk_type: str = ""
     symbol_name: str = ""
+    repo_root: str = ""
+    status: str = ""
+    indexed_at: int = 0
+    modified_at: int = 0
+    metadata_source: str = "ragd"
+    metadata_warnings: list[str] = field(default_factory=list)
 
     def citation(self) -> Citation:
         return Citation(self.chunk_id, self.filepath, self.line_start, self.line_end, self.content_hash)

@@ -30,6 +30,7 @@ const unsigned char *sqlite3_column_text(sqlite3_stmt *, int);
 int sqlite3_column_count(sqlite3_stmt *);
 const char *sqlite3_column_name(sqlite3_stmt *, int);
 long long sqlite3_last_insert_rowid(sqlite3 *);
+int sqlite3_changes(sqlite3 *);
 }
 
 constexpr int SQLITE_OK = 0;

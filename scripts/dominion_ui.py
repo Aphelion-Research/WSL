@@ -37,6 +37,15 @@ def render() -> str:
         ("tmux", run(["tmux", "ls"], timeout=5)),
         ("Local LLM", run(["llm", "doctor"], timeout=5)),
     ]
+
+    # Agent OS panels
+    try:
+        from dominion_agent.tui import render_agent_panels
+        agent_panel = render_agent_panels()
+    except Exception as e:
+        agent_panel = f"(agent os unavailable: {e})"
+    sections.append(("Agent OS", agent_panel))
+
     out = [f"Dominion UI - {datetime.now().isoformat(timespec='seconds')}", "=" * 72]
     for title, body in sections:
         out.append(f"\n[{title}]")

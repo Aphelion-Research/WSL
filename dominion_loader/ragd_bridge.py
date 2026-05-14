@@ -1,12 +1,12 @@
 """RAGD ingestion bridge for dominion_loader.
 
-Sends files to RAGD via batched POST /index requests.
+Sends files to RAGD via batched POST /index and /index/delete requests.
 Producer side of the RAGD_INTEGRATION_CONTRACT.
 
 Guarantees:
 - document_id is stable across runs for same (repo_root, relative_path).
 - Unchanged content (same hash) produces 0 new rows in RAGD chunks table.
-- Deletions are communicated by indexing paths that no longer appear in the walk.
+- Deletions are communicated through RAGD POST /index/delete.
 - Manifest tracks ingestion state; bridge resumes from manifest on RAGD failure.
 - Feature flag: DOMINION_RAGD_BRIDGE=off → skip all RAGD calls.
 
@@ -66,6 +66,45 @@ class IngestResult:
         }
 
 
+@dataclass(frozen=True)
+class DeleteResult:
+    """Result of a single RAGD deletion propagation batch.
+
+    INTERFACE(agent-3): Deletion is soft-delete only in RAGD storage.
+    """
+    paths_submitted: int
+    files_marked_deleted: int
+    chunks_marked_deleted: int
+    duration_ms: float
+    errors: list[dict[str, str]]
+    skipped: bool = False
+    reason: Optional[str] = None
+
+    @property
+    def ok(self) -> bool:
+        """True when deletion was accepted or intentionally skipped."""
+        return not self.errors
+
+    @property
+    def elapsed_s(self) -> float:
+        """Duration in seconds (derived from duration_ms)."""
+        return self.duration_ms / 1000.0
+
+    def to_dict(self) -> dict:
+        """Return JSON-serializable dict for CLI/logging output."""
+        return {
+            "paths_submitted": self.paths_submitted,
+            "files_marked_deleted": self.files_marked_deleted,
+            "chunks_marked_deleted": self.chunks_marked_deleted,
+            "duration_ms": round(self.duration_ms, 3),
+            "elapsed_s": round(self.elapsed_s, 3),
+            "errors": self.errors,
+            "skipped": self.skipped,
+            "reason": self.reason,
+            "ok": self.ok,
+        }
+
+
 class RagdBridge:
     """Sends file paths to RAGD for chunking and storage.
 
@@ -90,6 +129,7 @@ class RagdBridge:
         self._timeout = timeout
         self._max_retries = max_retries
         self._enabled = os.environ.get("DOMINION_RAGD_BRIDGE", "on").lower() != "off"
+        self._delete_enabled = os.environ.get("DOMINION_RAGD_DELETE", "on").lower() != "off"
 
     def ingest_paths(self, paths: list[str]) -> IngestResult:
         """Submit a list of file paths to RAGD /index.
@@ -129,6 +169,57 @@ class RagdBridge:
             already_current=total_current,
             duration_ms=duration_ms,
             error=last_error,
+        )
+
+    def delete_paths(self, paths: list[str]) -> DeleteResult:
+        """Submit file paths to RAGD /index/delete for soft deletion."""
+        if not paths:
+            return DeleteResult(0, 0, 0, 0.0, [])
+        if not self._enabled:
+            return DeleteResult(
+                paths_submitted=len(paths),
+                files_marked_deleted=0,
+                chunks_marked_deleted=0,
+                duration_ms=0.0,
+                errors=[],
+                skipped=True,
+                reason="DOMINION_RAGD_BRIDGE=off",
+            )
+        if not self._delete_enabled:
+            return DeleteResult(
+                paths_submitted=len(paths),
+                files_marked_deleted=0,
+                chunks_marked_deleted=0,
+                duration_ms=0.0,
+                errors=[],
+                skipped=True,
+                reason="DOMINION_RAGD_DELETE=off",
+            )
+
+        tracer = get_tracer()
+        start = time.monotonic()
+        total_files = 0
+        total_chunks = 0
+        errors: list[dict[str, str]] = []
+
+        with tracer.span("ragd_delete_batch", attrs={"paths": len(paths)}):
+            for batch in _batched(paths, self._batch_size):
+                result = self._post_delete(batch)
+                total_files += int(result.get("files_marked_deleted", 0))
+                total_chunks += int(result.get("chunks_marked_deleted", 0))
+                for error in result.get("errors", []):
+                    errors.append({"path": str(error.get("path", "")), "error": str(error.get("error", error))})
+                if result.get("error"):
+                    errors.append({"path": "", "error": str(result["error"])})
+                    break
+
+        duration_ms = (time.monotonic() - start) * 1000
+        return DeleteResult(
+            paths_submitted=len(paths),
+            files_marked_deleted=total_files,
+            chunks_marked_deleted=total_chunks,
+            duration_ms=duration_ms,
+            errors=errors,
         )
 
     def health(self) -> dict:
@@ -189,6 +280,47 @@ class RagdBridge:
             except json.JSONDecodeError as exc:
                 return {"error": f"invalid JSON from RAGD: {exc}", "chunks_indexed": 0}
         return {"error": "max retries exceeded", "chunks_indexed": 0}
+
+    def _post_delete(self, paths: list[str]) -> dict:
+        """POST /index/delete with a batch of paths. Returns parsed response or error dict."""
+        tracer = get_tracer()
+        payload = json.dumps({"paths": paths}).encode("utf-8")
+
+        for attempt in range(self._max_retries + 1):
+            try:
+                req = Request(
+                    f"{self._url}/index/delete",
+                    data=payload,
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with urlopen(req, timeout=self._timeout) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    tracer.event(
+                        "ragd_delete_chunk",
+                        attrs={
+                            "paths": len(paths),
+                            "chunks_deleted": data.get("chunks_marked_deleted", 0),
+                            "attempt": attempt,
+                        },
+                    )
+                    return data
+            except (OSError, URLError) as exc:
+                if attempt >= self._max_retries:
+                    tracer.event(
+                        "error",
+                        attrs={
+                            "class": type(exc).__name__,
+                            "message": str(exc),
+                            "paths": len(paths),
+                            "url": f"{self._url}/index/delete",
+                        },
+                    )
+                    return {"error": f"{self._url}/index/delete: {exc}", "errors": []}
+                time.sleep(0.5 * (attempt + 1))
+            except json.JSONDecodeError as exc:
+                return {"error": f"invalid JSON from RAGD delete: {exc}", "errors": []}
+        return {"error": "max retries exceeded", "errors": []}
 
 
 def _batched(items: list, size: int) -> Iterator[list]:

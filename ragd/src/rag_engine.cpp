@@ -24,6 +24,11 @@ void enrich(QueryResult &r, const std::unordered_map<int64_t, Chunk> &chunks) {
   r.line_start = c.line_start;
   r.line_end = c.line_end;
   r.git_commit = c.git_commit;
+  r.content_hash = c.content_hash;
+  r.repo_root = c.repo_root;
+  r.status = c.status;
+  r.indexed_at = c.indexed_at;
+  r.modified_at = c.modified_at;
 }
 
 nlohmann::json result_to_json(const QueryResult &r) {
@@ -41,6 +46,11 @@ nlohmann::json result_to_json(const QueryResult &r) {
       {"symbol_name", r.symbol_name},
       {"line_start", r.line_start},
       {"line_end", r.line_end},
+      {"content_hash", r.content_hash},
+      {"repo_root", r.repo_root},
+      {"status", r.status},
+      {"indexed_at", r.indexed_at},
+      {"modified_at", r.modified_at},
       {"git_commit", r.git_commit},
   };
 }

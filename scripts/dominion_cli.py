@@ -125,6 +125,19 @@ def cmd_start(args: argparse.Namespace) -> int:
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
+    if getattr(args, "deep", False):
+        from dominion_loader.truth_doctor import run_deep_doctor
+
+        report = run_deep_doctor(offline=getattr(args, "offline", False), max_sample=getattr(args, "max_sample", 200))
+        if args.json:
+            print_json(report)
+        else:
+            print(f"Dominion deep doctor: {report['overall']}")
+            for name, result in report["checks"].items():
+                status = result.get("status", "?").upper()
+                print(f"  {status} {name}: {result.get('detail', '')}")
+        return 0 if report["overall"] != "fail" else 1
+
     # Foundation checks — always run, no external dependencies
     foundation_checks: dict[str, dict] = {}
 
@@ -296,6 +309,18 @@ def cmd_hw(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_ignore(args: argparse.Namespace) -> int:
+    from dominion_loader.ignore import export_policy, policy_hash
+
+    payload = {"policy_hash": policy_hash(), "policy": export_policy()}
+    if args.json:
+        print_json(payload)
+    else:
+        print(f"policy_hash: {payload['policy_hash']}")
+        print(f"secrets_always_ignored: {payload['policy']['secrets_always_ignored']}")
+    return 0
+
+
 def cmd_ai_search(args: argparse.Namespace) -> int:
     from dominion_ai.cli import cmd_search
 
@@ -442,6 +467,9 @@ def cmd_scan(args: argparse.Namespace) -> int:
         "files_error": stats.files_error,
         "ragd_chunks_indexed": stats.ragd_chunks_indexed,
         "ragd_errors": stats.ragd_errors,
+        "ragd_paths_deleted": stats.ragd_paths_deleted,
+        "ragd_chunks_deleted": stats.ragd_chunks_deleted,
+        "ragd_delete_errors": stats.ragd_delete_errors,
         "duration_ms": round(stats.duration_ms, 1),
         "dry_run": dry_run,
     }
@@ -453,7 +481,8 @@ def cmd_scan(args: argparse.Namespace) -> int:
         print(f"{prefix}scan complete: seen={stats.files_seen} new={stats.files_new} "
               f"changed={stats.files_changed} deleted={stats.files_deleted} "
               f"skipped={stats.files_skipped} errors={stats.files_error} "
-              f"ragd_chunks={stats.ragd_chunks_indexed} ({stats.duration_ms:.0f}ms)")
+              f"ragd_chunks={stats.ragd_chunks_indexed} "
+              f"ragd_deleted={stats.ragd_chunks_deleted} ({stats.duration_ms:.0f}ms)")
     return 0
 
 
@@ -676,6 +705,9 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("doctor")
     p.add_argument("--verbose", action="store_true")
     p.add_argument("--json", action="store_true")
+    p.add_argument("--deep", action="store_true")
+    p.add_argument("--offline", action="store_true")
+    p.add_argument("--max-sample", type=int, default=200)
     p.set_defaults(func=cmd_doctor)
     p = sub.add_parser("help")
     p.set_defaults(func=lambda args: (parser.print_help() or 0))
@@ -772,6 +804,12 @@ def build_parser() -> argparse.ArgumentParser:
     hp.add_argument("--json", action="store_true")
     hp.set_defaults(func=cmd_hw)
 
+    p = sub.add_parser("ignore")
+    ignore_sub = p.add_subparsers(dest="ignore_command", required=True)
+    ip = ignore_sub.add_parser("policy")
+    ip.add_argument("--json", action="store_true")
+    ip.set_defaults(func=cmd_ignore)
+
     # -----------------------------------------------------------------------
     # Foundation (Agent 1) subcommands
     # -----------------------------------------------------------------------
@@ -830,6 +868,15 @@ def build_parser() -> argparse.ArgumentParser:
     gfp = gf_sub.add_parser("build")
     gfp.add_argument("--json", action="store_true")
     gfp.set_defaults(func=cmd_graph_foundation)
+
+    # -----------------------------------------------------------------------
+    # Agent OS (Agent 4) subcommands
+    # -----------------------------------------------------------------------
+    try:
+        from dominion_agent.cli import build_agent_subparser, cmd_agent
+        build_agent_subparser(sub)
+    except ImportError:
+        pass  # dominion_agent not yet installed
 
     return parser
 

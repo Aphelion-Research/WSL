@@ -13,7 +13,7 @@ from urllib.error import URLError
 import pytest
 
 from dominion_loader.obs import _NullTracer, set_tracer
-from dominion_loader.ragd_bridge import IngestResult, RagdBridge
+from dominion_loader.ragd_bridge import DeleteResult, IngestResult, RagdBridge
 
 
 @pytest.fixture(autouse=True)
@@ -128,6 +128,54 @@ def test_ingest_result_elapsed_s() -> None:
     """elapsed_s is derived from duration_ms."""
     r = IngestResult(paths_submitted=1, chunks_indexed=0, already_current=0, duration_ms=500.0, error=None)
     assert abs(r.elapsed_s - 0.5) < 1e-9
+
+
+def test_delete_result_ok_and_elapsed_s() -> None:
+    r = DeleteResult(paths_submitted=1, files_marked_deleted=1, chunks_marked_deleted=2, duration_ms=250.0, errors=[])
+    assert r.ok is True
+    assert abs(r.elapsed_s - 0.25) < 1e-9
+
+
+def test_delete_paths_empty_list() -> None:
+    bridge = RagdBridge()
+    result = bridge.delete_paths([])
+    assert result.paths_submitted == 0
+    assert result.ok is True
+
+
+def test_delete_paths_disabled_returns_structured_skip(monkeypatch) -> None:
+    monkeypatch.setenv("DOMINION_RAGD_DELETE", "off")
+    bridge = RagdBridge()
+    result = bridge.delete_paths(["/some/path.py"])
+    assert result.paths_submitted == 1
+    assert result.skipped is True
+    assert result.errors == []
+
+
+def test_delete_paths_mock_success(tmp_path: Path) -> None:
+    path1 = str(tmp_path / "deleted.py")
+    bridge = RagdBridge()
+    mock_resp = _mock_urlopen({"ok": True, "paths_submitted": 1, "files_marked_deleted": 1, "chunks_marked_deleted": 4, "errors": []})
+
+    with patch("dominion_loader.ragd_bridge.urlopen", return_value=mock_resp):
+        result = bridge.delete_paths([path1])
+
+    assert result.paths_submitted == 1
+    assert result.ok is True
+    assert result.files_marked_deleted == 1
+    assert result.chunks_marked_deleted == 4
+
+
+def test_delete_paths_mock_connection_error(tmp_path: Path) -> None:
+    path1 = str(tmp_path / "deleted.py")
+    bridge = RagdBridge(max_retries=0)
+
+    with patch("dominion_loader.ragd_bridge.urlopen", side_effect=URLError("refused")):
+        result = bridge.delete_paths([path1])
+
+    assert result.ok is False
+    assert result.errors
+    assert "/index/delete" in result.errors[0]["error"]
 
 
 # ---------------------------------------------------------------------------

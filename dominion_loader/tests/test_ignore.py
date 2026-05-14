@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import tempfile
+import json
 from pathlib import Path
 
 import pytest
 
-from dominion_loader.ignore import Ignore, _BUILTIN_DIR_DENY
+from dominion_loader.ignore import Ignore, _BUILTIN_DIR_DENY, export_policy, policy_hash
 
 
 # ---------------------------------------------------------------------------
@@ -118,3 +119,21 @@ def test_builtin_rules_export() -> None:
     assert "secrets" in rules["dir_deny"]
     # Sanity: at least 10 dir rules
     assert len(rules["dir_deny"]) >= 10
+
+
+def test_policy_hash_stable_for_same_rules() -> None:
+    first = policy_hash()
+    second = policy_hash()
+    assert first == second
+    assert len(first) == 64
+
+
+def test_export_policy_matches_builtin_rules() -> None:
+    assert export_policy() == Ignore.builtin_rules()
+
+
+def test_generated_policy_config_matches_export() -> None:
+    config_path = Path(__file__).parents[2] / "config" / "dominion_ignore_policy.json"
+    data = json.loads(config_path.read_text(encoding="utf-8"))
+    assert data["policy"] == export_policy()
+    assert data["policy_hash"] == policy_hash()

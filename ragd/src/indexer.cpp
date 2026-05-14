@@ -3,6 +3,7 @@
 #include "ragd/storage.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cctype>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -271,7 +272,10 @@ int Indexer::index_file(const fs::path &path, std::size_t max_file_bytes) {
   auto git_head = git_head_for(repo_root);
   int64_t modified_at = 0;
   try {
-    modified_at = static_cast<int64_t>(fs::last_write_time(path).time_since_epoch().count());
+    auto file_time = fs::last_write_time(path);
+    auto system_time = std::chrono::time_point_cast<std::chrono::seconds>(
+        file_time - fs::file_time_type::clock::now() + std::chrono::system_clock::now());
+    modified_at = system_time.time_since_epoch().count();
   } catch (...) {
     modified_at = 0;
   }
