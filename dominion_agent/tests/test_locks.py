@@ -5,7 +5,7 @@ import time
 
 import pytest
 
-from dominion_agent.locks import acquire_lock, release_lock, list_locks, stale_locks
+from dominion_agent.locks import acquire_lock, release_lock, list_locks, stale_locks, reap_expired_locks
 from dominion_agent.sessions import start_session
 from dominion_agent.store import AgentStore
 
@@ -137,3 +137,73 @@ def test_list_locks_active_only(tmp_path):
     release_lock("src/a.py", sess, store=store)
     active = list_locks(active_only=True, store=store)
     assert not any(l.filepath == "src/a.py" for l in active)
+
+
+# ---------------------------------------------------------------------------
+# reap_expired_locks (Phase 4)
+# ---------------------------------------------------------------------------
+
+def test_reap_expired_locks_marks_reaped(tmp_path):
+    """Locks whose expires_at is in the past are reaped."""
+    store = _store(tmp_path)
+    sess = _sess(store)
+    acquire_lock("src/exp.py", sess, expires_in_seconds=60, store=store)
+    # Backdate expires_at so it's already expired
+    store.conn.execute(
+        "UPDATE agent_file_locks SET expires_at=? WHERE filepath='src/exp.py'",
+        (int(time.time()) - 10,),
+    )
+    n = reap_expired_locks(store=store)
+    assert n == 1
+    active = list_locks(active_only=True, store=store)
+    assert not any(l.filepath == "src/exp.py" for l in active)
+
+
+def test_reap_expired_locks_leaves_valid_locks(tmp_path):
+    """Locks with future expires_at are NOT reaped."""
+    store = _store(tmp_path)
+    sess = _sess(store)
+    acquire_lock("src/valid.py", sess, expires_in_seconds=3600, store=store)
+    n = reap_expired_locks(store=store)
+    assert n == 0
+    active = list_locks(active_only=True, store=store)
+    assert any(l.filepath == "src/valid.py" for l in active)
+
+
+def test_reap_expired_locks_leaves_no_expiry_locks(tmp_path):
+    """Locks without expires_at (perpetual) are NOT reaped."""
+    store = _store(tmp_path)
+    sess = _sess(store)
+    acquire_lock("src/forever.py", sess, store=store)  # no expires_in_seconds
+    n = reap_expired_locks(store=store)
+    assert n == 0
+
+
+def test_expired_lock_does_not_block_acquisition(tmp_path):
+    """An expired active lock must not prevent a new acquisition."""
+    store = _store(tmp_path)
+    sess = _sess(store)
+    acquire_lock("src/blocked.py", sess, expires_in_seconds=60, store=store)
+    # Expire the lock manually
+    store.conn.execute(
+        "UPDATE agent_file_locks SET expires_at=? WHERE filepath='src/blocked.py'",
+        (int(time.time()) - 10,),
+    )
+    # New session should be able to acquire
+    sess2 = _sess(store)
+    result = acquire_lock("src/blocked.py", sess2, mode="write", store=store)
+    assert result.acquired is True, result.conflict_reason
+
+
+def test_reap_returns_count_of_reaped(tmp_path):
+    """reap_expired_locks returns correct count when multiple locks expire."""
+    store = _store(tmp_path)
+    sess = _sess(store)
+    for i in range(3):
+        acquire_lock(f"src/file{i}.py", sess, expires_in_seconds=60, mode="read", store=store)
+    store.conn.execute(
+        "UPDATE agent_file_locks SET expires_at=? WHERE status='active'",
+        (int(time.time()) - 10,),
+    )
+    n = reap_expired_locks(store=store)
+    assert n == 3

@@ -12,7 +12,7 @@ from dominion_agent.claims import claim_task, release_task, list_claims
 from dominion_agent.complexity import complexity_report, all_packages_report, COMPLEXITY_BUDGETS
 from dominion_agent.conflicts import check_conflicts
 from dominion_agent.impact import analyze_impact
-from dominion_agent.locks import acquire_lock, release_lock, list_locks, stale_locks
+from dominion_agent.locks import acquire_lock, release_lock, list_locks, stale_locks, reap_expired_locks
 from dominion_agent.prompt_compiler import compile_prompt
 from dominion_agent.sessions import (
     start_session,
@@ -102,7 +102,7 @@ __all__ = [
     # Claims
     "claim_task", "release_task", "list_claims",
     # Locks
-    "acquire_lock", "release_lock", "list_locks", "stale_locks",
+    "acquire_lock", "release_lock", "list_locks", "stale_locks", "reap_expired_locks",
     # Intelligence
     "check_conflicts", "analyze_impact",
     "compile_prompt", "run_adversarial_review",

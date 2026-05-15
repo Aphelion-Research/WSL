@@ -1,37 +1,47 @@
 # Dominion Agent Handoff
 
-## Live-Green Sprint — 2026-05-14
+## Architecture Truth Sprint — 2026-05-14
 
-Status: **LIVE_GREEN** — `bash scripts/verify_live.sh` → 14/14 PASS.
+Status: **ARCH_TRUE** — 6-phase sprint completed. All split-brain surfaces fixed.
 
 Use now:
 
 ```bash
 # Verify platform
 bash scripts/verify_live.sh                                     # LIVE_GREEN 14/14
-python scripts/dominion_cli.py truth --live --json              # mode:live, ragd:ok
-python scripts/dominion_cli.py truth --live --strict            # exits 1 on warn
-python scripts/dominion_cli.py vault repair --json              # dry-run: see stale count
-python scripts/dominion_cli.py vault repair --apply             # strip stale /tmp/ links
-python scripts/dominion_cli.py start                            # starts ragd in tmux
+python scripts/dominion_cli.py doctor --offline --json          # overall: warn/ok; exit 0
+python scripts/dominion_cli.py doctor --offline --json --strict # exit 1 on warn
+python scripts/dominion_cli.py scan --dry-run --json            # Python scan (1281 files)
+python scripts/dominion_cli.py scan --native --dry-run --json   # Native scan (~22ms)
+python dominion_agent/cli.py agent lock reap --json             # reap expired locks
+python domdata/check_no_trading.py                               # PASS: 0 violations
 ```
 
-Next best tasks:
+What changed this sprint (Architecture Truth):
 
-1. **Fix complexity over budget** — `dominion_agent` (471/350), `scripts/` (404/200) are the biggest. Refactor or raise budget in `config/complexity.yaml`.
-2. **Fix temp adapters warn** — `doctor --offline` shows `temp_adapters: warn`. Track down which adapters and remove them.
-3. **Fix C++ native vault doctor `.md` extension bug** — the binary doesn't append `.md` when checking wikilink targets, causing 17 false-positive broken links. Fix in `ragd/src/native/vault_doctor.cpp`.
-4. **Wire native scan into live ingestion** — `dominion-native-scan` exists but isn't wired to RAGD index. Connect scan → RAGD `/index/add` pipeline.
-5. **Agent OS lock consolidation** — `dominion_agent/locks.py` and `dominion_agent/sessions.py` have parallel state; audit and consolidate.
+1. **doctor exit semantics** — `doctor --json` now exits non-zero on `fail`. Added `--strict` flag for exit 1 on `warn`. Fixed `overall` computation to use worst check status. +5 tests.
 
-What changed this sprint:
+2. **Forbidden-token scanner** — `domdata/check_no_trading.py` refactored: loads allowlist from `config/forbidden_tokens.json` (not hardcoded), path-aware (e.g. `docs/` allowlisted via `allowlist_paths`), scans `.py,.sh,.cpp,.ts,.yaml,.md` etc. Added `allowlist_paths` to policy JSON. +18 tests.
 
-- RAGD started live in tmux `ragd`. Active chunks cleaned: 997 → 719.
-- Vault rebuilt: 0 broken links. Native vault doctor false positives annotated.
-- `ragd_vault/repair.py`: strips stale `/tmp/` wikilinks from SYMBOL_INDEX.md.
-- `ragd_vault/cli.py`: `repair` subcommand.
-- `scripts/dominion_cli.py`: `_ragd_start_in_tmux`, `_ragd_diagnose`, `cmd_start` rewrite, `truth --live/--strict`, native doctor in truth, vault repair passthrough.
-- `scripts/verify_live.sh`: 14-check live-green integration script.
+3. **Native scan wiring** — `dominion scan --native` routes through `cmd_scan_native()` which runs `dominion-native-scan --json`, maps native kind→file_class, feeds manifest + RAGD bridge. Falls back to Python if binary absent. ~17x faster than Python scan. +5 tests.
+
+4. **Agent OS lock reap** — Added `reap_expired_locks()` to `locks.py`: marks expired active locks as `reaped`. Fixed `acquire_lock()` to skip expired locks (`AND (expires_at IS NULL OR expires_at > ?)`). Added `lock reap` CLI subcommand. Exported via `api.py`/`__init__.py`. +5 tests.
+
+5. **Vault doctor `.md` bug** — Fixed `ragd/src/native/vault_doctor.cpp` line 111: was `if (target.extension().empty()) target += ".md"` — hash-suffixed filenames like `-L31-5de41f6d` have extension `.5de41f6d` (non-empty), so `.md` was never appended. Fixed to `if (ext != ".md" && ext != ".canvas")`. Rebuilt. Result: **0 broken links** (was 17 false positives).
+
+6. **Docs** — This file updated.
+
+Validation baseline after sprint:
+
+- `python -m pytest -q`: 387+ passed.
+- `ctest --test-dir ragd/build`: 24/24 passed.
+- `python domdata/check_no_trading.py`: PASS.
+- `./ragd/build/dominion-native-vault-doctor --root . --json`: 0 broken links.
+- `python scripts/dominion_cli.py scan --native --dry-run --json`: native=true, ~22ms.
+
+## Live-Green Sprint — 2026-05-14
+
+Status: **LIVE_GREEN** — `bash scripts/verify_live.sh` → 14/14 PASS (historical).
 
 ## Agent 5 Phase 5 Native Core — 2026-05-14
 

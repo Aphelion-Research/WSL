@@ -41,6 +41,7 @@ from dominion_agent.api import (
     list_locks,
     list_sessions,
     list_tasks,
+    reap_expired_locks,
     record_touch,
     refresh_architecture,
     release_lock,

@@ -24,7 +24,16 @@
     "safety.py",
     "check_no_trading.py",
     "forbidden_tokens.py",
-    "test_safety.py"
+    "test_safety.py",
+    "test_check_no_trading.py"
+  ],
+  "allowlist_paths": [
+    "config/forbidden_tokens.json",
+    "AGENTS.md",
+    "docs/",
+    "prompts/",
+    "notes/",
+    "vault/"
   ],
   "skip_parts": [
     "__pycache__",

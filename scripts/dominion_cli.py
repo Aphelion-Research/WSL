@@ -307,6 +307,7 @@ def cmd_start(args: argparse.Namespace) -> int:
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
+    strict = getattr(args, "strict", False)
     if getattr(args, "deep", False):
         from dominion_loader.truth_doctor import run_deep_doctor
 
@@ -318,7 +319,11 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             for name, result in report["checks"].items():
                 status = result.get("status", "?").upper()
                 print(f"  {status} {name}: {result.get('detail', '')}")
-        return 0 if report["overall"] != "fail" else 1
+        if report["overall"] == "fail":
+            return 1
+        if strict and report["overall"] == "warn":
+            return 1
+        return 0
 
     native_doctor: dict | None = None
     native_doctor_code: int | None = None
@@ -472,36 +477,46 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             "native_core_version": native_doctor.get("native_core_version"),
         }
         all_checks["native_doctor"] = foundation_checks["native_doctor"]
-    overall_ok = all(
-        v.get("status") not in {"error", "fail"} if isinstance(v, dict) and "status" in v else bool(v)
-        for v in all_checks.values()
-    )
 
+    def _check_status(v: object) -> str:
+        if isinstance(v, dict) and "status" in v:
+            return str(v["status"])
+        return "ok" if bool(v) else "fail"
+
+    check_statuses = [_check_status(v) for v in all_checks.values()]
+    if "fail" in check_statuses or "error" in check_statuses:
+        overall_str = "fail"
+    elif "warn" in check_statuses:
+        overall_str = "warn"
+    else:
+        overall_str = "ok"
     if args.json:
-        payload = {"overall": "ok" if overall_ok else "warn", "checks": all_checks}
+        payload = {"overall": overall_str, "checks": all_checks}
         if native_doctor is not None:
             payload["native_doctor"] = native_doctor
         else:
             payload["native_fallback"] = True
         print_json(payload)
-        return 0
-
-    # Human-readable output
-    print("=== Foundation Checks ===")
-    for name, result in foundation_checks.items():
-        status = result.get("status", "?") if isinstance(result, dict) else "ok"
-        mark = "PASS" if status == "ok" else "WARN" if status == "warn" else "FAIL"
-        print(f"  {mark} {name}")
-        if args.verbose and isinstance(result, dict) and result.get("error"):
-            print(f"       {result['error']}")
-    print("=== Platform Checks ===")
-    for name, result in platform_checks.items():
-        mark = "SKIP" if isinstance(result, str) and result.startswith("skipped") else "PASS" if result else "FAIL"
-        print(f"  {mark} {name}")
-    if native_doctor is not None:
-        print("=== Native Checks ===")
-        print(f"  {'PASS' if native_doctor_code == 0 else 'FAIL'} native_doctor overall={native_doctor.get('overall', 'unknown')}")
-    return 0 if overall_ok else 1
+    else:
+        print("=== Foundation Checks ===")
+        for name, result in foundation_checks.items():
+            status = result.get("status", "?") if isinstance(result, dict) else "ok"
+            mark = "PASS" if status == "ok" else "WARN" if status == "warn" else "FAIL"
+            print(f"  {mark} {name}")
+            if args.verbose and isinstance(result, dict) and result.get("error"):
+                print(f"       {result['error']}")
+        print("=== Platform Checks ===")
+        for name, result in platform_checks.items():
+            mark = "SKIP" if isinstance(result, str) and result.startswith("skipped") else "PASS" if result else "FAIL"
+            print(f"  {mark} {name}")
+        if native_doctor is not None:
+            print("=== Native Checks ===")
+            print(f"  {'PASS' if native_doctor_code == 0 else 'FAIL'} native_doctor overall={native_doctor.get('overall', 'unknown')}")
+    if overall_str == "fail":
+        return 1
+    if strict and overall_str == "warn":
+        return 1
+    return 0
 
 
 def cmd_tmux(args: argparse.Namespace) -> int:
@@ -922,6 +937,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--json", action="store_true")
     p.add_argument("--deep", action="store_true")
     p.add_argument("--offline", action="store_true")
+    p.add_argument("--strict", action="store_true", help="Exit 1 on warn as well as fail")
     p.add_argument("--max-sample", type=int, default=200)
     p.set_defaults(func=cmd_doctor)
     p = sub.add_parser("help")
@@ -1108,6 +1124,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--repo", default=None, help="Repo root path (default: DOMINION_ROOT)")
     p.add_argument("--once", action="store_true", default=True, help="Run once (default)")
     p.add_argument("--dry-run", action="store_true", help="Discover+hash without writing manifest or RAGD")
+    p.add_argument("--native", action="store_true", help="Use native C++ binary for file discovery and hashing")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_scan)
 

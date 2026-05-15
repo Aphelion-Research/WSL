@@ -108,7 +108,12 @@ VaultDoctorReport inspect_vault_native(const std::filesystem::path &repo_root, c
           target = note.parent_path() / target;
         }
       }
-      if (target.extension().empty()) target += ".md";
+      // Vault wikilinks without an explicit extension resolve to .md.
+      // Use != ".md"/".canvas" instead of .empty() because hash-suffixed
+      // filenames like "-L31-5de41f6d" have extension ".5de41f6d" which is
+      // non-empty yet still needs ".md" appended.
+      const auto ext = target.extension().string();
+      if (ext != ".md" && ext != ".canvas") target += ".md";
       auto norm = normalize_path(repo_root, target);
       if (!norm.within_repo) {
         ++report.broken_links;

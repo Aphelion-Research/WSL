@@ -96,10 +96,12 @@ def acquire_lock(
     # this point at a time, preventing the SELECT-then-INSERT race condition.
     _store.conn.execute("BEGIN IMMEDIATE")
     try:
-        # Check for conflicting active locks
+        # Check for conflicting active locks (skip expired ones)
         existing_rows = _store.conn.execute(
-            "SELECT lock_id, session_id, mode FROM agent_file_locks WHERE filepath=? AND status='active'",
-            (filepath,),
+            "SELECT lock_id, session_id, mode FROM agent_file_locks"
+            " WHERE filepath=? AND status='active'"
+            " AND (expires_at IS NULL OR expires_at > ?)",
+            (filepath, now),
         ).fetchall()
 
         for existing in existing_rows:
@@ -234,3 +236,27 @@ def stale_locks(
     if store is None:
         _store.close()
     return [_row_to_lock(r) for r in rows]
+
+
+def reap_expired_locks(
+    *,
+    store: Optional[AgentStore] = None,
+) -> int:
+    """Mark all expired active locks as 'reaped'. Returns count reaped.
+
+    A lock is expired if it has an expires_at value in the past.
+    This is separate from stale_locks() which detects by age, not expires_at.
+    """
+    _store = store or AgentStore()
+    now = int(time.time())
+    n = _store.conn.execute(
+        """UPDATE agent_file_locks
+              SET status='reaped', released_at=?
+           WHERE status='active'
+             AND expires_at IS NOT NULL
+             AND expires_at < ?""",
+        (now, now),
+    ).rowcount
+    if store is None:
+        _store.close()
+    return n

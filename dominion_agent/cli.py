@@ -239,6 +239,13 @@ def _cmd_lock_release(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_lock_reap(args: argparse.Namespace) -> int:
+    from dominion_agent.locks import reap_expired_locks
+    n = reap_expired_locks()
+    _out({"reaped": n}, getattr(args, "json", False))
+    return 0
+
+
 def _cmd_locks(args: argparse.Namespace) -> int:
     from dominion_agent.locks import list_locks
     from dominion_agent.reports import lock_to_dict
@@ -521,6 +528,10 @@ def build_agent_subparser(sub: argparse._SubParsersAction) -> None:  # type: ign
     p_lr.add_argument("--force", action="store_true")
     p_lr.add_argument("--json", action="store_true")
     p_lr.set_defaults(agent_func=_cmd_lock_release)
+
+    p_reap = lock_sub.add_parser("reap", help="Reap all expired locks (expires_at < now)")
+    p_reap.add_argument("--json", action="store_true")
+    p_reap.set_defaults(agent_func=_cmd_lock_reap)
 
     # -- locks ---------------------------------------------------------------
     p_locks = agent_sub.add_parser("locks", help="List all file locks")

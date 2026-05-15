@@ -7,7 +7,10 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
+import time
+from pathlib import Path
 from pathlib import Path
 
 
@@ -18,8 +21,194 @@ def _print_json(data: object) -> None:
     print(json.dumps(data, indent=2, default=str))
 
 
+# ---------------------------------------------------------------------------
+# Native scan helpers
+# ---------------------------------------------------------------------------
+
+_NATIVE_KIND_TO_CLASS: dict[str, str] = {
+    "document": "doc",
+    "source": "code",
+    "config": "config",
+    "data": "data",
+    "binary": "binary",
+}
+
+
+def _native_scan_binary() -> Path:
+    """Return path to the native scan binary (may not exist)."""
+    candidates = [
+        Path(__file__).resolve().parents[1] / "ragd" / "build" / "dominion-native-scan",
+        Path(os.environ.get("DOMINION_NATIVE_BIN", "")) / "dominion-native-scan",
+    ]
+    for p in candidates:
+        if p.is_file():
+            return p
+    # Return first candidate even if it doesn't exist (caller checks .exists())
+    return candidates[0]
+
+
+def _run_native_scan(repo_root: Path) -> dict:
+    """Run dominion-native-scan and return parsed JSON output."""
+    binary = _native_scan_binary()
+    if not binary.is_file():
+        raise FileNotFoundError(f"native scan binary not found: {binary}")
+    result = subprocess.run(
+        [str(binary), "--root", str(repo_root), "--json"],
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"native scan failed (exit {result.returncode}): {result.stderr[:200]}")
+    return json.loads(result.stdout)
+
+
+def cmd_scan_native(args) -> int:
+    """Run scan using native C++ binary for file discovery and hashing."""
+    from dominion_loader.hashing import document_id_for
+    from dominion_loader.manifest import Manifest, ManifestEntry
+    from dominion_loader.obs import _NullTracer, get_tracer, set_tracer
+    from dominion_loader.ragd_bridge import RagdBridge
+
+    previous_tracer = get_tracer()
+    set_tracer(_NullTracer())
+    dry_run = getattr(args, "dry_run", False)
+    repo = Path(getattr(args, "repo", None) or ROOT).resolve()
+
+    try:
+        native_data = _run_native_scan(repo)
+    except (FileNotFoundError, RuntimeError) as exc:
+        print(f"native scan unavailable, falling back to Python scan: {exc}", file=sys.stderr)
+        args.native = False  # clear flag then delegate
+        return cmd_scan(args)
+
+    native_files: list[dict] = native_data.get("files", [])
+    native_errors: list = native_data.get("errors", [])
+
+    manifest = Manifest()
+    bridge = RagdBridge()
+    start = time.monotonic()
+
+    files_seen = len(native_files)
+    files_new = files_changed = files_skipped = files_error = 0
+    ingest_batch: list[str] = []
+    seen_ids: set[str] = set()
+
+    known_ids = manifest.list_all_document_ids(str(repo))
+
+    try:
+        if not dry_run:
+            from dominion_loader.obs import new_trace_id
+            trace_id = new_trace_id()
+            manifest.start_scan_run(trace_id, str(repo))
+        else:
+            trace_id = "dry-run"
+
+        for nf in native_files:
+            rel_path: str = nf["relative_path"]
+            file_class: str = _NATIVE_KIND_TO_CLASS.get(nf.get("kind", ""), "unknown")
+            if file_class == "binary":
+                files_skipped += 1
+                continue
+
+            doc_id = document_id_for(str(repo), rel_path)
+            seen_ids.add(doc_id)
+
+            content_hash: str = nf.get("content_hash", "")
+            mtime_ns: int = int(nf.get("mtime_ns", 0))
+            size: int = int(nf.get("size_bytes", 0))
+            language: str = nf.get("language", "unknown")
+
+            prior_entry = manifest.get(doc_id)
+            is_new = prior_entry is None
+            is_changed = (not is_new) and (prior_entry.content_hash != content_hash)
+
+            if is_new:
+                files_new += 1
+            elif is_changed:
+                files_changed += 1
+
+            if not dry_run:
+                if is_new or is_changed:
+                    ingest_batch.append(nf["absolute_path"])
+                manifest.upsert(ManifestEntry(
+                    document_id=doc_id,
+                    repo_root=str(repo),
+                    relative_path=rel_path,
+                    file_class=file_class,
+                    language=language,
+                    content_hash=content_hash,
+                    mtime_ns=mtime_ns,
+                    size=size,
+                    indexed_at=int(time.time()),
+                    ragd_ingested=prior_entry.ragd_ingested if prior_entry else 0,
+                    ragd_ingested_at=prior_entry.ragd_ingested_at if prior_entry else None,
+                    status="active",
+                ))
+
+        # Deletions
+        files_deleted = 0
+        deleted_ids = known_ids - seen_ids
+        delete_batch: list[str] = []
+        for doc_id in deleted_ids:
+            entry = manifest.get(doc_id)
+            if entry is not None:
+                delete_batch.append(str((Path(entry.repo_root) / entry.relative_path).resolve()))
+            if not dry_run:
+                manifest.mark_deleted(doc_id)
+            files_deleted += 1
+
+        ragd_chunks_indexed = ragd_errors = ragd_paths_deleted = ragd_chunks_deleted = ragd_delete_errors = 0
+        if not dry_run:
+            if ingest_batch:
+                ingest_result = bridge.ingest_paths(ingest_batch)
+                ragd_chunks_indexed = ingest_result.chunks_indexed
+                ragd_errors = ingest_result.errors
+            if delete_batch:
+                delete_result = bridge.delete_paths(delete_batch)
+                ragd_paths_deleted = delete_result.files_marked_deleted
+                ragd_chunks_deleted = delete_result.chunks_deleted
+                ragd_delete_errors = delete_result.errors
+    finally:
+        manifest.close()
+
+    duration_ms = (time.monotonic() - start) * 1000
+    data = {
+        "trace_id": trace_id,
+        "repo_root": str(repo),
+        "native": True,
+        "files_seen": files_seen,
+        "files_new": files_new,
+        "files_changed": files_changed,
+        "files_deleted": files_deleted,
+        "files_skipped": files_skipped,
+        "files_error": files_error + len(native_errors),
+        "ragd_chunks_indexed": ragd_chunks_indexed,
+        "ragd_errors": ragd_errors,
+        "ragd_paths_deleted": ragd_paths_deleted,
+        "ragd_chunks_deleted": ragd_chunks_deleted,
+        "ragd_delete_errors": ragd_delete_errors,
+        "duration_ms": round(duration_ms, 1),
+        "dry_run": dry_run,
+    }
+    if getattr(args, "json", False):
+        _print_json(data)
+    else:
+        prefix = "[DRY RUN] " if dry_run else ""
+        print(
+            f"{prefix}native scan complete: seen={data['files_seen']} new={files_new} "
+            f"changed={files_changed} deleted={files_deleted} "
+            f"skipped={files_skipped} errors={data['files_error']} "
+            f"ragd_chunks={ragd_chunks_indexed} ({duration_ms:.0f}ms)"
+        )
+    return 0
+
+
 def cmd_scan(args) -> int:
     """Run dominion_loader scan over the repo."""
+    if getattr(args, "native", False):
+        return cmd_scan_native(args)
+
     from dominion_loader.scan import scan
     from dominion_loader.manifest import Manifest
     from dominion_loader.obs import _NullTracer, get_tracer, set_tracer

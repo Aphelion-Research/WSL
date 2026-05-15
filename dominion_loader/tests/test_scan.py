@@ -261,3 +261,119 @@ def test_scan_returns_trace_id(small_repo: Path, tmp_path: Path) -> None:
     stats = scan(small_repo, manifest=m, trace_id="test-trace-id")
     assert stats.trace_id == "test-trace-id"
     m.close()
+
+
+# ---------------------------------------------------------------------------
+# Native scan wiring (Phase 3)
+# ---------------------------------------------------------------------------
+
+def test_native_scan_binary_helper_returns_path():
+    """_native_scan_binary() returns a Path object."""
+    from dominion_loader.cli import _native_scan_binary
+    p = _native_scan_binary()
+    assert isinstance(p, Path)
+
+
+def test_native_scan_falls_back_to_python_when_binary_missing(tmp_path, monkeypatch):
+    """cmd_scan_native falls back to Python scan when binary is absent."""
+    import types, argparse
+    from dominion_loader.cli import cmd_scan_native
+
+    # Patch binary path to a non-existent file
+    monkeypatch.setattr(
+        "dominion_loader.cli._native_scan_binary",
+        lambda: tmp_path / "no-such-binary",
+    )
+
+    call_log = []
+
+    def fake_cmd_scan(args):
+        call_log.append(args)
+        return 0
+
+    monkeypatch.setattr("dominion_loader.cli.cmd_scan", fake_cmd_scan)
+
+    args = argparse.Namespace(repo=str(tmp_path), dry_run=True, json=False, native=True)
+    rc = cmd_scan_native(args)
+    assert rc == 0
+    assert len(call_log) == 1  # fell back to Python scan
+    assert call_log[0].native is False  # flag cleared before delegation
+
+
+def test_native_scan_dry_run_discovers_files(tmp_path):
+    """cmd_scan_native dry run with mocked native output produces correct stats."""
+    import argparse
+    import json as _json
+    from unittest.mock import patch
+    from dominion_loader.cli import cmd_scan_native
+
+    # Build fake native scan output (3 source files, 1 binary skipped)
+    fake_native_output = _json.dumps({
+        "files": [
+            {
+                "absolute_path": str(tmp_path / "main.py"),
+                "relative_path": "main.py",
+                "content_hash": "a" * 64,
+                "kind": "source",
+                "language": "python",
+                "mtime_ns": 1_000_000_000,
+                "size_bytes": 42,
+            },
+            {
+                "absolute_path": str(tmp_path / "README.md"),
+                "relative_path": "README.md",
+                "content_hash": "b" * 64,
+                "kind": "document",
+                "language": "markdown",
+                "mtime_ns": 1_000_000_001,
+                "size_bytes": 12,
+            },
+            {
+                "absolute_path": str(tmp_path / "blob.bin"),
+                "relative_path": "blob.bin",
+                "content_hash": "c" * 64,
+                "kind": "binary",
+                "language": "unknown",
+                "mtime_ns": 1_000_000_002,
+                "size_bytes": 4096,
+            },
+        ],
+        "errors": [],
+    })
+
+    # Patch _run_native_scan to return our fake data
+    with patch("dominion_loader.cli._run_native_scan", return_value=_json.loads(fake_native_output)):
+        args = argparse.Namespace(repo=str(tmp_path), dry_run=True, json=False, native=True)
+        rc = cmd_scan_native(args)
+
+    assert rc == 0
+
+
+def test_native_scan_json_output_contains_native_flag(tmp_path, capsys):
+    """cmd_scan_native --json output has 'native: true'."""
+    import argparse
+    import json as _json
+    from unittest.mock import patch
+    from dominion_loader.cli import cmd_scan_native
+
+    fake_data = {"files": [], "errors": []}
+    with patch("dominion_loader.cli._run_native_scan", return_value=fake_data):
+        args = argparse.Namespace(repo=str(tmp_path), dry_run=True, json=True, native=True)
+        rc = cmd_scan_native(args)
+
+    assert rc == 0
+    captured = capsys.readouterr()
+    result = _json.loads(captured.out)
+    assert result.get("native") is True
+    assert result.get("dry_run") is True
+
+
+def test_native_kind_to_class_mapping():
+    """All expected native kind values map to known file classes."""
+    from dominion_loader.cli import _NATIVE_KIND_TO_CLASS
+    assert _NATIVE_KIND_TO_CLASS["source"] == "code"
+    assert _NATIVE_KIND_TO_CLASS["document"] == "doc"
+    assert _NATIVE_KIND_TO_CLASS["config"] == "config"
+    assert _NATIVE_KIND_TO_CLASS["data"] == "data"
+    assert _NATIVE_KIND_TO_CLASS["binary"] == "binary"
+
