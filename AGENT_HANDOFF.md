@@ -1,10 +1,56 @@
 # Dominion Agent Handoff
 
-## Current State — 2026-05-18
+## Current State — 2026-05-19
 
-Status: **LIVE_GREEN** — All systems operational. RAGD daemon running, vault clean, sovereign data pipeline deployed.
+Status: **LIVE_GREEN** — All systems operational. RAGD daemon running, vault clean, sovereign data pipeline deployed, 5 microstructure subsystems complete.
 
-### NEW: Sovereign Data Pipeline (Commit d16c5a9)
+### NEW: Market Microstructure Subsystems (Commit 97a2fd6)
+
+**5 week-long advanced subsystems for market microstructure analysis:**
+
+1. **LOB Reconstruction Engine** (`lob/`) — 8 tests PASS
+   - Tick ingestion + 10-level book state machine
+   - Metrics: OFI (1s/5s/1m), VPIN, Roll/CS spreads, depth-weighted mid
+   - DuckDB: lob_snapshots, lob_events, lob_metrics
+   - CLI: `python -m lob.cli compute|metrics|vpin`
+
+2. **Execution Simulator** (`exec_sim/`) — 8 tests PASS
+   - VWAP/TWAP/POV strategies with Almgren-Chriss impact
+   - Order matching + partial fills + slippage tracking
+   - DuckDB: sim_strategies, sim_orders, sim_performance
+   - CLI: `python -m exec_sim.cli run|report|compare`
+
+3. **TCA Dashboard** (`tca/`) — 4 tests PASS
+   - Cost attribution (decision/timing/impact/opportunity)
+   - Benchmark vs VWAP/TWAP + regime conditioning
+   - DuckDB: tca_trades, tca_attribution, tca_benchmarks
+   - CLI: `python -m tca.cli analyze|report|heatmap`
+
+4. **Toxicity Monitor** (`toxicity/`) — 4 tests PASS
+   - VPIN + OFI + adverse selection metrics
+   - Composite toxicity score + alerting → anomaly_log
+   - DuckDB: toxicity_metrics, toxicity_alerts
+   - CLI: `python -m toxicity.cli compute|status|alerts`
+
+5. **Execution Alpha Features** (`exec_features/`) — 6 tests PASS
+   - 50 features (spread/depth/flow/quote/trade)
+   - IC tracking (60-min forward returns) + decay monitoring
+   - DuckDB: execution_features, feature_decay_alerts
+   - CLI: `python -m exec_features.cli compute|top|decay`
+
+**Integration:**
+- LOB → Toxicity (OFI feeds)
+- LOB + Toxicity → ExecSim (impact adjustment)
+- ExecSim → TCA (benchmarks)
+- All → `dominion` CLI (commands added to scripts/dominion_cli.py)
+
+**Validation:**
+- 30/30 tests PASS
+- Trading guard: PASS
+- 56 files, 3328 insertions
+- Zero trading execution (pure analysis)
+
+### Sovereign Data Pipeline (Commit d16c5a9)
 
 Complete institutional-grade XAU/USD data pipeline deployed:
 - 5 sources: Yahoo Finance (GC=F, GLD), FRED (10 macro series), Alpha Vantage, CFTC COT, MT5/domdata
