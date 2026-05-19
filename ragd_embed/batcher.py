@@ -24,6 +24,19 @@ class EmbedBatcher:
         self.retry_delays = tuple(retry_delays)
         self.last_stats = BatchStats(0, 0, 0)
 
+    def _embed_with_split(self, batch: list[str]) -> list[list[float]]:
+        """Embed batch, splitting in half on 400 errors."""
+        try:
+            return self.provider.embed_batch(batch)
+        except Exception as exc:
+            if "400" in str(exc) and len(batch) > 1:
+                logger.warning(f"400 error on batch of {len(batch)}, splitting in half")
+                mid = len(batch) // 2
+                left = self._embed_with_split(batch[:mid])
+                right = self._embed_with_split(batch[mid:])
+                return left + right
+            raise
+
     def embed_in_batches(
         self,
         texts: list[str],
@@ -37,7 +50,7 @@ class EmbedBatcher:
             attempt = 0
             while True:
                 try:
-                    batch_vectors = self.provider.embed_batch(batch)
+                    batch_vectors = self._embed_with_split(batch)
                     vectors.extend(batch_vectors)
                     batches += 1
                     logger.debug(f"Batch {batch_idx + 1}: embedded {len(batch)} texts → {len(batch_vectors)} vectors")
@@ -45,6 +58,9 @@ class EmbedBatcher:
                         batch_callback(batch_idx, len(batch))
                     break
                 except Exception as exc:
+                    if "400" in str(exc):
+                        logger.error(f"Batch {batch_idx + 1} got 400 after splits, skipping")
+                        raise
                     if attempt >= len(self.retry_delays):
                         logger.error(f"Batch {batch_idx + 1} failed after {attempt} retries: {exc}")
                         raise

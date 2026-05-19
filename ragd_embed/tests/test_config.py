@@ -32,4 +32,4 @@ def test_ollama_provider_config(monkeypatch, tmp_path):
     assert cfg.provider == "ollama"
     assert cfg.model == "nomic-embed-text"
     assert cfg.dim == 768
-    assert cfg.batch_size == 512
+    assert cfg.batch_size == 128

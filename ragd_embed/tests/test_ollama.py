@@ -28,6 +28,7 @@ def test_ollama_api_key_ignored():
 @patch("ragd_embed.providers.ollama.requests.post")
 def test_ollama_embed_batch_single_text(mock_post):
     mock_response = MagicMock()
+    mock_response.status_code = 200
     mock_response.json.return_value = {"embeddings": [[0.1, 0.2, 0.3]]}
     mock_post.return_value = mock_response
 
@@ -46,6 +47,7 @@ def test_ollama_embed_batch_single_text(mock_post):
 @patch("ragd_embed.providers.ollama.requests.post")
 def test_ollama_embed_batch_multiple_texts(mock_post):
     mock_response = MagicMock()
+    mock_response.status_code = 200
     mock_response.json.return_value = {"embeddings": [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]]}
     mock_post.return_value = mock_response
 

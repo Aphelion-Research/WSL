@@ -17,12 +17,24 @@ class OllamaProvider:
         self.base_url = base_url.rstrip("/")
 
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        MAX_CHARS = 2000
+        cleaned = []
+        for text in texts:
+            text = text or ""
+            text = text.strip()
+            if len(text) > MAX_CHARS:
+                text = text[:MAX_CHARS]
+            if not text:
+                text = "."
+            cleaned.append(text)
         response = requests.post(
             f"{self.base_url}/api/embed",
-            json={"model": self.model, "input": texts},
+            json={"model": self.model, "input": cleaned},
             timeout=300,
         )
-        response.raise_for_status()
+        if response.status_code != 200:
+            error_body = response.text[:500]
+            raise RuntimeError(f"Ollama API error {response.status_code}: {error_body}")
         result = response.json()
         return result["embeddings"]
 
