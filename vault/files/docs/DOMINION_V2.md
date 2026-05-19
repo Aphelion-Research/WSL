@@ -1,46 +1,46 @@
 ---
-title: DOMINION_V2.md
-filepath: /home/Martin/Dominion/docs/DOMINION_V2.md
-language: markdown
-lines: 43
-symbols: 6
-public_symbols: 6
-content_hash: c10da86077221ca6
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Dominion V2
 
-# DOMINION_V2.md
+Dominion V2 is a local operating environment for agent-assisted engineering, research, and read-only market data work.
 
-> **Language**: `markdown` | **Symbols**: 6
+## Operating Model
 
-## Purpose
+1. Codex codes.
+2. RAGD remembers code, docs, decisions, TODOs, handoffs, and research bundles.
+3. Research OS collects evidence from approved sources only.
+4. RAGD embedding, HNSW, graph, and vault tools provide retrieval context for frontier agents.
+5. `domdata` provides read-only MT5/XAUUSD data.
+6. `dominion` and `dominion-ui` expose operational status.
+7. tmux/SSH/Tailscale provide shared access for Matin and Dan.
 
-Defines 6 indexed symbol(s): # Dominion V2, ## Operating Model, ## What Is Automatic, ## What Is Not Automatic, ## Scaling Principles.
+## What Is Automatic
 
-## Public Symbols
+- `research init` creates the SQLite schema and imports approved sources.
+- `research run --limit N` processes bounded queued jobs.
+- `research ingest-ragd` creates a markdown bundle and calls RAGD `/index`.
+- `dominion status` summarizes RAGD, tmux, Codex MCP config, Research OS, retrieval infrastructure, and domdata safety.
 
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/Dominion_V2-L1-5f5d7942|# Dominion V2]] | section | 1-4 | # Dominion V2 |
-| [[symbols/docs/Operating_Model-L5-5c766402|## Operating Model]] | section | 5-14 | ## Operating Model |
-| [[symbols/docs/What_Is_Automatic-L15-b6b10d38|## What Is Automatic]] | section | 15-21 | ## What Is Automatic |
-| [[symbols/docs/What_Is_Not_Automatic-L22-d6e653a6|## What Is Not Automatic]] | section | 22-29 | ## What Is Not Automatic |
-| [[symbols/docs/Scaling_Principles-L30-7b140300|## Scaling Principles]] | section | 30-38 | ## Scaling Principles |
-| [[symbols/docs/Current_MVP_Limits-L39-c10da860|## Current MVP Limits]] | section | 39-43 | ## Current MVP Limits |
+## What Is Not Automatic
 
-## Imports
+- No arbitrary internet crawling.
+- No local model downloads.
+- No trading execution.
+- No secret indexing or reporting.
+- No tmux auto-attach from shell startup files.
 
-- *(none indexed)*
+## Scaling Principles
 
-## Call Graph
+- Stable commands before ad hoc scripts.
+- Explicit runtime directories.
+- SQLite schemas with guarded initialization.
+- Health and doctor commands for each subsystem.
+- Reports that distinguish passed, failed, partial, and untested states.
+- RAGD memory updates for decisions that future agents need.
 
-```mermaid
-graph LR
-    file --> symbols
-```
+## Current MVP Limits
 
-## Recent Changes
-
-> Content hash: `c10da86077221ca6`. Last modified epoch: `-4659044264195807619`.
+- Semantic embedding runs require explicit `RAGD_EMBED_API_KEY`; without it, retrieval fails closed before sending code externally.
+- RAGD keeps BM25/keyword retrieval available while semantic HNSW indexing waits for embeddings.
+- Research OS fetches static pages with `requests`; JavaScript-heavy sources may need a future Playwright/crawl4ai adapter.

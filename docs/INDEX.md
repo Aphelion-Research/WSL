@@ -180,7 +180,7 @@ Current state (as of 2026-05-19):
 - Vault notes: 878 files, 0 broken links
 - RAGD active chunks: 7159
 - Tests passing: 426/426 Python, 24/24 C++
-- Repository status: LIVE_GREEN
+- Repository status: SOURCE_GREEN | LIVE_WARN (run `dominion doctor` for details)
 
 ---
 

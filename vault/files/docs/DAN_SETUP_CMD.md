@@ -1,41 +1,45 @@
 ---
-title: DAN_SETUP_CMD.md
-filepath: /home/Martin/Dominion/docs/DAN_SETUP_CMD.md
-language: markdown
-lines: 39
-symbols: 1
-public_symbols: 1
-content_hash: 98525b7bf00474a1
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Dan Setup From Windows CMD
 
-# DAN_SETUP_CMD.md
+1. Install Tailscale if needed.
+2. Accept Matin's Tailnet invite.
+3. In CMD:
 
-> **Language**: `markdown` | **Symbols**: 1
-
-## Purpose
-
-Defines 1 indexed symbol(s): # Dan Setup From Windows CMD.
-
-## Public Symbols
-
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/Dan_Setup_From_Windows_CMD-L1-98525b7b|# Dan Setup From Windows CMD]] | section | 1-39 | # Dan Setup From Windows CMD |
-
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    file --> symbols
+```cmd
+tailscale status
+tailscale ip -4
+tailscale ping <tailscale-ip>
+ssh Martin@<tailscale-ip>
 ```
 
-## Recent Changes
+Note: `connectinfo` is run by Matin inside WSL/Dominion (Linux shell), not by Dan in Windows CMD.
 
-> Content hash: `98525b7bf00474a1`. Last modified epoch: `-4659111162985303465`.
+4. After SSH:
+
+```bash
+tmux attach -t dan
+```
+
+5. VS Code Remote SSH config at `%USERPROFILE%\.ssh\config`:
+
+```text
+Host dominion
+  HostName <tailscale-ip>
+  User Martin
+  ServerAliveInterval 30
+  ServerAliveCountMax 3
+```
+
+Open:
+
+```cmd
+code --remote ssh-remote+dominion /home/Martin/Dominion
+```
+
+Fallback:
+
+```cmd
+"%LocalAppData%\Programs\Microsoft VS Code\bin\code.cmd" --remote ssh-remote+dominion /home/Martin/Dominion
+```

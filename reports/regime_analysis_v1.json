@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "created": "2026-05-19T18:42:25.865646",
+  "dataset": "dataset_v1",
+  "model": "RandomForest",
+  "regime_type": "micro (time-of-day)",
+  "regimes": {
+    "asian": {
+      "ic": 0.5469760900140648,
+      "ic_pval": 1.5247539915348127e-07,
+      "sharpe": 7.7829346411666815,
+      "mean_return": 445.8743973178531,
+      "volatility": 57.28872435333922,
+      "win_rate": 0.625,
+      "profit_factor": 47.92701106924362,
+      "max_drawdown": -0.9123605210592802,
+      "drawdown_start": "63",
+      "drawdown_end": "73",
+      "turnover": 1.0379746835443038,
+      "regime": "asian",
+      "samples": 80
+    }
+  }
+}

@@ -68,11 +68,7 @@ Do NOT proceed without reading this file.
 **MANDATORY BEFORE CODE CHANGES**
 
 ```bash
-# Python
-from ragd.scripts.ragd_mcp_stdio import ragd_query
-result = ragd_query("<your task description>", top_k=5)
-
-# CLI
+# CLI (always available)
 python scripts/dominion_cli.py search "<your task>" --top-k 5 --json
 
 # Direct HTTP
@@ -80,6 +76,8 @@ curl -X POST http://127.0.0.1:7474/query \
   -H 'Content-Type: application/json' \
   -d '{"q":"<your task>","top_k":5}'
 ```
+
+**Note:** MCP tool `ragd_query` referenced in some docs but not currently connected. Use CLI/REST API above.
 
 Use task-specific queries:
 - ✓ "implement data pipeline feature"
@@ -214,14 +212,11 @@ Update as relevant:
 **RECOMMENDED**
 
 ```bash
-# Python
-from ragd.scripts.ragd_mcp_stdio import ragd_remember
-ragd_remember("<your finding or decision>")
-
-# CLI
-python scripts/dominion_cli.py graph store \
-  --content "<your finding>"
+# Update AGENT_HANDOFF.md or PROGRESS.md directly
+# Document decisions in appropriate doc section
 ```
+
+**Note:** MCP tool `ragd_remember` and CLI command `graph store` referenced in some docs but not available. For now, update handoff/progress docs directly.
 
 Store:
 - Important architectural decisions

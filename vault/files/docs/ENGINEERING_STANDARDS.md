@@ -1,50 +1,69 @@
 ---
-title: ENGINEERING_STANDARDS.md
-filepath: /home/Martin/Dominion/docs/ENGINEERING_STANDARDS.md
-language: markdown
-lines: 66
-symbols: 10
-public_symbols: 10
-content_hash: 75797bb04d477ee
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Dominion V2 Engineering Standards
 
-# ENGINEERING_STANDARDS.md
+These standards keep Dominion operable as it grows from one workstation to a team-managed local platform.
 
-> **Language**: `markdown` | **Symbols**: 10
+## CLI Conventions
 
-## Purpose
+- Commands use short stable names: `dominion`, `research`, `llm`, `codexrag`, and `dominion-ui`.
+- Commands should support human-readable output by default.
+- Machine-readable output should be available with `--json` when practical.
+- Failures should include the failing component and an actionable next step.
+- Long-running commands must accept an explicit limit, interval, or quit path.
 
-Defines 10 indexed symbol(s): # Dominion V2 Engineering Standards, ## CLI Conventions, ## Configuration Conventions, ## Test Conventions, ## Documentation Conventions.
+## Configuration Conventions
 
-## Public Symbols
+- Default paths are rooted at `/home/Martin/Dominion`.
+- Runtime state belongs under the package runtime directory, not hidden in random locations.
+- Environment overrides are allowed for host/model/service addresses.
+- Secrets are loaded only by the component that needs them and are never printed.
 
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/Dominion_V2_Engineering_Standards-L1-888899c0|# Dominion V2 Engineering Standards]] | section | 1-4 | # Dominion V2 Engineering Standards |
-| [[symbols/docs/CLI_Conventions-L5-6ddadf7a|## CLI Conventions]] | section | 5-12 | ## CLI Conventions |
-| [[symbols/docs/Configuration_Conventions-L13-b8c550b7|## Configuration Conventions]] | section | 13-19 | ## Configuration Conventions |
-| [[symbols/docs/Test_Conventions-L20-eb608566|## Test Conventions]] | section | 20-27 | ## Test Conventions |
-| [[symbols/docs/Documentation_Conventions-L28-bc469140|## Documentation Conventions]] | section | 28-34 | ## Documentation Conventions |
-| [[symbols/docs/Health_And_Doctor_Conventions-L35-a01b92c3|## Health And Doctor Conventions]] | section | 35-41 | ## Health And Doctor Conventions |
-| [[symbols/docs/Report_Conventions-L42-b0aa67e4|## Report Conventions]] | section | 42-47 | ## Report Conventions |
-| [[symbols/docs/Security_Rules-L48-bd4a4658|## Security Rules]] | section | 48-54 | ## Security Rules |
-| [[symbols/docs/Idempotency_And_Recovery-L55-1d0ac313|## Idempotency And Recovery]] | section | 55-61 | ## Idempotency And Recovery |
-| [[symbols/docs/Migration_And_Versioning-L62-75797bb0|## Migration And Versioning]] | section | 62-66 | ## Migration And Versioning |
+## Test Conventions
 
-## Imports
+- Package tests live under `PACKAGE/tests/`.
+- Tests for offline adapters must pass without network services.
+- Crawler tests must not depend on live internet.
+- RAGD C++ changes require CMake build and `ctest`.
+- domdata changes require the forbidden-token scanner.
 
-- *(none indexed)*
+## Documentation Conventions
 
-## Call Graph
+- Every subsystem needs a daily-use doc and a troubleshooting path.
+- Reports must say what passed, what failed, and what was not tested.
+- Stubs and partial implementations must be labeled as such.
+- Include exact continuation commands in handoff docs.
 
-```mermaid
-graph LR
-    file --> symbols
-```
+## Health And Doctor Conventions
 
-## Recent Changes
+- `status` commands summarize current state quickly.
+- `doctor` commands perform deeper checks and explain fixes.
+- Health checks must not expose secrets or trigger trading behavior.
+- Missing optional dependencies should degrade cleanly.
 
-> Content hash: `75797bb04d477ee`. Last modified epoch: `-4659045102739759117`.
+## Report Conventions
+
+- Current report: `reports/dominion-v2-latest.md`.
+- Timestamped report: `reports/dominion-v2-YYYYMMDD-HHMMSS.md`.
+- Include baseline, changed files, tests, failures, risks, and next steps.
+
+## Security Rules
+
+- Never read or print `secrets/mt5.env`; existence and permissions checks are allowed.
+- Never commit `secrets/`, `data/raw/`, `data/normalized/`, `.venv/`, logs with secrets, Wine folders, local model files, or backups.
+- Mask account, password, token, cookie, and API key material in diagnostics.
+- Prefer allowlists over blocklists for crawler source control.
+
+## Idempotency And Recovery
+
+- Re-running initialization should not duplicate sources, jobs, chunks, or reports unnecessarily.
+- Re-running indexing should not grow active chunks for unchanged content.
+- Schema changes should be versioned or guarded by migrations.
+- Commands that mutate persistent state should be explicit about what changed.
+
+## Migration And Versioning
+
+- SQLite schemas should use `CREATE TABLE IF NOT EXISTS` plus clear migration points.
+- Backward compatibility matters for CLI output used by scripts.
+- Breaking changes require docs and handoff notes.

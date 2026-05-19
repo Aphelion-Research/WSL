@@ -1,41 +1,17 @@
 ---
-title: LOCAL_LLM.md
-filepath: /home/Martin/Dominion/docs/LOCAL_LLM.md
-language: markdown
-lines: 14
-symbols: 1
-public_symbols: 1
-content_hash: d2672bb90f097b9
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Local Generation Retired
 
-# LOCAL_LLM.md
+Dominion no longer ships a local generation subsystem. Claude Code, Codex, and Cursor handle generation; RAGD provides retrieval context.
 
-> **Language**: `markdown` | **Symbols**: 1
+Use:
 
-## Purpose
-
-Defines 1 indexed symbol(s): # Local Generation Retired.
-
-## Public Symbols
-
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/Local_Generation_Retired-L1-d2672bb9|# Local Generation Retired]] | section | 1-14 | # Local Generation Retired |
-
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    file --> symbols
+```bash
+dominion search "query"
+dominion ask "query" --json
+dominion embed stats
+dominion vault status
 ```
 
-## Recent Changes
-
-> Content hash: `d2672bb90f097b9`. Last modified epoch: `1778728296`.
+The `llm` wrapper remains only as a compatibility note and does not load models or send code anywhere.

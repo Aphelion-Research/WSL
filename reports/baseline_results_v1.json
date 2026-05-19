@@ -1,0 +1,83 @@
+{
+  "version": "1.0",
+  "created": "2026-05-19T18:41:57.580537",
+  "dataset": "dataset_v1",
+  "models": {
+    "ridge": {
+      "train": {
+        "ic": 0.6044658266396088,
+        "ic_pval": 3.099882312643932e-37,
+        "sharpe": 7.624017503632398,
+        "mean_return": 445.35312785552765,
+        "volatility": 58.41449441102975,
+        "win_rate": 0.6444444444444445,
+        "profit_factor": 36.422718574670625,
+        "max_drawdown": -0.9095305194490533,
+        "drawdown_start": "306",
+        "drawdown_end": "307",
+        "turnover": 0.9693593314763231,
+        "model": "Ridge",
+        "split": "train"
+      },
+      "val": {
+        "ic": 0.2934599156118144,
+        "ic_pval": 0.008243872420808934,
+        "sharpe": 2.165590325947741,
+        "mean_return": 137.05644004620393,
+        "volatility": 63.288258358017494,
+        "win_rate": 0.6375,
+        "profit_factor": 1.836166714206284,
+        "max_drawdown": -17790.772273525894,
+        "drawdown_start": "34",
+        "drawdown_end": "65",
+        "turnover": 0.5063291139240507,
+        "model": "Ridge",
+        "split": "val"
+      },
+      "ratings": {
+        "ic": "excellent",
+        "sharpe": "excellent",
+        "max_drawdown": "poor",
+        "turnover": "acceptable"
+      }
+    },
+    "random_forest": {
+      "train": {
+        "ic": 0.7433431842323887,
+        "ic_pval": 1.714837391937252e-64,
+        "sharpe": 8.14278436560674,
+        "mean_return": 469.4918792581084,
+        "volatility": 57.65741276916712,
+        "win_rate": 0.6861111111111111,
+        "profit_factor": 934.1005799531657,
+        "max_drawdown": -0.03572474424746145,
+        "drawdown_start": "194",
+        "drawdown_end": "201",
+        "turnover": 0.8245125348189415,
+        "model": "RandomForest",
+        "split": "train"
+      },
+      "val": {
+        "ic": 0.5180731364275668,
+        "ic_pval": 8.571463344785439e-07,
+        "sharpe": 8.1650054643999,
+        "mean_return": 463.2240312372762,
+        "volatility": 56.73285011957082,
+        "win_rate": 0.6875,
+        "profit_factor": 561.3780855420962,
+        "max_drawdown": -0.03247866645652269,
+        "drawdown_start": "26",
+        "drawdown_end": "29",
+        "turnover": 0.9113924050632911,
+        "model": "RandomForest",
+        "split": "val"
+      },
+      "ratings": {
+        "ic": "excellent",
+        "sharpe": "excellent",
+        "max_drawdown": "excellent",
+        "turnover": "acceptable"
+      }
+    }
+  }
+}

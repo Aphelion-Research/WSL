@@ -4,6 +4,18 @@
 **Last Updated:** 2026-05-19  
 **Purpose:** Control RAGD indexing priority and chunking strategy
 
+**Note:** This manifest includes both **existing docs** (~71 files) and **planned docs** (~100+ files). Many referenced docs do not exist yet.
+
+**Indexing behavior:**
+- RAGD indexing will skip missing files without error
+- Only docs that exist will be indexed
+- Priority levels apply to both existing and planned docs
+- Use `python scripts/dominion_cli.py scan --dry-run` to see what would be indexed
+
+**Current vs Planned:**
+- ✓ **Existing:** AGENT_README.md, RAGD docs, core architecture, agent operations, some features
+- ⚠ **Planned:** Most feature specs, development guides, testing docs, decision logs, system maps, backlog files
+
 ---
 
 ## Overview

@@ -2,7 +2,7 @@
 
 **Version:** 2.0  
 **Last Updated:** 2026-05-19  
-**Status:** LIVE_GREEN  
+**Status:** SOURCE_GREEN | LIVE_WARN (see doctor output for details)  
 **Purpose:** First file every AI coding agent must read before touching Dominion repo
 
 ---
@@ -15,8 +15,8 @@ Your job: improve the platform while preserving working systems.
 
 This is not a greenfield project. This is a living, operational platform with:
 - Working MT5/Wine data bridge (read-only, CRITICAL to preserve)
-- Live RAGD daemon on 127.0.0.1:7474
-- 426 passing Python tests + 24 passing C++ tests
+- RAGD daemon on 127.0.0.1:7474 (REST API operational, chunker/embed config incomplete)
+- 24 passing C++ tests (RAGD native core)
 - 878-note Obsidian vault with 0 broken links
 - Active tmux sessions for collaboration
 - Strict no-trading safety boundary
@@ -33,11 +33,10 @@ Before any code change:
 
 ```bash
 # Read handoff state
-ragd_handoff_read
-# or: cat /home/Martin/Dominion/AGENT_HANDOFF.md
+cat /home/Martin/Dominion/AGENT_HANDOFF.md
 
 # Query RAGD for task context
-ragd_query "<your task description>" --top-k 5
+python scripts/dominion_cli.py search "<your task description>" --top-k 5
 # or: curl -X POST http://127.0.0.1:7474/query -d '{"q":"<query>","top_k":5}'
 
 # Inspect relevant files after understanding context
@@ -49,10 +48,11 @@ ragd_query "<your task description>" --top-k 5
 After significant work:
 
 ```bash
-# Remember important findings
-ragd_remember "<your finding or decision>"
-# or: python scripts/dominion_cli.py graph store --content "<content>"
+# Update handoff state (edit AGENT_HANDOFF.md directly)
+# or update PROGRESS.md for historical record
 ```
+
+**Note:** MCP tools `ragd_handoff_read`, `ragd_query`, `ragd_remember` are referenced in RAGD docs but not currently connected. Use CLI/REST API equivalents above.
 
 ### 2. Safety Boundaries (NON-NEGOTIABLE)
 

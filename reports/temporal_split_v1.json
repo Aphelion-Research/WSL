@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "created": "2026-05-19T18:10:22.199530",
+  "split": {
+    "total_rows": 1256,
+    "date_range": {
+      "min": "2021-05-21 00:00:00",
+      "max": "2026-05-19 00:00:00"
+    },
+    "train": {
+      "date_range": {
+        "start": "2021-05-21 00:00:00",
+        "end": "2024-11-15 00:00:00"
+      },
+      "rows": 879,
+      "pct": 0.6998
+    },
+    "val": {
+      "date_range": {
+        "start": "2024-11-15 00:00:00",
+        "end": "2025-08-18 00:00:00"
+      },
+      "rows": 188,
+      "pct": 0.1497
+    },
+    "test": {
+      "date_range": {
+        "start": "2025-08-18 00:00:00",
+        "end": "2026-05-19 00:00:00"
+      },
+      "rows": 189,
+      "pct": 0.1505
+    }
+  },
+  "features": {
+    "total": 4,
+    "safe": [
+      "fused_price",
+      "fused_confidence",
+      "source_weights_json",
+      "regime"
+    ],
+    "excluded": [],
+    "excluded_expected": [
+      "regime_tactical",
+      "regime_prob_trend_up",
+      "regime_prob_trend_down",
+      "regime_prob_ranging",
+      "regime_prob_crisis"
+    ]
+  },
+  "validation": {
+    "passed": true,
+    "issues": []
+  }
+}

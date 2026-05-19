@@ -1,41 +1,27 @@
 ---
-title: RAGD_CODEX_WORKFLOW.md
-filepath: /home/Martin/Dominion/docs/RAGD_CODEX_WORKFLOW.md
-language: markdown
-lines: 24
-symbols: 1
-public_symbols: 1
-content_hash: 69a65cfdfa4fe0a4
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# RAGD And Codex Workflow
 
-# RAGD_CODEX_WORKFLOW.md
+Every substantial Codex session should use RAGD before editing.
 
-> **Language**: `markdown` | **Symbols**: 1
-
-## Purpose
-
-Defines 1 indexed symbol(s): # RAGD And Codex Workflow.
-
-## Public Symbols
-
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/RAGD_And_Codex_Workflow-L1-69a65cfd|# RAGD And Codex Workflow]] | section | 1-24 | # RAGD And Codex Workflow |
-
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    file --> symbols
+```text
+ragd_handoff_read
+ragd_query(task-specific context)
+inspect files
+edit
+validate
+ragd_remember(important decisions)
+update PROGRESS.md, AGENT_HANDOFF.md, and reports/
 ```
 
-## Recent Changes
+Helper commands:
 
-> Content hash: `69a65cfdfa4fe0a4`. Last modified epoch: `-4659044369519801552`.
+```bash
+codexstatus
+codexprompt
+codexrag "domdata read only safety"
+codexstart
+```
+
+`codexrag` prints a context preamble and top RAGD chunks for a task. It is useful before starting Codex or while preparing a prompt for another agent.

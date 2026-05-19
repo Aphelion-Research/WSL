@@ -1,45 +1,37 @@
 ---
-title: RESEARCH_OS.md
-filepath: /home/Martin/Dominion/docs/RESEARCH_OS.md
-language: markdown
-lines: 34
-symbols: 5
-public_symbols: 5
-content_hash: 9b6952bf7598db1e
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Research OS
 
-# RESEARCH_OS.md
+Research OS is Dominion V2's approved-source evidence collector. It fetches explicit queued URLs, cleans them to markdown, chunks them, stores provenance in SQLite, and prepares bundles for RAGD ingestion.
 
-> **Language**: `markdown` | **Symbols**: 5
+## Daily Commands
 
-## Purpose
-
-Defines 5 indexed symbol(s): # Research OS, ## Daily Commands, ## Source Policy, ## Runtime Files, ## Failure Behavior.
-
-## Public Symbols
-
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/Research_OS-L1-a3f22ba8|# Research OS]] | section | 1-4 | # Research OS |
-| [[symbols/docs/Daily_Commands-L5-bcc4f5ad|## Daily Commands]] | section | 5-20 | ## Daily Commands |
-| [[symbols/docs/Source_Policy-L21-4ccadee3|## Source Policy]] | section | 21-24 | ## Source Policy |
-| [[symbols/docs/Runtime_Files-L25-70c71cae|## Runtime Files]] | section | 25-31 | ## Runtime Files |
-| [[symbols/docs/Failure_Behavior-L32-9b6952bf|## Failure Behavior]] | section | 32-34 | ## Failure Behavior |
-
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    file --> symbols
+```bash
+research init
+research status
+research doctor
+research list-sources
+research add-url https://docs.crawl4ai.com/ --source crawl4ai_docs
+research run --limit 1
+research list
+research query "crawler"
+research summarize DOCUMENT_ID
+research ragd-status
+research ingest-ragd
 ```
 
-## Recent Changes
+## Source Policy
 
-> Content hash: `9b6952bf7598db1e`. Last modified epoch: `-4659044796959776980`.
+Approved sources live in `research/sources.yaml`. A URL must match the source host and base path before it can be queued. Research OS does not spider arbitrary links.
+
+## Runtime Files
+
+- Database: `research/research.db`.
+- Raw HTML: `research/raw/`.
+- Markdown: `research/markdown/`.
+- RAGD ingest bundle: `research/extracted/ragd_ingest/`.
+
+## Failure Behavior
+
+Fetch failures are recorded on the crawl job. Runs are bounded by `--limit`; there is no infinite crawler loop.

@@ -50,7 +50,7 @@ tags:
 
 ### P0: Critical
 
-*(None as of 2026-05-19 — Platform is LIVE_GREEN)*
+*(None as of 2026-05-19 — Platform operational, see `dominion doctor` for status)*
 
 ### P1: High Priority
 

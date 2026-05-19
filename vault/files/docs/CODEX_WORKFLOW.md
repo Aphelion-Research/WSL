@@ -1,41 +1,46 @@
 ---
-title: CODEX_WORKFLOW.md
-filepath: /home/Martin/Dominion/docs/CODEX_WORKFLOW.md
-language: markdown
-lines: 43
-symbols: 1
-public_symbols: 1
-content_hash: cab6bbfbc5be5f55
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Codex Workflow
 
-# CODEX_WORKFLOW.md
+Start substantial work with RAGD:
 
-> **Language**: `markdown` | **Symbols**: 1
-
-## Purpose
-
-Defines 1 indexed symbol(s): # Codex Workflow.
-
-## Public Symbols
-
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/Codex_Workflow-L1-cab6bbfb|# Codex Workflow]] | section | 1-43 | # Codex Workflow |
-
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    file --> symbols
+```text
+ragd_handoff_read
+ragd_query(task-specific context)
+inspect files
+edit
+validate
+ragd_remember(important decisions)
+update PROGRESS.md, AGENT_HANDOFF.md, and reports/
 ```
 
-## Recent Changes
+Helpers:
 
-> Content hash: `cab6bbfbc5be5f55`. Last modified epoch: `-4659044264199807619`.
+```bash
+codexstatus
+codexprompt
+codexrag "task-specific context"
+codexstart
+codexmatin
+codexdan
+codexls
+codexsend SESSION MESSAGE...
+codexkill SESSION
+codexnew SESSION PATH
+```
+
+Review before handoff:
+
+```bash
+git status --short
+git diff --stat
+python ~/Dominion/domdata/check_no_trading.py
+```
+
+Stop a bad Codex session:
+
+```bash
+codexls
+codexkill codex-matin
+```

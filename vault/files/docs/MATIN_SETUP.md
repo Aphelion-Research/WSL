@@ -1,41 +1,22 @@
 ---
-title: MATIN_SETUP.md
-filepath: /home/Martin/Dominion/docs/MATIN_SETUP.md
-language: markdown
-lines: 19
-symbols: 1
-public_symbols: 1
-content_hash: 248eb452b722823a
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Matin Setup
 
-# MATIN_SETUP.md
-
-> **Language**: `markdown` | **Symbols**: 1
-
-## Purpose
-
-Defines 1 indexed symbol(s): # Matin Setup.
-
-## Public Symbols
-
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/Matin_Setup-L1-248eb452|# Matin Setup]] | section | 1-19 | # Matin Setup |
-
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    file --> symbols
+```bash
+domshare start
+domshare status
+matin
+shared
+tailscale status
+service ssh status
 ```
 
-## Recent Changes
+Reset tmux sessions only when no one is using them:
 
-> Content hash: `248eb452b722823a`. Last modified epoch: `-4659111162985303465`.
+```bash
+tmux kill-session -t dominion
+tmux new -d -s dominion
+```
+
+`codehere` opens local VS Code on Matin's local WSL. From plain SSH it prints the Dan-side Remote SSH command. `openhere` never opens Matin's Explorer for remote SSH users.

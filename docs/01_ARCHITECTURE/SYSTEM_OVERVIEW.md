@@ -69,6 +69,112 @@ This doc focuses on architectural design principles and high-level structure.
 
 ## Component Interaction
 
+```mermaid
+graph TB
+    subgraph "Agent Layer"
+        CODEX[Codex/Claude<br/>AI Agents]
+        AGENTSYS[Agent OS<br/>Session + Safety]
+        ADVERSARY[Adversary<br/>Review System]
+    end
+    
+    subgraph "Intelligence Layer"
+        RAGD[(RAGD<br/>SQLite + HNSW<br/>7159 chunks)]
+        RAG[RAG Retrieval<br/>BM25 + Semantic]
+        VAULT[Vault<br/>878 Obsidian notes]
+        GRAPH[Graph Memory<br/>Handoffs + Relations]
+    end
+    
+    subgraph "Data Layer"
+        PIPELINE[Data Pipeline<br/>5 sources<br/>400+ features]
+        LOB[LOB Engine<br/>Order book<br/>OFI + VPIN]
+        EXEC[Exec Simulator<br/>VWAP/TWAP/POV]
+        TCA[TCA Dashboard<br/>Cost attribution]
+        TOX[Toxicity Monitor<br/>Adverse selection]
+        EXECFEAT[Exec Features<br/>50 alpha features]
+    end
+    
+    subgraph "Storage Layer"
+        DUCKDB[(DuckDB<br/>gold_master<br/>features<br/>reports)]
+        SQLITE[(SQLite<br/>RAGD<br/>Agent OS<br/>Manifest)]
+    end
+    
+    subgraph "Foundation Layer"
+        NATIVE[Native Core<br/>C++ spine<br/>Fast scan]
+        DOMDATA[domdata<br/>MT5 bridge<br/>Read-only]
+        LOADER[Loader<br/>File scanner<br/>Manifest gen]
+        RESEARCH[Research OS<br/>Web crawler<br/>Approved sources]
+    end
+    
+    subgraph "Data Sources"
+        MT5[MT5/Wine<br/>Real-time ticks]
+        YAHOO[Yahoo Finance<br/>GC=F, GLD]
+        FRED[FRED API<br/>10 macro series]
+        AV[Alpha Vantage<br/>GLD OHLCV]
+        COT[CFTC COT<br/>Positioning]
+    end
+    
+    %% Agent workflows
+    CODEX -->|init session| AGENTSYS
+    CODEX -->|query context| RAG
+    RAG -->|retrieve chunks| RAGD
+    CODEX -->|read files| NATIVE
+    CODEX -->|write code| AGENTSYS
+    AGENTSYS -->|check safety| ADVERSARY
+    ADVERSARY -->|score output| CODEX
+    CODEX -->|handoff report| GRAPH
+    GRAPH -->|store| RAGD
+    
+    %% Intelligence layer
+    VAULT -.->|synced to| RAGD
+    RAGD -->|indexes| NATIVE
+    LOADER -->|scans repo| NATIVE
+    LOADER -->|writes manifest| SQLITE
+    RESEARCH -->|fetches docs| RAGD
+    
+    %% Data ingestion
+    MT5 -->|ticks| DOMDATA
+    YAHOO -->|prices| PIPELINE
+    FRED -->|macro| PIPELINE
+    AV -->|OHLCV| PIPELINE
+    COT -->|positioning| PIPELINE
+    DOMDATA -->|XAU/USD ticks| PIPELINE
+    
+    %% Data processing
+    PIPELINE -->|fused prices| DUCKDB
+    PIPELINE -->|400+ features| DUCKDB
+    PIPELINE -->|intelligence reports| RAGD
+    
+    %% Microstructure flow
+    DUCKDB -->|ticks| LOB
+    LOB -->|OFI + depth| TOX
+    LOB -->|book state| EXEC
+    TOX -->|toxicity| EXEC
+    EXEC -->|simulated trades| TCA
+    TCA -->|TCA reports| DUCKDB
+    DUCKDB -->|market data| EXECFEAT
+    EXECFEAT -->|features| DUCKDB
+    
+    %% Agent reads data
+    CODEX -.->|query| DUCKDB
+    RAG -.->|search| DUCKDB
+```
+
+**Key Interactions:**
+
+| From | To | Purpose |
+|---|---|---|
+| Agent | RAGD | Context retrieval before code changes |
+| Agent | Agent OS | Session lifecycle + safety enforcement |
+| Agent | Adversary | Output review + toxicity scoring |
+| Data Sources | Pipeline | Multi-source fusion + feature generation |
+| Pipeline | DuckDB | Normalized storage (gold_master, features) |
+| Pipeline | RAGD | Intelligence reports indexed for retrieval |
+| DuckDB | Microstructure | Tick data + book reconstruction |
+| LOB | Toxicity/Exec | Order flow imbalance + adverse selection |
+| Vault | RAGD | Obsidian notes indexed for semantic search |
+| Loader | Native | Fast file scanning (11x faster than Python) |
+| Research | RAGD | External docs ingested with provenance |
+
 See DATA_FLOW.md, CONTROL_FLOW.md, MODULE_MAP.md for detailed diagrams.
 
 ## Extension Points

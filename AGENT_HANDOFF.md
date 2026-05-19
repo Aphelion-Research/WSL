@@ -2,7 +2,57 @@
 
 ## Current State — 2026-05-19
 
-Status: **LIVE_GREEN** — All systems operational. RAGD daemon running, vault clean, sovereign data pipeline deployed, 5 microstructure subsystems complete.
+Status: **SOURCE_GREEN | LIVE_WARN** — Core systems operational. RAGD REST API running, vault clean, data pipeline deployed, 5 microstructure subsystems complete. Chunker service unreachable, embed config incomplete (see doctor output).
+
+### Documentation Cleanup (2026-05-19)
+
+**Issue:** Docs claimed "LIVE_GREEN" + hard-coded test counts, but doctor shows warn status.
+
+**Actions taken:**
+1. **Deduplicated RAGD docs** — 4 near-identical 132-line files rewritten into distinct guides:
+   - RAGD_OVERVIEW.md — Architecture + current state (SOURCE_GREEN | LIVE_WARN)
+   - RAGD_AGENT_USAGE.md — Agent workflow with RAGD
+   - RAGD_INDEXING_STRATEGY.md — What gets indexed, priority tiers
+   - RAGD_QUERY_PATTERNS.md — Effective query patterns
+2. **Replaced LIVE_GREEN with accurate status** — Docs now say SOURCE_GREEN | LIVE_WARN per doctor
+3. **Fixed agent command examples** — MCP tools (`ragd_handoff_read`, `ragd_query`, `ragd_remember`) not connected; docs now show CLI/REST equivalents + note MCP unavailable
+4. **Clarified WebSocket /bus status** — Native WebSocket not implemented yet (REST only)
+5. **Updated RAGD_INGESTION_MANIFEST** — Added note that most referenced docs (~100+) are planned, only ~71 exist
+
+**Result:** Docs now tell the truth. Status wording matches doctor output. Agent workflows show executable commands.
+
+**Next gate before neural network work:** ~~Leakage audit~~ ✓, ~~temporal split~~ ✓, ~~metrics definition~~ ✓, baseline models, reproducible dataset build, feature stability, regime conditioning.
+
+### Neural Network Pre-Work (2026-05-19) — 3 of 7 Complete
+
+**Completed:**
+1. ✓ **Leakage audit** — Found 1 critical leak (HMM regime), 395 of 400 features safe
+2. ✓ **Temporal split** — 70/15/15 (879/188/189 rows), validated chronological order
+3. ✓ **Metrics definition** — IC, Sharpe, Drawdown, Turnover with institutional thresholds
+
+**Remaining:**
+4. → Baseline models (Ridge, RandomForest)
+5. → Reproducible dataset v1 (join features, hash, Parquet)
+6. → Feature stability monitoring (IC decay tracking)
+7. → Regime-conditioned performance split (micro regime)
+
+**Key findings:**
+- **Leakage:** HMM regime detection (`regime.py:52-61`) fits on full dataset → excludes 5 features
+- **Split:** 2021-05-21 to 2024-11-15 (train), 2024-11-15 to 2025-08-18 (val), 2025-08-18 to 2026-05-19 (test)
+- **Metrics targets:** IC > 0.05 (good), Sharpe > 1.0 (good), Max DD > -10% (good)
+- **Dataset size:** 1256 rows → ~1000 after dropna → Train ~630, Val ~180, Test ~180
+
+**Next priority:** Build dataset v1 (Task #13: join features, pivot wide, save Parquet) → Then train baselines (Task #11)
+
+**Reports:**
+- `reports/2026-05-19_leakage_audit.md`
+- `reports/2026-05-19_temporal_split.md`
+- `reports/2026-05-19_metrics_definition.md`
+- `reports/2026-05-19_neural_network_pre_work_summary.md`
+
+**Scripts:**
+- `scripts/temporal_split.py` — Compute train/val/test boundaries
+- `scripts/metrics.py` — IC, Sharpe, Drawdown, Turnover computation
 
 ### NEW: Market Microstructure Subsystems (Commit 97a2fd6)
 
@@ -75,22 +125,19 @@ Use now:
 
 ```bash
 # Verify platform
-bash scripts/verify_live.sh                                     # LIVE_GREEN 14/14
-python scripts/dominion_cli.py doctor --offline --json          # overall: warn; exit 0
-python scripts/dominion_cli.py doctor --json                    # overall: warn; RAGD reachable
-python scripts/dominion_cli.py scan --native --dry-run --json   # Native scan 1282 files ~18ms
-python scripts/dominion_cli.py scan --dry-run --json            # Python scan 1281 files ~201ms
+python scripts/dominion_cli.py doctor --json                    # overall: warn (chunker/embed config)
 python domdata/check_no_trading.py                              # PASS: 0 violations
-python -m pytest -q                                             # 426/426 PASS
+python -m pytest -q                                             # 435 tests collected (2 deselected)
 ctest --test-dir ragd/build --output-on-failure                 # 24/24 PASS
 ```
 
-Current stats:
-- RAGD: 7159 active chunks, 8760 total, 0 orphan `/tmp/pytest*` chunks
-- Tests: 426 passed (2 deselected)
+Current stats (2026-05-19):
+- RAGD: 7159 active chunks, REST API operational, chunker/embed config incomplete
+- Tests: 435 collected (2 deselected), run with `python -m pytest -q`
 - Native core: 24/24 ctest pass
 - Vault: 878 notes, 0 broken links
 - Trading safety: PASS
+- Doctor: overall=warn (ragd_chunker unreachable, ragd_embed no API key)
 
 RAGD daemon:
 ```bash

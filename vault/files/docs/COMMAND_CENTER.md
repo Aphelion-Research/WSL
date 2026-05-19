@@ -1,41 +1,23 @@
 ---
-title: COMMAND_CENTER.md
-filepath: /home/Martin/Dominion/docs/COMMAND_CENTER.md
-language: markdown
-lines: 20
-symbols: 1
-public_symbols: 1
-content_hash: dd534b99a9ecbaa8
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Dominion Command Center
 
-# COMMAND_CENTER.md
+`dominion` is the V2 operational cockpit.
 
-> **Language**: `markdown` | **Symbols**: 1
-
-## Purpose
-
-Defines 1 indexed symbol(s): # Dominion Command Center.
-
-## Public Symbols
-
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/Dominion_Command_Center-L1-dd534b99|# Dominion Command Center]] | section | 1-20 | # Dominion Command Center |
-
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    file --> symbols
+```bash
+dominion start
+dominion status
+dominion health
+dominion doctor
+dominion tmux
+dominion codex
+dominion ragd
+dominion research
+dominion data
+dominion llm
 ```
 
-## Recent Changes
+`dominion-ui --once` prints a one-shot terminal dashboard. `dominion-ui` refreshes until interrupted.
 
-> Content hash: `dd534b99a9ecbaa8`. Last modified epoch: `-4659044369523801551`.
+The command center reports state; it does not expose secrets or enable trading.

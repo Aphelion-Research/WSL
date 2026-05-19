@@ -17,7 +17,7 @@ tags:
 # Dominion V2 System Overview
 
 **Version:** 2.0  
-**Status:** LIVE_GREEN  
+**Status:** SOURCE_GREEN | LIVE_WARN (run `dominion doctor` for details)  
 **Last Updated:** 2026-05-19
 
 ---
@@ -31,7 +31,7 @@ Core principles:
 - **Read-only market data:** MT5 connection is data-only, zero trading execution
 - **Agent-native:** Designed for AI coding agents (Codex, Claude Code, Cursor)
 - **RAGD-first:** Persistent memory and retrieval system powers everything
-- **Validated:** 426 Python tests + 24 C++ tests, all passing
+- **Validated:** 24 C++ tests passing, safety scanner passing
 - **Collaborative:** tmux + SSH + Tailscale for Matin/Dan collaboration
 
 **Mission:** Build institutional-grade quant research platform that is:
@@ -63,10 +63,10 @@ Persistent project memory system.
 - REST API on 127.0.0.1:7474
 - AST-aware chunking
 - Graph memory for relationships
-- Bus system for agent coordination
+- Agent coordination (REST API operational, WebSocket /bus planned)
 - 7159 active chunks (as of 2026-05-19)
 
-**Status:** LIVE_GREEN (daemon running in tmux session `ragd`)
+**Status:** Operational (daemon running in tmux session `ragd`)
 
 **Docs:** [docs/02_RAGD/](../02_RAGD/)
 
@@ -120,7 +120,7 @@ Institutional-grade XAU/USD data pipeline with 5 sources and 400+ features.
 - **Health monitoring:** Staleness watchdog, gap detection, drift detection, anomaly detection
 - **Intelligence reports:** Daily markdown reports + DuckDB storage + RAGD ingestion
 
-**Status:** LIVE_GREEN (16/16 tests passing)
+**Status:** Operational (16/16)
 
 **Docs:** [docs/DATA_PIPELINE.md](../DATA_PIPELINE.md), [docs/05_FEATURES/DATA_PIPELINE_FEATURE.md](../05_FEATURES/DATA_PIPELINE_FEATURE.md)
 
@@ -167,7 +167,7 @@ Institutional-grade XAU/USD data pipeline with 5 sources and 400+ features.
 
 **Integration:** LOB → Toxicity → ExecSim → TCA → All feed data pipeline
 
-**Status:** LIVE_GREEN (30/30 tests passing)
+**Status:** Operational (30/30)
 
 **Docs:** [docs/05_FEATURES/](../05_FEATURES/)
 
@@ -194,7 +194,7 @@ SQLite-backed operating system that constrains, observes, and audits AI coding a
 - Adversarial reviewer (scores agent output)
 - Dashboard and "next action" recommendation
 
-**Status:** LIVE_GREEN (full test coverage)
+**Status:** Operational (full test coverage)
 
 **Docs:** [docs/agents/AGENT_OS_CONTRACT.md](../agents/AGENT_OS_CONTRACT.md), [docs/agents/AGENT_OS_COMMANDS.md](../agents/AGENT_OS_COMMANDS.md)
 
@@ -219,7 +219,7 @@ Hybrid retrieval system for agent context loading.
 - Evaluation suite (recall, MRR, nDCG, citation accuracy)
 - CLI: `dominion search`, `dominion ask`, `dominion eval`, `dominion trace`
 
-**Status:** LIVE_GREEN (evaluation passing: recall@10=1.0, MRR=1.0)
+**Status:** Operational (evaluation passing: recall@10=1.0, MRR=1.0)
 
 **Docs:** [docs/01_ARCHITECTURE/](../01_ARCHITECTURE/), RAG subsystem docs
 
@@ -243,7 +243,7 @@ Approved-source web crawler + evidence collection system.
 - RAGD ingestion bridge
 - CLI: `research status`, `research fetch`, `research doctor`, `research ingest-ragd`
 
-**Status:** Operational (7 tests passing)
+**Status:** Operational (7)
 
 **Docs:** [docs/RESEARCH_OS.md](../RESEARCH_OS.md)
 
@@ -268,7 +268,7 @@ High-performance C++ spine for core operations.
 - Path normalization
 - 24/24 C++ tests passing
 
-**Status:** LIVE_GREEN
+**Status:** Operational
 
 **Docs:** [docs/NATIVE_CORE.md](../NATIVE_CORE.md)
 
@@ -294,7 +294,7 @@ Obsidian-compatible knowledge graph with 878 notes.
 - Frontmatter metadata
 - Vault doctor for validation
 
-**Status:** LIVE_GREEN
+**Status:** Operational
 
 **Docs:** [docs/OBSIDIAN_VAULT_MANIFEST.md](OBSIDIAN_VAULT_MANIFEST.md)
 
@@ -318,7 +318,7 @@ File scanning, caching, manifest generation.
 - Symbol extraction
 - Python-only and native-hybrid modes
 
-**Status:** LIVE_GREEN
+**Status:** Operational
 
 **Docs:** Architecture docs, dominion_loader/ code
 
@@ -665,7 +665,7 @@ python scripts/dominion_cli.py vault doctor --json  # ok: true
 
 ---
 
-**Status:** LIVE_GREEN ✓  
+**Status:** Operational ✓  
 **Last Validated:** 2026-05-19  
 **Next Review:** When major changes occur
 

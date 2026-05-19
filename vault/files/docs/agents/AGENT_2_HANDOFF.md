@@ -1,47 +1,44 @@
 ---
-title: AGENT_2_HANDOFF.md
-filepath: /home/Martin/Dominion/docs/agents/AGENT_2_HANDOFF.md
-language: markdown
-lines: 41
-symbols: 5
-public_symbols: 5
-content_hash: a9669b6f81a1114f
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Agent 2 Handoff
 
-# AGENT_2_HANDOFF.md
+Timestamp: 2026-05-13T21:49:49Z
 
-> **Language**: `markdown` | **Symbols**: 5
+## What Landed
 
-## Purpose
+- New `dominion_ai/` package with planner, RAGD client, hybrid retrieval composition, heuristic rerank, confidence scoring, budgeted context assembly, trace rendering, eval runner, ledger query, and CLI handlers.
+- Additive CLI: `dominion ask/search/explain/trace/eval/ledger/graph/bench`.
+- Local generation support landed in Agent 2 and was retired by Agent 6; frontier agents now handle generation.
+- `dominion-ui --once` now includes "Latest queries" and "Latest decisions".
+- Focused Agent 2 tests passed at the time; Phase 6 validation now covers `dominion_ai/tests` plus RAG retrieval packages.
+- Full configured tests: `python -m pytest -q` => `42 passed`.
 
-Defines 5 indexed symbol(s): # Agent 2 Handoff, ## What Landed, ## Important Boundaries, ## Evidence, ## Next Best Tasks.
+## Important Boundaries
 
-## Public Symbols
+- RAGD remains the only retrieval spine. Agent 2 calls RAGD `/query`; it does not create a parallel index.
+- `TEMP_ADAPTER(agent-1)` derives `content_hash` until RAGD query results expose it.
+- `dominion hw probe --json` now consumes `dominion_loader.api.hw_probe`; `TEMP_ADAPTER(agent-1)` remains only as a fallback for older checkouts.
+- `dominion ask --generate` now stays retrieve-only and reports that Claude Code, Codex, or Cursor handles generation.
 
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/agents/Agent_2_Handoff-L1-9d67e547|# Agent 2 Handoff]] | section | 1-4 | # Agent 2 Handoff |
-| [[symbols/docs/agents/What_Landed-L5-2354af05|## What Landed]] | section | 5-13 | ## What Landed |
-| [[symbols/docs/agents/Important_Boundaries-L14-7baff794|## Important Boundaries]] | section | 14-20 | ## Important Boundaries |
-| [[symbols/docs/agents/Evidence-L21-ea8e3ac0|## Evidence]] | section | 21-35 | ## Evidence |
-| [[symbols/docs/agents/Next_Best_Tasks-L36-a9669b6f|## Next Best Tasks]] | section | 36-41 | ## Next Best Tasks |
+## Evidence
 
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    Important_Boundaries --> TEMP_ADAPTER
-    Important_Boundaries --> TEMP_ADAPTER
-    Next_Best_Tasks --> TEMP_ADAPTER
+```bash
+dominion search "agent handoff" --top-k 3 --json
+dominion ask "how does the handoff protocol work" --json
+dominion ask "how does the handoff protocol work" --generate --json
+dominion explain --chunk 1024 --json
+dominion trace ad51518679964fab8b78802762e7d5bd
+dominion eval --bundle dominion_ai/tests/eval_fixtures/tiny --top-k 10 --json
+dominion ledger list --kind decision --since 7d --json
+dominion embed stats --json
+dominion vault status --json
+dominion-ui --once
 ```
 
-## Recent Changes
+## Next Best Tasks
 
-> Content hash: `a9669b6f81a1114f`. Last modified epoch: `1778728388`.
+1. Agent 1 should add `content_hash` and `document_id` to RAGD `/query` results, then remove `TEMP_ADAPTER(agent-1)` from `dominion_ai/ragd_client.py`.
+2. Keep `dominion_loader.api.hw_probe` stable for diagnostics, but it no longer gates generation.
+3. Configure `RAGD_EMBED_API_KEY` and run `dominion embed run` when semantic retrieval is required.
+4. Register `dominion_ai.bench` with Agent 1's benchmark harness once that extension point is available.

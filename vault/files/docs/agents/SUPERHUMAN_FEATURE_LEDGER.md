@@ -1,43 +1,19 @@
 ---
-title: SUPERHUMAN_FEATURE_LEDGER.md
-filepath: /home/Martin/Dominion/docs/agents/SUPERHUMAN_FEATURE_LEDGER.md
-language: markdown
-lines: 16
-symbols: 3
-public_symbols: 3
-content_hash: a1cfb3b05b600cd2
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Superhuman Feature Ledger
 
-# SUPERHUMAN_FEATURE_LEDGER.md
+## Agent 2 Scope
 
-> **Language**: `markdown` | **Symbols**: 3
+| Feature | Status | Evidence | Notes |
+|---|---:|---|---|
+| S06 Retrieval confidence and escalation | Complete | `dominion ask "how does the handoff protocol work" --json` score `0.91`; `test_confidence.py` | Low confidence escalates once, then refuses below threshold |
+| S07 Context budget optimizer | Complete | `test_budget.py`; context citations preserved | Greedy value/cost optimizer; compresses low-value chunks |
+| S08 Query-to-code trace explorer | Complete | `dominion trace ad51518679964fab8b78802762e7d5bd` | Shows plan/retrieve/rrf/filter/rerank/confidence/assemble |
+| S09 Local model performance governor | Retired by Agent 6 | `scripts/bin/llm`; `dominion ask --generate --json` | Frontier agents handle generation; RAGD retrieval remains local-first |
 
-## Purpose
+## Explicitly Deferred
 
-Defines 3 indexed symbol(s): # Superhuman Feature Ledger, ## Agent 2 Scope, ## Explicitly Deferred.
-
-## Public Symbols
-
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/agents/Superhuman_Feature_Ledger-L1-c453ecac|# Superhuman Feature Ledger]] | section | 1-2 | # Superhuman Feature Ledger |
-| [[symbols/docs/agents/Agent_2_Scope-L3-218a6847|## Agent 2 Scope]] | section | 3-11 | ## Agent 2 Scope |
-| [[symbols/docs/agents/Explicitly_Deferred-L12-a1cfb3b0|## Explicitly Deferred]] | section | 12-16 | ## Explicitly Deferred |
-
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    Explicitly_Deferred --> TEMP_ADAPTER
-```
-
-## Recent Changes
-
-> Content hash: `a1cfb3b05b600cd2`. Last modified epoch: `1778728394`.
+- External embedding runs are interface-ready and fail closed until `RAGD_EMBED_API_KEY` is configured.
+- Full Agent 1 benchmark harness registration is not implemented; `dominion bench` supplies lightweight local measurements.
+- The governor consumes Agent 1 `dominion_loader.api.hw_probe`; a `TEMP_ADAPTER(agent-1)` fallback remains for older checkouts where the interface is absent.

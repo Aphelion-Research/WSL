@@ -1,41 +1,16 @@
 ---
-title: SECURITY.md
-filepath: /home/Martin/Dominion/docs/SECURITY.md
-language: markdown
-lines: 13
-symbols: 1
-public_symbols: 1
-content_hash: 5fdb8ced2a03a4c2
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Security
 
-# SECURITY.md
+- `secrets/` is excluded from git and has mode `700`.
+- `secrets/mt5.env` should have mode `600`.
+- Do not print, copy, index, or document secret values.
+- `domdata` is read-only and blocks trade-like commands.
+- Run `python ~/Dominion/domdata/check_no_trading.py` before releases.
+- Research OS may only fetch approved sources from `research/sources.yaml`.
+- Do not index `secrets/`, raw data, Wine folders, backups, model files, or logs with sensitive content.
+- Mask account, password, token, cookie, and API key values in diagnostics.
+- Do not add MetaTrader5 `order_send` or live trading behavior.
 
-> **Language**: `markdown` | **Symbols**: 1
-
-## Purpose
-
-Defines 1 indexed symbol(s): # Security.
-
-## Public Symbols
-
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/Security-L1-5fdb8ced|# Security]] | section | 1-13 | # Security |
-
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    file --> symbols
-```
-
-## Recent Changes
-
-> Content hash: `5fdb8ced2a03a4c2`. Last modified epoch: `-4659044264199807619`.
+If a secret may have leaked, stop work, report the exact path/output channel, and rotate credentials outside this repo.

@@ -1,41 +1,32 @@
 ---
-title: DOMDATA.md
-filepath: /home/Martin/Dominion/docs/DOMDATA.md
-language: markdown
-lines: 29
-symbols: 1
-public_symbols: 1
-content_hash: fd214dddf5c33dc9
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# domdata
 
-# DOMDATA.md
+`domdata` is the MT5 read-only data CLI. MT5 commands run under Wine-side Python. Conversion commands run under the Linux `.venv`.
 
-> **Language**: `markdown` | **Symbols**: 1
+Useful commands:
 
-## Purpose
-
-Defines 1 indexed symbol(s): # domdata.
-
-## Public Symbols
-
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/domdata-L1-fd214ddd|# domdata]] | section | 1-29 | # domdata |
-
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    file --> symbols
+```bash
+domdata notice
+domdata doctor
+domdata account-info
+domdata select XAUUSD
+domdata xautick
+domdata xaurates --count 20
+domdata xauticks --start 2026-05-11T00:00:00Z --count 20
+domdata tick XAUUSD
+domdata rates XAUUSD M1 --count 20
+domdata ticks XAUUSD --start 2026-05-11T00:00:00Z --count 20
 ```
 
-## Recent Changes
+Blocked forever:
 
-> Content hash: `fd214dddf5c33dc9`. Last modified epoch: `-4659111162985303465`.
+```bash
+domdata order-send
+domdata order-check
+domdata buy
+domdata sell
+domdata close
+domdata modify
+```

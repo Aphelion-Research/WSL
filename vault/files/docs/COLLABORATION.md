@@ -1,41 +1,32 @@
 ---
-title: COLLABORATION.md
-filepath: /home/Martin/Dominion/docs/COLLABORATION.md
-language: markdown
-lines: 22
-symbols: 1
-public_symbols: 1
-content_hash: 31e6a62a654ecae0
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Collaboration
 
-# COLLABORATION.md
+SSH endpoint:
 
-> **Language**: `markdown` | **Symbols**: 1
-
-## Purpose
-
-Defines 1 indexed symbol(s): # Collaboration.
-
-## Public Symbols
-
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/Collaboration-L1-31e6a62a|# Collaboration]] | section | 1-22 | # Collaboration |
-
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    file --> symbols
+```bash
+ssh Martin@<tailscale-ip>
 ```
 
-## Recent Changes
+Find the current IP with:
 
-> Content hash: `31e6a62a654ecae0`. Last modified epoch: `-4659044264199807619`.
+```bash
+connectinfo
+tailscale ip -4
+```
+
+tmux sessions:
+
+```bash
+warp list
+warp matin
+warp dan
+warp dominion
+warp codex
+warp ragd
+```
+
+Scrolling in tmux: press `Ctrl-b`, then `[`, use arrows/PageUp/PageDown, press `q` to exit copy mode. In Windows Terminal, use `Ctrl+Shift+V` to paste and hold `Shift` while dragging if tmux mouse mode captures selection.
+
+Remote file editing should use VS Code Remote SSH. Plain SSH cannot open Dan's local Explorer.

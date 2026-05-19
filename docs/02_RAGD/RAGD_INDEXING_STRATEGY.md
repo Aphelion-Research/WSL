@@ -9,124 +9,351 @@ status: current
 last_reviewed: 2026-05-19
 tags:
   - ragd
-  - retrieval
+  - indexing
+  - strategy
 ---
 
-# RAGD INDEXING STRATEGY
+# RAGD Indexing Strategy
 
-**Status:** LIVE_GREEN (RAGD daemon running on 127.0.0.1:7474)
+**Purpose:** What gets indexed, when, and how.
 
-## Purpose
+---
 
-RAGD (Retrieval-Augmented Graph Database) is Dominion's persistent memory system.
+## Indexing Goals
 
-This doc covers: ragd indexing strategy
+1. **High-priority docs indexed first** (agent operating manuals, safety rules)
+2. **Current docs only** (exclude deprecated/archived)
+3. **Metadata-enriched** (priority, audience, status)
+4. **Optimal chunk sizes** (500-2000 chars)
+5. **Fast retrieval** (<50ms query latency)
 
-## Current State
+---
 
-- 7159 active chunks
-- 8760 total chunks
-- SQLite + HNSW vector index
-- Native C++ implementation (24/24 tests passing)
-- REST API on 127.0.0.1:7474
-- MCP support
-- Bus system for agent coordination
+## Priority Tiers
 
-## Key Operations
+### Tier 1: Priority 9-10 (CRITICAL)
+**Index immediately, high boost, re-index on every change**
 
-```bash
-# Query RAGD
-curl -X POST http://127.0.0.1:7474/query \
-  -H 'Content-Type: application/json' \
-  -d '{"q":"<query>","top_k":5}'
+- Agent operating manuals (AGENT_README.md, AGENT_OPERATING_SYSTEM.md)
+- Safety rules (AGENT_SAFETY_RULES.md)
+- Platform contract (AGENTS.md)
+- Current state (AGENT_HANDOFF.md)
+- Core architecture (SYSTEM_OVERVIEW.md, DATA_FLOW.md)
 
-# Index files
-curl -X POST http://127.0.0.1:7474/index \
-  -H 'Content-Type: application/json' \
-  -d '{"path":"<path>","content":"<content>"}'
+**Retrieval boost:** 2.0x (P10), 1.5x (P9)
 
-# Health check
-curl http://127.0.0.1:7474/health
+**Why:** Agents query these most frequently. Incorrect retrieval causes safety/contract violations.
+
+---
+
+### Tier 2: Priority 7-8 (HIGH)
+**Index early, medium boost, re-index daily**
+
+- Feature specs (LOB, TCA, exec_sim)
+- Development standards (CODING_STANDARDS.md, TESTING_GUIDE.md)
+- RAGD system docs (this doc, RAGD_OVERVIEW.md)
+- Risk & security (FAILURE_MODES.md, RISK_REGISTER.md)
+
+**Retrieval boost:** 1.2x (P8), 1.0x (P7)
+
+**Why:** Frequently referenced during development. Errors here cause bugs but not safety violations.
+
+---
+
+### Tier 3: Priority 5-6 (MEDIUM)
+**Index normally, no boost, re-index weekly**
+
+- Roadmap (MASTER_ROADMAP.md, phase plans)
+- Decision logs (ADRs)
+- Prompts (agent templates)
+- Backlog (feature queue, tech debt)
+- System maps (diagrams)
+
+**Retrieval boost:** 1.0x
+
+**Why:** Context for planning but not execution-critical.
+
+---
+
+### Tier 4: Priority 3-4 (LOW)
+**Index late, low priority, re-index monthly**
+
+- Research notes (future investigations)
+- Future vision (long-term plans)
+- Historical reports (past work)
+
+**Retrieval boost:** 0.8x
+
+**Why:** Historical context only. Rarely queried by agents.
+
+---
+
+### Tier 5: Priority 1-2 (ARCHIVE)
+**Index only if space allows**
+
+- Deprecated docs
+- Archive material
+- Old drafts
+
+**Retrieval boost:** 0.5x
+
+**Why:** Kept for historical record but should not appear in normal queries.
+
+---
+
+## What Gets Indexed
+
+### Always Index
+- ✓ Documentation (`.md` files) in `docs/`
+- ✓ Top-level docs (README.md, AGENTS.md, AGENT_HANDOFF.md)
+- ✓ Obsidian vault notes (`vault/**/*.md`)
+- ✓ Python source files with docstrings
+- ✓ C++ header files with documentation comments
+
+### Conditionally Index
+- Code files: Only if they have significant documentation
+- Configuration files: Only if they define behavior
+- Test files: Only integration test docs, not unit test code
+
+### Never Index
+- ✗ `secrets/` directory (safety boundary)
+- ✗ `.git/` directory
+- ✗ Binary files (`.db`, `.bin`, `.parquet`)
+- ✗ Generated files (`build/`, `__pycache__/`)
+- ✗ Temporary files (`.tmp`, `.bak`)
+- ✗ Raw data dumps (MT5 data, logs)
+
+---
+
+## Chunking Strategy by File Type
+
+### Markdown Docs
+**Strategy:** Heading-based (split on `##` headers)
+
+**Target size:** 500-2000 chars
+
+**Overlap:** 200 chars
+
+**Example:**
+```markdown
+# Doc Title
+## Section 1
+Content A...
+## Section 2
+Content B...
 ```
+→ Chunk 1: "## Section 1\nContent A..."
+→ Chunk 2: "## Section 2\nContent B..."
 
-## Agent Usage
+---
 
-Agents MUST query RAGD before code changes:
+### Python Code
+**Strategy:** AST-aware (split by function/class)
 
+**Target size:** 300-1500 chars
+
+**Overlap:** 100 chars
+
+**Example:**
 ```python
-# Python
-from ragd.scripts.ragd_mcp_stdio import ragd_query
-result = ragd_query("<task description>", top_k=5)
+def func_a():
+    """Does A"""
+    pass
 
-# CLI
-python scripts/dominion_cli.py search "<query>" --top-k 5 --json
+class MyClass:
+    def method_a(self):
+        """Does M"""
+        pass
+```
+→ Chunk 1: `def func_a(): ...`
+→ Chunk 2: `class MyClass: def method_a(self): ...`
+
+---
+
+### C++ Code
+**Strategy:** AST-aware (split by function/class)
+
+**Target size:** 300-1500 chars
+
+**Overlap:** 100 chars
+
+---
+
+### Small Files (<500 words)
+**Strategy:** Full-document
+
+**Why:** Splitting loses context for short files
+
+---
+
+## Metadata Extraction
+
+Every indexed chunk includes:
+
+```yaml
+chunk_id: unique-hash
+document_id: relative/path/to/file.md
+chunk_index: 0
+chunk_type: markdown_section | python_function | cpp_function | full_doc
+content: "actual chunk text"
+
+# From frontmatter
+doc_type: workflow
+system: RAGD
+ragd_priority: 10
+audience: [ai_agent, maintainer]
+status: current
+last_reviewed: 2026-05-19
+tags: [ragd, agent]
+
+# Generated
+indexed_at: 2026-05-19T17:30:00Z
+content_hash: sha256:...
+char_count: 1234
+word_count: 234
 ```
 
-## Indexing Strategy
+See [RAGD_METADATA_SCHEMA.md](RAGD_METADATA_SCHEMA.md) for full schema.
 
-- **heading-based chunking:** Split markdown by ## headers
-- **semantic chunking:** AST-aware for code
-- **metadata extraction:** Frontmatter → filter/boost
-- **priority tiers:** P10 docs indexed first
+---
 
-See RAGD_INGESTION_MANIFEST.md for full strategy.
+## Indexing Commands
 
-## Query Patterns
+### Full Rebuild
+```bash
+# Scan entire repo, index everything
+python scripts/dominion_cli.py scan
 
-Best practices:
-- Use task-specific queries ("how to add feature" not "code")
-- Include context ("data pipeline feature implementation")
-- Check top 5-10 results
-- Verify metadata (doc_type, status, last_reviewed)
+# Output
+Scanning: 878 files
+Indexed: 7159 chunks
+Skipped: 42 files (secrets, binary, generated)
+Errors: 0
+Duration: 23.4s
+```
 
-## Common Queries
+### Incremental Update
+```bash
+# Index only changed files
+python scripts/dominion_cli.py scan --incremental
 
-| Query | Expected Result |
-|---|---|
-| "agent workflow" | AGENT_OPERATING_SYSTEM.md |
-| "safety rules" | AGENT_SAFETY_RULES.md |
-| "data pipeline" | DATA_PIPELINE_FEATURE.md |
-| "how RAGD works" | RAGD_OVERVIEW.md |
+# Output
+Changed: 5 files
+Indexed: 32 chunks
+Duration: 1.2s
+```
+
+### Single File
+```bash
+# Index specific file
+python scripts/dominion_cli.py scan --file docs/AGENT_README.md
+
+# Output
+Indexed: 12 chunks from docs/AGENT_README.md
+```
+
+### Dry Run
+```bash
+# See what would be indexed without doing it
+python scripts/dominion_cli.py scan --dry-run --json
+
+# Output
+{"files_to_index": [...], "files_to_skip": [...]}
+```
+
+---
+
+## Re-Indexing Schedule
+
+| Priority | Trigger | Frequency |
+|---|---|---|
+| **P10** | On every change | Immediate |
+| **P9** | On every change | Immediate |
+| **P8** | File modified | Daily |
+| **P7** | File modified | Daily |
+| **P6** | File modified | Weekly |
+| **P5** | File modified | Weekly |
+| **P1-4** | Manual | Monthly |
+
+**Implementation:** Watch for file changes, trigger re-index per schedule.
+
+---
+
+## Quality Control
+
+### Before Indexing
+- [ ] Doc has valid frontmatter metadata
+- [ ] Priority level is appropriate (9-10 for agent-critical docs)
+- [ ] Status is `current` (not deprecated)
+- [ ] Last_reviewed is recent (<90 days)
+- [ ] Audience is clearly defined
+
+### After Indexing
+- [ ] Run test queries
+- [ ] Verify priority docs appear first
+- [ ] Check chunk sizes (target 500-2000 chars)
+- [ ] Verify metadata is extractable
+- [ ] Check for duplicate chunks
+
+### Maintenance
+- [ ] Re-index changed files
+- [ ] Purge deprecated docs
+- [ ] Update priorities quarterly
+- [ ] Audit staleness (last_reviewed > 90 days)
+
+---
 
 ## Failure Modes
 
-- **Stale chunks:** Re-run `dominion scan`
-- **Missing embeddings:** Set `RAGD_EMBED_API_KEY` + run `dominion embed run`
-- **Poor retrieval:** Check query specificity, verify metadata
-- **Daemon down:** Check `curl 127.0.0.1:7474/health`
+### Symptom: Retrieval Misses Relevant Docs
+**Cause:** Doc not indexed or stale
 
-## Validation
-
+**Fix:**
 ```bash
-# Check RAGD health
-curl http://127.0.0.1:7474/health
+# Check if indexed
+python scripts/dominion_cli.py search "exact phrase from doc" --top-k 1
 
-# Run retrieval tests
-python -m pytest -q dominion_ai/tests/test_eval.py
-
-# Check embedding coverage
-python scripts/dominion_cli.py embed stats --json
+# If not found, re-index
+python scripts/dominion_cli.py scan
 ```
 
-## Future Enhancements
+---
 
-- WebSocket support (in progress)
-- Multi-level indexing
-- Semantic clustering
-- Auto-reindexing on file change
-- Query rewriting
-- Cross-reference validation
+### Symptom: Too Many Results
+**Cause:** Chunks too small or query too generic
+
+**Fix:**
+- Increase chunk size (edit chunker config)
+- Use more specific queries
+- Add metadata filters
+
+---
+
+### Symptom: Wrong Docs Appear First
+**Cause:** Priority misconfigured or query too broad
+
+**Fix:**
+- Check doc frontmatter `ragd_priority`
+- Add filters: `--filter-doc-type`, `--filter-audience`
+- Make query more specific
+
+---
 
 ## Related Docs
 
-- [RAGD_INGESTION_MANIFEST.md](../RAGD_INGESTION_MANIFEST.md)
-- [01_ARCHITECTURE/DATA_FLOW.md](../01_ARCHITECTURE/DATA_FLOW.md)
-- [03_AGENT_OPERATIONS/AGENT_OPERATING_SYSTEM.md](../03_AGENT_OPERATIONS/AGENT_OPERATING_SYSTEM.md)
+- [RAGD_OVERVIEW.md](RAGD_OVERVIEW.md) — System architecture
+- [RAGD_CHUNKING_GUIDE.md](RAGD_CHUNKING_GUIDE.md) — Chunking strategies
+- [RAGD_METADATA_SCHEMA.md](RAGD_METADATA_SCHEMA.md) — Metadata format
+- [RAGD_AGENT_USAGE.md](RAGD_AGENT_USAGE.md) — How agents use RAGD
+- [RAGD_INGESTION_MANIFEST.md](../RAGD_INGESTION_MANIFEST.md) — Full indexing manifest
+
+---
 
 ## Retrieval Hints
 
-- "RAGD"
-- "retrieval"
-- "indexing"
-- "query"
-- "how to use memory system"
+Queries that should find this doc:
+- "indexing strategy"
+- "what gets indexed"
+- "RAGD indexing"
+- "how to reindex"
+- "chunk priorities"

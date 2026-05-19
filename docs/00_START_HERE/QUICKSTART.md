@@ -33,7 +33,7 @@ Dominion V2 = local-first quant research workstation.
 5. **Agent OS:** AI agent safety + lifecycle
 6. **Vault:** 878-note Obsidian knowledge graph
 
-**Status:** LIVE_GREEN (426 Python tests + 24 C++ tests passing)
+**Status:** SOURCE_GREEN | LIVE_WARN (24 C++ tests passing, RAGD chunker/embed config incomplete)
 
 ---
 
@@ -42,11 +42,12 @@ Dominion V2 = local-first quant research workstation.
 ```bash
 cd ~/Dominion
 python domdata/check_no_trading.py  # MUST output "PASS"
-python -m pytest -q                 # Should output "426 passed"
+python scripts/dominion_cli.py doctor --json  # Check overall status
 curl 127.0.0.1:7474/health          # Should output {"status":"ok"}
 ```
 
-If all pass → system is healthy.
+If `doctor` shows `overall: ok` → system is fully healthy.
+If `doctor` shows `overall: warn` → check which subsystems need attention.
 
 ---
 

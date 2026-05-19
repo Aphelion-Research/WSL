@@ -1,41 +1,33 @@
 ---
-title: TMUX_WORKFLOW.md
-filepath: /home/Martin/Dominion/docs/TMUX_WORKFLOW.md
-language: markdown
-lines: 30
-symbols: 1
-public_symbols: 1
-content_hash: 6363b7045ae6625b
-tags:
-- markdown
-- file
+synced: 2026-05-19 18:24
 ---
+# Tmux Workflow
 
-# TMUX_WORKFLOW.md
+Dominion uses stable tmux sessions for shared work:
 
-> **Language**: `markdown` | **Symbols**: 1
+- `matin`
+- `dan`
+- `dominion`
+- `ragd`
+- `codex-matin`
 
-## Purpose
+Use `warp` for navigation:
 
-Defines 1 indexed symbol(s): # Tmux Workflow.
-
-## Public Symbols
-
-| Symbol | Type | Lines | Description |
-|---|---|---:|---|
-| [[symbols/docs/Tmux_Workflow-L1-6363b704|# Tmux Workflow]] | section | 1-30 | # Tmux Workflow |
-
-## Imports
-
-- *(none indexed)*
-
-## Call Graph
-
-```mermaid
-graph LR
-    file --> symbols
+```bash
+warp list
+warp matin
+warp dan
+warp dominion
+warp codex
+warp ragd
 ```
 
-## Recent Changes
+Copy and paste:
 
-> Content hash: `6363b7045ae6625b`. Last modified epoch: `-4659044369519801552`.
+- Windows Terminal paste: `Ctrl+Shift+V`.
+- Windows Terminal selection: hold `Shift` and drag when mouse mode captures selection.
+- tmux prefix: `Ctrl+b`.
+- tmux copy mode: `Ctrl+b [` then move/select/copy according to tmux bindings.
+- Mouse scrolling works when tmux mouse mode is enabled; use terminal scrollback with `Shift` if needed.
+
+No shell startup file should auto-attach tmux or run blocking commands.
