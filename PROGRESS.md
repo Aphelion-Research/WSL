@@ -69,7 +69,7 @@ Built complete institutional-grade XAU/USD data pipeline for Blackmark Dominion 
 
 8. **Safety** ✓
    - Zero trading execution (data-only pipeline)
-   - Forbidden token scanner: PASS (no order_send, order_check, TRADE_ACTION_*)
+   - Forbidden token scanner: PASS (no trading execution tokens)
    - MT5 read-only integration via domdata CLI wrapper
    - All API keys from environment (ALPHAVANTAGE_API_KEY, FRED_API_KEY)
 
