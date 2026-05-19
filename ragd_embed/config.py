@@ -6,8 +6,9 @@ from pathlib import Path
 
 VOYAGE_MODEL = "voyage-code-2"
 OPENAI_MODEL = "text-embedding-3-small"
-MODEL_DIMS = {VOYAGE_MODEL: 3072, OPENAI_MODEL: 1536}
-PROVIDER_DEFAULT_MODELS = {"voyage": VOYAGE_MODEL, "openai": OPENAI_MODEL}
+BEDROCK_MODEL = "amazon.titan-embed-text-v2:0"
+MODEL_DIMS = {VOYAGE_MODEL: 3072, OPENAI_MODEL: 1536, BEDROCK_MODEL: 1024}
+PROVIDER_DEFAULT_MODELS = {"voyage": VOYAGE_MODEL, "openai": OPENAI_MODEL, "bedrock": BEDROCK_MODEL}
 
 
 @dataclass(frozen=True)
@@ -25,7 +26,7 @@ class EmbedConfig:
 def load_config(*, require_key: bool = True) -> EmbedConfig:
     provider = os.environ.get("RAGD_EMBED_PROVIDER", "voyage").strip().lower()
     if provider not in PROVIDER_DEFAULT_MODELS:
-        raise ValueError(f"Unsupported RAGD_EMBED_PROVIDER={provider!r}; expected voyage or openai")
+        raise ValueError(f"Unsupported RAGD_EMBED_PROVIDER={provider!r}; expected voyage, openai, or bedrock")
     model = os.environ.get("RAGD_EMBED_MODEL", PROVIDER_DEFAULT_MODELS[provider]).strip()
     dim = MODEL_DIMS.get(model)
     if dim is None:
