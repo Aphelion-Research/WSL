@@ -196,18 +196,28 @@ def abandon_session(
 ) -> Session:
     """Force-abandon a session (for stale/orphaned sessions)."""
     _store = store or AgentStore()
+    existing = _store.conn.execute(
+        "SELECT status FROM agent_sessions_v2 WHERE session_id=?", (session_id,)
+    ).fetchone()
+    if existing is None:
+        if store is None:
+            _store.close()
+        raise ValueError(f"session not found: {session_id}")
+    if existing["status"] not in ("active", "idle"):
+        if store is None:
+            _store.close()
+        raise ValueError(
+            f"session {session_id!r} is already in terminal state {existing['status']!r}; "
+            "cannot abandon"
+        )
     now = int(time.time())
-    cursor = _store.conn.execute(
+    _store.conn.execute(
         """UPDATE agent_sessions_v2
               SET status='abandoned', ended_at=?,
                   metadata_json=json_patch(metadata_json, ?)
            WHERE session_id=?""",
         (now, json.dumps({"abandon_reason": reason}), session_id),
     )
-    if cursor.rowcount == 0:
-        if store is None:
-            _store.close()
-        raise ValueError(f"session not found: {session_id}")
     row = _store.conn.execute(
         "SELECT * FROM agent_sessions_v2 WHERE session_id=?", (session_id,)
     ).fetchone()

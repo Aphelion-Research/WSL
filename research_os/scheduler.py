@@ -47,7 +47,6 @@ def run(limit: int, p: ResearchPaths | None = None) -> dict[str, int]:
             db.mark_job(conn, job["id"], "failed", f"max attempts ({_MAX_JOB_ATTEMPTS}) reached")
             failed += 1
             continue
-        processed += 1
         source_row = db.get_source(conn, job["source_name"])
         if not source_row:
             db.mark_job(conn, job["id"], "failed", "source not found")
@@ -62,6 +61,12 @@ def run(limit: int, p: ResearchPaths | None = None) -> dict[str, int]:
         if elapsed < source.rate_limit_sec:
             time.sleep(source.rate_limit_sec - elapsed)
         try:
+            validate_url_for_source(job["url"], source)
+        except Exception as exc:
+            db.mark_job(conn, job["id"], "failed", f"url not allowed for source: {exc}")
+            failed += 1
+            continue
+        try:
             adapter = resolve_adapter(source.adapter_preference) or resolve_adapter("requests")
             if adapter is None:
                 raise RuntimeError("no fetch adapters available")
@@ -71,12 +76,6 @@ def run(limit: int, p: ResearchPaths | None = None) -> dict[str, int]:
                 failed += 1
                 last_fetch_by_source[source.name] = time.monotonic()
                 continue
-
-            source_allowed = True
-            try:
-                validate_url_for_source(job["url"], source)
-            except Exception:
-                source_allowed = False
 
             raw_path = _write(p.raw / source.name / safe_name(result.final_url or result.url, ".html"), result.text)
             extracted = extract(
@@ -95,7 +94,7 @@ def run(limit: int, p: ResearchPaths | None = None) -> dict[str, int]:
             dup = conn.execute("SELECT 1 FROM documents WHERE content_hash = ? LIMIT 1", (result.content_hash or "",)).fetchone() is not None
             quality = assess_quality(
                 fetch_ok=True,
-                source_allowed=source_allowed,
+                source_allowed=True,
                 text_length=extracted.text_length,
                 has_title=bool(extracted.title and extracted.title != "Untitled"),
                 chunk_count=len(chunks),

@@ -33,78 +33,81 @@ def claim_task(
     """
     _store = store or AgentStore()
 
-    # Verify session is active
-    session_row = _store.conn.execute(
-        "SELECT status FROM agent_sessions_v2 WHERE session_id=?", (session_id,)
-    ).fetchone()
-    if session_row is None:
-        if store is None:
-            _store.close()
-        raise ValueError(f"session not found: {session_id}")
-    if session_row["status"] not in ("active", "idle"):
-        if store is None:
-            _store.close()
-        raise ValueError(
-            f"session {session_id!r} has status {session_row['status']!r}; "
-            "only active/idle sessions can claim tasks"
+    _store.conn.execute("BEGIN IMMEDIATE")
+    try:
+        # Verify session is active
+        session_row = _store.conn.execute(
+            "SELECT status FROM agent_sessions_v2 WHERE session_id=?", (session_id,)
+        ).fetchone()
+        if session_row is None:
+            raise ValueError(f"session not found: {session_id}")
+        if session_row["status"] not in ("active", "idle"):
+            raise ValueError(
+                f"session {session_id!r} has status {session_row['status']!r}; "
+                "only active/idle sessions can claim tasks"
+            )
+
+        # Verify task exists and is claimable
+        task_row = _store.conn.execute(
+            "SELECT status FROM agent_tasks WHERE task_id=?", (task_id,)
+        ).fetchone()
+        if task_row is None:
+            raise ValueError(f"task not found: {task_id}")
+        if task_row["status"] not in ("open", "claimed"):
+            raise ValueError(
+                f"task {task_id!r} has status {task_row['status']!r}; "
+                "only open/claimed tasks can be claimed"
+            )
+
+        # Check for existing active claim
+        existing = _store.conn.execute(
+            "SELECT claim_id, session_id FROM agent_claims WHERE task_id=? AND status='active'",
+            (task_id,),
+        ).fetchone()
+        if existing and not collaborative:
+            if existing["session_id"] == session_id:
+                # Already claimed by same session — idempotent
+                row = _store.conn.execute(
+                    "SELECT * FROM agent_claims WHERE claim_id=?", (existing["claim_id"],)
+                ).fetchone()
+                _store.conn.execute("COMMIT")
+                if store is None:
+                    _store.close()
+                return _row_to_claim(row)
+            raise ValueError(
+                f"task {task_id!r} already claimed by session {existing['session_id']!r}. "
+                "Use --collaborative to allow multiple claimants."
+            )
+
+        claim_id = _new_claim_id()
+        now = int(time.time())
+
+        _store.conn.execute(
+            """INSERT OR IGNORE INTO agent_claims(
+                   claim_id, task_id, session_id, status, claimed_at
+               ) VALUES(?,?,?,?,?)""",
+            (claim_id, task_id, session_id, "active", now),
         )
 
-    # Verify task exists and is claimable
-    task_row = _store.conn.execute(
-        "SELECT status FROM agent_tasks WHERE task_id=?", (task_id,)
-    ).fetchone()
-    if task_row is None:
-        if store is None:
-            _store.close()
-        raise ValueError(f"task not found: {task_id}")
-    if task_row["status"] not in ("open", "claimed"):
-        if store is None:
-            _store.close()
-        raise ValueError(
-            f"task {task_id!r} has status {task_row['status']!r}; "
-            "only open/claimed tasks can be claimed"
+        # Update task status
+        _store.conn.execute(
+            "UPDATE agent_tasks SET status='claimed', claimed_by_session=?, updated_at=? WHERE task_id=?",
+            (session_id, now, task_id),
         )
 
-    # Check for existing active claim
-    existing = _store.conn.execute(
-        "SELECT claim_id, session_id FROM agent_claims WHERE task_id=? AND status='active'",
-        (task_id,),
-    ).fetchone()
-    if existing and not collaborative:
-        if existing["session_id"] == session_id:
-            # Already claimed by same session — idempotent
-            row = _store.conn.execute(
-                "SELECT * FROM agent_claims WHERE claim_id=?", (existing["claim_id"],)
-            ).fetchone()
-            if store is None:
-                _store.close()
-            return _row_to_claim(row)
+        row = _store.conn.execute(
+            "SELECT * FROM agent_claims WHERE claim_id=?", (claim_id,)
+        ).fetchone()
+        _store.conn.execute("COMMIT")
+    except Exception:
+        try:
+            _store.conn.execute("ROLLBACK")
+        except Exception:
+            pass
         if store is None:
             _store.close()
-        raise ValueError(
-            f"task {task_id!r} already claimed by session {existing['session_id']!r}. "
-            "Use --collaborative to allow multiple claimants."
-        )
+        raise
 
-    claim_id = _new_claim_id()
-    now = int(time.time())
-
-    _store.conn.execute(
-        """INSERT OR IGNORE INTO agent_claims(
-               claim_id, task_id, session_id, status, claimed_at
-           ) VALUES(?,?,?,?,?)""",
-        (claim_id, task_id, session_id, "active", now),
-    )
-
-    # Update task status
-    _store.conn.execute(
-        "UPDATE agent_tasks SET status='claimed', claimed_by_session=?, updated_at=? WHERE task_id=?",
-        (session_id, now, task_id),
-    )
-
-    row = _store.conn.execute(
-        "SELECT * FROM agent_claims WHERE claim_id=?", (claim_id,)
-    ).fetchone()
     if store is None:
         _store.close()
     return _row_to_claim(row)
