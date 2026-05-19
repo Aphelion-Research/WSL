@@ -919,6 +919,47 @@ def cmd_graph_foundation(args: argparse.Namespace) -> int:
     return _cmd(args)
 
 
+# Microstructure subsystem commands
+def cmd_lob(args: argparse.Namespace) -> int:
+    """LOB reconstruction commands."""
+    import sys
+    sys.argv = ["lob.cli", args.lob_command] + (args.extra or [])
+    from lob import cli
+    return cli.main()
+
+
+def cmd_sim(args: argparse.Namespace) -> int:
+    """Execution simulator commands."""
+    import sys
+    sys.argv = ["exec_sim.cli", args.sim_command] + (args.extra or [])
+    from exec_sim import cli
+    return cli.main()
+
+
+def cmd_tca(args: argparse.Namespace) -> int:
+    """TCA commands."""
+    import sys
+    sys.argv = ["tca.cli", args.tca_command] + (args.extra or [])
+    from tca import cli
+    return cli.main()
+
+
+def cmd_toxicity(args: argparse.Namespace) -> int:
+    """Toxicity monitor commands."""
+    import sys
+    sys.argv = ["toxicity.cli", args.toxicity_command] + (args.extra or [])
+    from toxicity import cli
+    return cli.main()
+
+
+def cmd_exec_features(args: argparse.Namespace) -> int:
+    """Execution features commands."""
+    import sys
+    sys.argv = ["exec_features.cli", args.exec_features_command] + (args.extra or [])
+    from exec_features import cli
+    return cli.main()
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="dominion", description="Dominion V2 command center")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -1188,6 +1229,34 @@ def build_parser() -> argparse.ArgumentParser:
         build_agent_subparser(sub)
     except ImportError:
         pass  # dominion_agent not yet installed
+
+    # -----------------------------------------------------------------------
+    # Microstructure subsystems
+    # -----------------------------------------------------------------------
+    p = sub.add_parser("lob", help="LOB reconstruction engine")
+    p.add_argument("lob_command", choices=["compute", "metrics", "vpin"])
+    p.add_argument("extra", nargs="*")
+    p.set_defaults(func=cmd_lob)
+
+    p = sub.add_parser("sim", help="Execution simulator")
+    p.add_argument("sim_command", choices=["run", "report", "compare"])
+    p.add_argument("extra", nargs="*")
+    p.set_defaults(func=cmd_sim)
+
+    p = sub.add_parser("tca", help="Trade cost analysis")
+    p.add_argument("tca_command", choices=["analyze", "report", "heatmap"])
+    p.add_argument("extra", nargs="*")
+    p.set_defaults(func=cmd_tca)
+
+    p = sub.add_parser("toxicity", help="Order flow toxicity monitor")
+    p.add_argument("toxicity_command", choices=["compute", "status", "alerts"])
+    p.add_argument("extra", nargs="*")
+    p.set_defaults(func=cmd_toxicity)
+
+    p = sub.add_parser("exec-features", help="Execution alpha features")
+    p.add_argument("exec_features_command", choices=["compute", "top", "decay"])
+    p.add_argument("extra", nargs="*")
+    p.set_defaults(func=cmd_exec_features)
 
     return parser
 
