@@ -295,6 +295,13 @@ class Pipeline:
         # Store features
         self.feature_store.store_features(features, ic_dict)
 
+        # Store regime labels
+        from data_pipeline.features.regime_storage import store_regime_labels
+        regime_cols = [c for c in features.columns if 'regime' in c]
+        if regime_cols:
+            regime_df = features[regime_cols]
+            store_regime_labels(regime_df)
+
         return len(features.columns)
 
     def run_health_checks(self) -> None:
