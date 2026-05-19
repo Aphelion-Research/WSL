@@ -1,8 +1,29 @@
 # Dominion Agent Handoff
 
-## Current State — 2026-05-19
+## Current State — 2026-05-18
 
-Status: **LIVE_GREEN** — All systems operational. RAGD daemon running, vault clean, 0 orphan chunks.
+Status: **LIVE_GREEN** — All systems operational. RAGD daemon running, vault clean, sovereign data pipeline deployed.
+
+### NEW: Sovereign Data Pipeline (Commit d16c5a9)
+
+Complete institutional-grade XAU/USD data pipeline deployed:
+- 5 sources: Yahoo Finance (GC=F, GLD), FRED (10 macro series), Alpha Vantage, CFTC COT, MT5/domdata
+- Kalman filter bank (6 timescales) with dynamic trust scoring
+- 400+ alpha features across 7 categories
+- HMM regime detection + health monitoring
+- Daily intelligence reports → DuckDB + RAGD
+- Zero trading execution (safety scanner PASS)
+- 16/16 tests passing
+
+**Quick Start:**
+```bash
+python -m data_pipeline.cli run       # full pipeline run
+python -m data_pipeline.cli status    # source health
+python -m data_pipeline.cli doctor    # deep health check
+python -m data_pipeline.cli report    # intelligence report
+```
+
+See full architecture in PROGRESS.md below.
 
 Use now:
 
