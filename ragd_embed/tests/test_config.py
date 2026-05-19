@@ -6,6 +6,7 @@ from ragd_embed.config import load_config
 
 
 def test_provider_resolved_from_env(monkeypatch, tmp_path):
+    monkeypatch.delenv("RAGD_EMBED_MODEL", raising=False)
     monkeypatch.setenv("RAGD_EMBED_PROVIDER", "openai")
     monkeypatch.setenv("RAGD_EMBED_API_KEY", "test-key")
     monkeypatch.setenv("RAGD_EMBED_CACHE", str(tmp_path / "cache.db"))

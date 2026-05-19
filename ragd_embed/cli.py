@@ -16,7 +16,7 @@ def _json(data: dict) -> None:
 def cmd_run(args: argparse.Namespace) -> int:
     try:
         cfg = load_config(require_key=True)
-        stats = run_embedding_pipeline(cfg=cfg, changed_only=args.changed_only)
+        stats = run_embedding_pipeline(cfg=cfg, changed_only=args.changed_only, show_progress=not args.json)
         from ragd_hnsw.config import default_index_path
         from ragd_hnsw.index import HNSWIndex
         from ragd_hnsw.sync import sync_index

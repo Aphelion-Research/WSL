@@ -44,6 +44,7 @@ def test_unchanged_chunks_produce_zero_api_calls(tmp_path):
         provider=provider,
         cache=cache,
         ragd_db_path=tmp_path / "missing.db",
+        show_progress=False,
     )
     assert stats.cache_hits == 1
     assert stats.api_batches == 0
@@ -58,6 +59,7 @@ def test_changed_chunks_call_provider_once(tmp_path):
         provider=provider,
         cache=EmbeddingCache(tmp_path / "cache.db"),
         ragd_db_path=tmp_path / "missing.db",
+        show_progress=False,
     )
     assert stats.cache_misses == 1
     assert stats.api_batches == 1

@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import logging
 import time
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Callable, Sequence
 
 from .providers import EmbedProvider
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -21,22 +24,33 @@ class EmbedBatcher:
         self.retry_delays = tuple(retry_delays)
         self.last_stats = BatchStats(0, 0, 0)
 
-    def embed_in_batches(self, texts: list[str]) -> list[list[float]]:
+    def embed_in_batches(
+        self,
+        texts: list[str],
+        batch_callback: Callable[[int, int], None] | None = None,
+    ) -> list[list[float]]:
         vectors: list[list[float]] = []
         retries = 0
         batches = 0
-        for start in range(0, len(texts), self.batch_size):
+        for batch_idx, start in enumerate(range(0, len(texts), self.batch_size)):
             batch = texts[start:start + self.batch_size]
             attempt = 0
             while True:
                 try:
-                    vectors.extend(self.provider.embed_batch(batch))
+                    batch_vectors = self.provider.embed_batch(batch)
+                    vectors.extend(batch_vectors)
                     batches += 1
+                    logger.debug(f"Batch {batch_idx + 1}: embedded {len(batch)} texts → {len(batch_vectors)} vectors")
+                    if batch_callback:
+                        batch_callback(batch_idx, len(batch))
                     break
-                except Exception:
+                except Exception as exc:
                     if attempt >= len(self.retry_delays):
+                        logger.error(f"Batch {batch_idx + 1} failed after {attempt} retries: {exc}")
                         raise
-                    time.sleep(self.retry_delays[attempt])
+                    delay = self.retry_delays[attempt]
+                    logger.warning(f"Batch {batch_idx + 1} failed (attempt {attempt + 1}), retrying in {delay}s: {exc}")
+                    time.sleep(delay)
                     retries += 1
                     attempt += 1
         self.last_stats = BatchStats(batches=batches, texts=len(texts), retries=retries)

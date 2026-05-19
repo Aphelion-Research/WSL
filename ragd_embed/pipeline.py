@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 import sqlite3
+import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 import numpy as np
+from rich.console import Console
+from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn, TimeElapsedColumn, TimeRemainingColumn
 
 from .batcher import EmbedBatcher
 from .cache import EmbeddingCache
@@ -15,6 +19,9 @@ from .providers import EmbedProvider
 from .providers.bedrock import BedrockProvider
 from .providers.openai import OpenAIProvider
 from .providers.voyage import VoyageProvider
+
+logger = logging.getLogger(__name__)
+console = Console()
 
 
 @dataclass(frozen=True)
@@ -120,6 +127,7 @@ def run_embedding_pipeline(
     cache: EmbeddingCache | None = None,
     ragd_db_path: Path | None = None,
     changed_only: bool = False,
+    show_progress: bool = True,
 ) -> EmbedRunStats:
     cfg = cfg or load_config(require_key=True)
     provider = provider or provider_from_config(cfg)
@@ -127,30 +135,103 @@ def run_embedding_pipeline(
     ragd_db_path = Path(ragd_db_path or cfg.ragd_db_path)
     chunk_list = list(chunks) if chunks is not None else load_chunks_from_ragd(ragd_db_path, changed_only=changed_only)
 
+    console.print(f"[bold cyan]Embedding pipeline starting[/bold cyan]")
+    console.print(f"Provider: [yellow]{provider.name}[/yellow]  Model: [yellow]{provider.model}[/yellow]  Dim: [yellow]{provider.dim}[/yellow]")
+    console.print(f"Chunks found: [green]{len(chunk_list)}[/green]")
+
     hits = 0
     misses: list[ChunkInput] = []
     vectors_by_id: dict[int, list[float]] = {}
-    for chunk in chunk_list:
-        cached = cache.get(chunk.content_hash, provider=provider.name, model=provider.model, dim=provider.dim)
-        if cached is not None:
-            hits += 1
-            vectors_by_id[chunk.chunk_id] = cached
-        else:
-            misses.append(chunk)
+
+    start_time = time.time()
+
+    if show_progress and chunk_list:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[bold blue]Cache check[/bold blue]"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            TimeElapsedColumn(),
+            console=console,
+        ) as progress:
+            task = progress.add_task("Checking cache", total=len(chunk_list))
+            for chunk in chunk_list:
+                cached = cache.get(chunk.content_hash, provider=provider.name, model=provider.model, dim=provider.dim)
+                if cached is not None:
+                    hits += 1
+                    vectors_by_id[chunk.chunk_id] = cached
+                else:
+                    misses.append(chunk)
+                progress.update(task, advance=1)
+    else:
+        for chunk in chunk_list:
+            cached = cache.get(chunk.content_hash, provider=provider.name, model=provider.model, dim=provider.dim)
+            if cached is not None:
+                hits += 1
+                vectors_by_id[chunk.chunk_id] = cached
+            else:
+                misses.append(chunk)
+
+    console.print(f"Cache hits: [green]{hits}[/green]  Cache misses: [red]{len(misses)}[/red]")
 
     if misses:
+        console.print(f"[bold cyan]Embedding {len(misses)} chunks via API[/bold cyan]")
         batcher = EmbedBatcher(provider, batch_size=cfg.batch_size)
-        vectors = batcher.embed_in_batches([chunk_text(chunk) for chunk in misses])
+
+        batch_callback: Callable[[int, int], None] | None = None
+        if show_progress:
+            num_batches = (len(misses) + cfg.batch_size - 1) // cfg.batch_size
+            progress = Progress(
+                SpinnerColumn(),
+                TextColumn("[bold blue]Batch {task.fields[current]}/{task.fields[total_batches]}[/bold blue]"),
+                BarColumn(),
+                TaskProgressColumn(),
+                TextColumn("•"),
+                TextColumn("{task.fields[rate]:.1f} emb/s"),
+                TextColumn("•"),
+                TimeRemainingColumn(),
+                console=console,
+            )
+            progress.start()
+            task_id = progress.add_task("Embedding", total=len(misses), current=0, total_batches=num_batches, rate=0.0)
+
+            batch_counter = [0]
+            embed_start = [time.time()]
+
+            def callback(batch_idx: int, batch_size: int) -> None:
+                batch_counter[0] += 1
+                completed = min((batch_idx + 1) * cfg.batch_size, len(misses))
+                elapsed = time.time() - embed_start[0]
+                rate = completed / elapsed if elapsed > 0 else 0.0
+                progress.update(task_id, completed=completed, current=batch_counter[0], total=num_batches, rate=rate)
+
+            batch_callback = callback
+
+        try:
+            vectors = batcher.embed_in_batches([chunk_text(chunk) for chunk in misses], batch_callback=batch_callback)
+        finally:
+            if show_progress:
+                progress.stop()
+
         if len(vectors) != len(misses):
             raise RuntimeError(f"embedding provider returned {len(vectors)} vectors for {len(misses)} chunks")
         for chunk, vector in zip(misses, vectors):
             cache.put(chunk.content_hash, vector, provider=provider.name, model=provider.model)
             vectors_by_id[chunk.chunk_id] = vector
         api_batches = batcher.last_stats.batches
+
+        elapsed = time.time() - start_time
+        rate = len(misses) / elapsed if elapsed > 0 else 0.0
+        console.print(f"[green]✓[/green] Embedded {len(misses)} chunks in {api_batches} batches ([cyan]{rate:.1f}[/cyan] emb/s)")
+        if batcher.last_stats.retries > 0:
+            console.print(f"[yellow]⚠[/yellow] Retries: {batcher.last_stats.retries}")
     else:
         api_batches = 0
+        console.print("[green]✓[/green] All chunks cached, no API calls needed")
 
     store_vectors_in_ragd(ragd_db_path, vectors_by_id)
+    console.print(f"[green]✓[/green] Stored {len(vectors_by_id)} vectors in ragd_db")
+
     return EmbedRunStats(
         chunks_seen=len(chunk_list),
         cache_hits=hits,
