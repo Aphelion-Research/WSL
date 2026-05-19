@@ -1,8 +1,10 @@
 {
   "mcpServers": {
     "ragd": {
-      "url": "http://localhost:7474/mcp",
-      "transport": "http"
+      "type": "http",
+      "url": "http://127.0.0.1:7474",
+      "name": "ragd",
+      "description": "Blackmark Dominion RAGD memory daemon — decisions, TODOs, handoffs, architecture"
     }
   }
 }
