@@ -158,7 +158,7 @@ def compute_real_gold_price(gold_df: pd.DataFrame, macro_df: pd.DataFrame) -> pd
 
     # Merge gold and CPI
     merged = gold_df[["close"]].join(macro_pivot[["CPIAUCSL"]], how='left')
-    merged = merged.fillna(method='ffill')
+    merged = merged.ffill()
 
     # Real gold = nominal / (CPI / 100)
     features["real_gold"] = merged["close"] / (merged["CPIAUCSL"] / 100)

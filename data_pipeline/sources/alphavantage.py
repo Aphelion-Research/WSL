@@ -21,56 +21,94 @@ class AlphaVantageSource(DataSource):
         self.base_url = "https://www.alphavantage.co/query"
 
     def fetch(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
-        """Fetch gold OHLCV from Alpha Vantage."""
+        """Fetch gold OHLCV from Alpha Vantage with aggressive caching."""
+        import json
+        from pathlib import Path
+
         if end_date is None:
             end_date = datetime.now()
         if start_date is None:
             start_date = end_date - timedelta(days=365 * 5)
 
+        cache_dir = Path('/tmp')
+        cache_file = cache_dir / 'av_gld_cache.json'
+
+        # Use cache if less than 23 hours old
+        data = None
+        if cache_file.exists():
+            age_hours = (time.time() - cache_file.stat().st_mtime) / 3600
+            if age_hours < 23:
+                print(f"Using AV cache ({age_hours:.1f}h old)")
+                with open(cache_file) as f:
+                    data = json.load(f)
+
         all_data = []
 
         for symbol in self.symbols:
             try:
-                # TIME_SERIES_DAILY for GLD
-                params = {
-                    "function": "TIME_SERIES_DAILY",
-                    "symbol": symbol,
-                    "outputsize": "full",
-                    "apikey": self.api_key,
-                }
+                # Fetch if no cache
+                if data is None:
+                    params = {
+                        "function": "TIME_SERIES_DAILY",
+                        "symbol": symbol,
+                        "outputsize": "full",
+                        "apikey": self.api_key,
+                    }
 
-                response = requests.get(self.base_url, params=params, timeout=30)
-                response.raise_for_status()
-                data = response.json()
+                    response = requests.get(self.base_url, params=params, timeout=30)
+                    response.raise_for_status()
+                    data = response.json()
 
-                if "Time Series (Daily)" not in data:
-                    self.mark_error(f"No daily data for {symbol}: {data.get('Note', data.get('Error Message', 'Unknown error'))}")
+                    # Check for rate limit
+                    if 'Information' in data or 'Note' in data:
+                        msg = data.get('Information', data.get('Note', 'Unknown'))
+                        print(f"AV rate limited: {msg}")
+                        self.mark_error(f"AV rate limited: {msg}")
+                        # Return empty df gracefully — other sources will carry the load
+                        return pd.DataFrame()
+
+                    # Cache the response
+                    with open(cache_file, 'w') as f:
+                        json.dump(data, f)
+
+                # Parse time series
+                ts_key = [k for k in data.keys() if 'Time Series' in k]
+                if not ts_key:
+                    self.mark_error(f"No time series in AV response for {symbol}: {list(data.keys())}")
                     continue
 
-                ts = data["Time Series (Daily)"]
+                ts = data[ts_key[0]]
                 rows = []
                 for date_str, values in ts.items():
-                    rows.append({
-                        "timestamp": pd.to_datetime(date_str),
-                        "open": float(values["1. open"]),
-                        "high": float(values["2. high"]),
-                        "low": float(values["3. low"]),
-                        "close": float(values["4. close"]),
-                        "volume": float(values["5. volume"]),
-                    })
+                    try:
+                        rows.append({
+                            "timestamp": pd.to_datetime(date_str),
+                            "open": float(values.get("1. open", values.get("open", 0))),
+                            "high": float(values.get("2. high", values.get("high", 0))),
+                            "low": float(values.get("3. low", values.get("low", 0))),
+                            "close": float(values.get("4. close", values.get("close", 0))),
+                            "volume": float(values.get("5. volume", values.get("volume", 0))),
+                        })
+                    except (ValueError, KeyError):
+                        continue
 
-                df = pd.DataFrame(rows)
+                df = pd.DataFrame(rows).sort_values('timestamp')
                 df = df[(df["timestamp"] >= start_date) & (df["timestamp"] <= end_date)]
+                df['source'] = 'alphavantage'
+                df['fetch_time'] = datetime.now()
+                df['quality_score'] = 0.9
                 all_data.append(df)
 
-                # Rate limit delay (free tier: 25 req/day)
+                # Rate limit delay
                 time.sleep(ALPHAVANTAGE_RATE_LIMIT_DELAY)
 
             except Exception as e:
                 self.mark_error(f"Failed to fetch {symbol}: {e}")
 
         if not all_data:
-            raise RuntimeError("No data fetched from Alpha Vantage")
+            # Graceful degradation — return empty rather than crash
+            print("WARNING: No Alpha Vantage data, pipeline will use other sources")
+            return pd.DataFrame()
 
         df = pd.concat(all_data, ignore_index=True)
         df = df.sort_values("timestamp").drop_duplicates("timestamp", keep="last")

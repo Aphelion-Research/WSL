@@ -20,6 +20,11 @@ CREATE TABLE IF NOT EXISTS gold_raw (
 -- Kalman-fused gold master timeseries
 CREATE TABLE IF NOT EXISTS gold_master (
     timestamp TIMESTAMP PRIMARY KEY,
+    open DOUBLE,
+    high DOUBLE,
+    low DOUBLE,
+    close DOUBLE NOT NULL,
+    volume DOUBLE,
     fused_price DOUBLE NOT NULL,
     fused_confidence DOUBLE NOT NULL,
     source_weights_json VARCHAR,

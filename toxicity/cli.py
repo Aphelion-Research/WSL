@@ -53,12 +53,17 @@ def cmd_compute():
 
     lob_metrics['toxicity_score'] = scores
 
-    # Store metrics
+    # Store metrics row-by-row
     conn.execute("DELETE FROM toxicity_metrics")
-    conn.execute("""
-        INSERT INTO toxicity_metrics
-        SELECT * FROM lob_metrics
-    """, {"lob_metrics": lob_metrics})
+    for _, row in lob_metrics.iterrows():
+        conn.execute("""
+            INSERT INTO toxicity_metrics (timestamp, vpin, ofi_1s, ofi_5s, ofi_1m,
+                                         adverse_selection_bps, effective_spread_bps, realized_spread_bps,
+                                         price_impact_bps, toxicity_score)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, [row['timestamp'], row['vpin'], row['ofi_1s'], row['ofi_5s'], row['ofi_1m'],
+              row['adverse_selection_bps'], row['effective_spread_bps'], row['realized_spread_bps'],
+              row['price_impact_bps'], row['toxicity_score']])
 
     rows_stored = conn.execute("SELECT COUNT(*) FROM toxicity_metrics").fetchone()[0]
     conn.close()

@@ -45,8 +45,9 @@ class FeatureStore:
         all_features.append(crossasset.compute_all_crossasset_features(gold_df, macro_df))
 
         # COT features (~30)
-        # Merge COT with gold index
-        cot_aligned = cot_df.set_index("report_date").reindex(gold_df.index, method='ffill')
+        # Merge COT with gold index (sort, reindex, forward fill)
+        cot_indexed = cot_df.set_index("report_date").sort_index()
+        cot_aligned = cot_indexed.reindex(gold_df.index).ffill()
         if not cot_aligned.empty:
             all_features.append(cot_features.compute_all_cot_features(cot_aligned))
 

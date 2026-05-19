@@ -170,54 +170,92 @@ class Pipeline:
         conn.close()
 
     def fuse_prices(self, raw_data: Dict[str, pd.DataFrame]) -> pd.DataFrame:
-        """Fuse prices via Kalman filter bank."""
+        """Fuse prices via Kalman filter bank with graceful degradation."""
         print("Fusing prices via Kalman filter bank...")
 
-        # Combine all gold sources
-        gold_sources = ["yahoo", "alphavantage", "mt5"]
-        all_gold = []
+        # Find any source with gold OHLCV data
+        gold_frames = []
+        for source_name, df in raw_data.items():
+            if df is None or df.empty:
+                continue
+            if 'close' not in df.columns:
+                continue
+            if len(df) < 10:
+                print(f"  Skipping {source_name}: only {len(df)} rows")
+                continue
+            gold_frames.append((source_name, df))
 
-        for source in gold_sources:
-            if source in raw_data and not raw_data[source].empty:
-                df = raw_data[source].copy()
-                df["source"] = source
-                all_gold.append(df)
+        if not gold_frames:
+            raise RuntimeError("No usable gold data from any source")
 
-        if not all_gold:
-            raise RuntimeError("No gold data to fuse")
+        print(f"Fusing from {len(gold_frames)} sources: {[s for s, _ in gold_frames]}")
 
-        combined = pd.concat(all_gold, ignore_index=True)
+        # Use best source as primary (most rows)
+        primary_source, primary_df = max(gold_frames, key=lambda x: len(x[1]))
+        print(f"Primary source: {primary_source} ({len(primary_df)} bars)")
 
-        # Group by timestamp and fuse
-        fused_data = []
+        # Align timestamps — use primary as index
+        primary_df = primary_df.set_index('timestamp').sort_index()
 
-        for ts, group in combined.groupby("timestamp"):
-            observations = {row["source"]: row["close"] for _, row in group.iterrows()}
+        fused = pd.DataFrame(index=primary_df.index)
+        fused['open'] = primary_df['open'] if 'open' in primary_df.columns else primary_df['close']
+        fused['high'] = primary_df['high'] if 'high' in primary_df.columns else primary_df['close']
+        fused['low'] = primary_df['low'] if 'low' in primary_df.columns else primary_df['close']
+        fused['close'] = primary_df['close']
+        fused['volume'] = primary_df['volume'] if 'volume' in primary_df.columns else 0
+        fused['fused_price'] = primary_df['close']
+        fused['fused_confidence'] = 0.9
+        fused['source_weights_json'] = json.dumps({'primary': primary_source})
+        fused['anomaly_flag'] = False
+        fused['regime'] = 'unknown'
 
-            fused_price, confidence, source_weights, anomaly_flag = self.kalman_bank.fuse(
-                observations, ts
-            )
+        # If multiple sources: run Kalman fusion
+        if len(gold_frames) > 1:
+            try:
+                print("  Running Kalman fusion across sources...")
+                from data_pipeline.fusion.kalman import KalmanFilterBank
+                bank = KalmanFilterBank()
 
-            fused_data.append({
-                "timestamp": ts,
-                "fused_price": fused_price,
-                "fused_confidence": confidence,
-                "source_weights_json": json.dumps(source_weights),
-                "anomaly_flag": anomaly_flag,
-            })
+                for ts in fused.index:
+                    observations = {}
+                    for sname, sdf in gold_frames:
+                        sdf_ts = sdf.set_index('timestamp') if 'timestamp' in sdf.columns else sdf
+                        if ts in sdf_ts.index:
+                            observations[sname] = float(sdf_ts.loc[ts, 'close'])
 
-        fused_df = pd.DataFrame(fused_data)
+                    if len(observations) > 0:
+                        fused_price, confidence, source_weights, anomaly = bank.fuse(observations, ts)
+                        fused.loc[ts, 'fused_price'] = fused_price
+                        fused.loc[ts, 'fused_confidence'] = confidence
+                        fused.loc[ts, 'source_weights_json'] = json.dumps(source_weights)
+                        fused.loc[ts, 'anomaly_flag'] = anomaly
+
+                print(f"  Kalman fusion complete: {len(fused)} bars")
+            except Exception as e:
+                print(f"  Kalman fusion failed ({e}), using primary source prices")
+
+        fused = fused.reset_index()
+        fused = fused.rename(columns={'index': 'timestamp'})
+        fused['timestamp'] = pd.to_datetime(fused['timestamp'])
 
         # Store in gold_master
         conn = duckdb.connect(str(self.db_path))
+
+        # Register df for DuckDB SQL query
+        conn.register('fused_temp', fused)
+
         conn.execute("""
             INSERT OR REPLACE INTO gold_master
-            SELECT timestamp, fused_price, fused_confidence, source_weights_json, anomaly_flag, NULL as regime
-            FROM fused_df
+            SELECT timestamp, open, high, low, close, volume, fused_price, fused_confidence, source_weights_json, anomaly_flag, regime
+            FROM fused_temp
         """)
+
+        conn.unregister('fused_temp')
         conn.close()
 
-        return fused_df
+        print(f"  Stored {len(fused)} bars in gold_master")
+
+        return fused
 
     def reconstruct_ticks(self, fused_df: pd.DataFrame) -> None:
         """Reconstruct synthetic ticks."""
@@ -359,12 +397,12 @@ class Pipeline:
 
             # Phase 4: Compute features
             conn = duckdb.connect(str(self.db_path))
-            gold_df = conn.execute("SELECT timestamp, fused_price as close FROM gold_master ORDER BY timestamp").fetchdf()
+            gold_df = conn.execute("SELECT timestamp, open, high, low, close, volume, fused_price FROM gold_master ORDER BY timestamp").fetchdf()
             macro_df = conn.execute("SELECT * FROM macro_data").fetchdf()
             cot_df = conn.execute("SELECT * FROM cot_data").fetchdf()
             conn.close()
 
-            gold_df = gold_df.set_index("timestamp")
+            gold_df = gold_df.set_index("timestamp").sort_index()
 
             features_computed = self.compute_features(gold_df, macro_df, cot_df)
 

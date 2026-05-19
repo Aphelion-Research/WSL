@@ -24,53 +24,112 @@ class COTSource(DataSource):
 
         for year, url in self.urls.items():
             try:
+                print(f"Fetching COT {year}...")
                 response = requests.get(url, timeout=60)
                 response.raise_for_status()
 
                 # Extract Excel from zip
                 with zipfile.ZipFile(io.BytesIO(response.content)) as zf:
-                    # Find the Excel file
+                    # Find the Excel file (usually .xls)
                     excel_files = [f for f in zf.namelist() if f.endswith('.xls') or f.endswith('.xlsx')]
                     if not excel_files:
                         self.mark_error(f"No Excel file in {year} zip")
                         continue
 
-                    with zf.open(excel_files[0]) as excel_file:
-                        df = pd.read_excel(excel_file)
+                    excel_file = excel_files[0]
+                    print(f"  Parsing {excel_file}...")
 
-                        # Filter for gold futures (COMEX code 088691)
-                        df_gold = df[df['CFTC_Contract_Market_Code'].astype(str) == self.gold_code].copy()
+                    with zf.open(excel_file) as f:
+                        # Try xlrd for .xls files
+                        try:
+                            if excel_file.endswith('.xls'):
+                                df = pd.read_excel(f, engine='xlrd')
+                            else:
+                                df = pd.read_excel(f, engine='openpyxl')
+                        except Exception as e:
+                            # Fallback: read bytes and try again
+                            f.seek(0)
+                            df = pd.read_excel(io.BytesIO(f.read()), engine='xlrd' if excel_file.endswith('.xls') else 'openpyxl')
 
-                        if df_gold.empty:
-                            self.mark_error(f"No gold data in {year} COT report")
-                            continue
+                    # Find gold rows — column names vary between years
+                    # Try multiple search strategies
+                    df_gold = pd.DataFrame()
 
-                        # Extract relevant columns
-                        df_gold = df_gold.rename(columns={
-                            'Report_Date_as_YYYY-MM-DD': 'report_date',
-                            'Comm_Positions_Long_All': 'commercial_long',
-                            'Comm_Positions_Short_All': 'commercial_short',
-                            'NonComm_Positions_Long_All': 'noncommercial_long',
-                            'NonComm_Positions_Short_All': 'noncommercial_short',
-                            'Open_Interest_All': 'open_interest',
-                        })
+                    # Strategy 1: Search by CFTC_Contract_Market_Code
+                    if 'CFTC_Contract_Market_Code' in df.columns:
+                        mask = df['CFTC_Contract_Market_Code'].astype(str).str.contains(self.gold_code, na=False)
+                        df_gold = df[mask].copy()
 
-                        # Keep only needed columns
-                        cols = ['report_date', 'commercial_long', 'commercial_short',
+                    # Strategy 2: Search by Market_and_Exchange_Names
+                    if df_gold.empty:
+                        name_cols = [c for c in df.columns if 'market' in c.lower() and 'exchange' in c.lower()]
+                        for name_col in name_cols:
+                            mask = df[name_col].astype(str).str.contains('GOLD|088691', case=False, na=False)
+                            if mask.any():
+                                df_gold = df[mask].copy()
+                                break
+
+                    # Strategy 3: Search any column for 088691
+                    if df_gold.empty:
+                        for col in df.columns:
+                            if df[col].dtype == 'object' or 'int' in str(df[col].dtype):
+                                mask = df[col].astype(str).str.contains('088691', na=False)
+                                if mask.any():
+                                    df_gold = df[mask].copy()
+                                    break
+
+                    if df_gold.empty:
+                        self.mark_error(f"No gold data (088691) in {year} COT report")
+                        continue
+
+                    print(f"  Found {len(df_gold)} gold rows")
+
+                    # Flexible column mapping — try multiple name variants
+                    col_map = {}
+                    for col in df_gold.columns:
+                        col_lower = col.lower().replace('_', '').replace(' ', '')
+                        if 'reportdate' in col_lower and ('mm' in col_lower or 'yyyy' in col_lower):
+                            col_map['report_date'] = col
+                        elif col == 'Comm_Positions_Long_All':
+                            col_map['commercial_long'] = col
+                        elif col == 'Comm_Positions_Short_All':
+                            col_map['commercial_short'] = col
+                        elif col == 'NonComm_Positions_Long_All':
+                            col_map['noncommercial_long'] = col
+                        elif col == 'NonComm_Positions_Short_All':
+                            col_map['noncommercial_short'] = col
+                        elif col == 'Open_Interest_All':
+                            col_map['open_interest'] = col
+
+                    # Rename columns
+                    df_gold = df_gold.rename(columns={v: k for k, v in col_map.items()})
+
+                    # Keep only needed columns
+                    required = ['report_date', 'commercial_long', 'commercial_short',
                                 'noncommercial_long', 'noncommercial_short', 'open_interest']
-                        df_gold = df_gold[cols]
+                    available = [c for c in required if c in df_gold.columns]
 
-                        # Compute derived metrics
+                    if len(available) < 3:
+                        self.mark_error(f"Missing COT columns in {year}: found {available}")
+                        continue
+
+                    df_gold = df_gold[available].copy()
+
+                    # Compute derived metrics
+                    if 'commercial_long' in df_gold.columns and 'commercial_short' in df_gold.columns:
                         df_gold['net_commercial'] = df_gold['commercial_long'] - df_gold['commercial_short']
+                    if 'noncommercial_long' in df_gold.columns and 'noncommercial_short' in df_gold.columns:
                         df_gold['speculator_sentiment'] = (
                             df_gold['noncommercial_long'] /
-                            (df_gold['noncommercial_long'] + df_gold['noncommercial_short'])
+                            (df_gold['noncommercial_long'] + df_gold['noncommercial_short'] + 1e-9)
                         )
 
-                        # Convert report_date to datetime
-                        df_gold['report_date'] = pd.to_datetime(df_gold['report_date'])
+                    # Convert report_date to datetime
+                    if 'report_date' in df_gold.columns:
+                        df_gold['report_date'] = pd.to_datetime(df_gold['report_date'], errors='coerce')
+                        df_gold = df_gold.dropna(subset=['report_date'])
 
-                        all_data.append(df_gold)
+                    all_data.append(df_gold)
 
             except Exception as e:
                 self.mark_error(f"Failed to fetch COT {year}: {e}")

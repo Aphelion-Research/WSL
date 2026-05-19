@@ -13,6 +13,7 @@ class DataSource(ABC):
         self.last_fetch: Optional[datetime] = None
         self.error_count = 0
         self.last_error: Optional[str] = None
+        self.trust_score = 0.5  # Initial trust score for Kalman fusion
 
     @abstractmethod
     def fetch(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:

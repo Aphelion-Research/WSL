@@ -38,13 +38,13 @@ FRED_YEARS = 5
 ALPHAVANTAGE_RATE_LIMIT_DELAY = 13  # seconds between requests (free tier: 25/day)
 ALPHAVANTAGE_SYMBOLS = ["GLD"]
 
-# COT data
+# COT data (disaggregated commodity futures, not financial futures)
 COT_URLS = {
-    2022: "https://www.cftc.gov/files/dea/history/fut_fin_xls_2022.zip",
-    2023: "https://www.cftc.gov/files/dea/history/fut_fin_xls_2023.zip",
-    2024: "https://www.cftc.gov/files/dea/history/fut_fin_xls_2024.zip",
-    2025: "https://www.cftc.gov/files/dea/history/fut_fin_xls_2025.zip",  # May 404 if not yet available
-    2026: "https://www.cftc.gov/files/dea/history/fut_fin_xls_2026.zip",  # May 404 if not yet available
+    2022: "https://www.cftc.gov/files/dea/history/dea_fut_xls_2022.zip",
+    2023: "https://www.cftc.gov/files/dea/history/dea_fut_xls_2023.zip",
+    2024: "https://www.cftc.gov/files/dea/history/dea_fut_xls_2024.zip",
+    2025: "https://www.cftc.gov/files/dea/history/dea_fut_xls_2025.zip",  # May 404 if not yet available
+    2026: "https://www.cftc.gov/files/dea/history/dea_fut_xls_2026.zip",  # May 404 if not yet available
 }
 COT_GOLD_CODE = "088691"  # COMEX gold futures
 

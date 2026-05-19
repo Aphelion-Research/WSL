@@ -164,7 +164,7 @@ def compute_all_crossasset_features(
 
     # Merge with gold
     merged = gold_df[["close"]].join(macro_pivot, how='left')
-    merged = merged.fillna(method='ffill').fillna(method='bfill')
+    merged = merged.ffill().bfill()
 
     # Compute features for each macro series
     for series_id in macro_pivot.columns:

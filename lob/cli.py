@@ -30,11 +30,17 @@ def cmd_compute():
     # Clear existing metrics
     conn.execute("DELETE FROM lob_metrics")
 
-    # Insert new metrics
-    conn.execute("""
-        INSERT INTO lob_metrics
-        SELECT * FROM metrics
-    """, {"metrics": metrics})
+    # Insert row by row
+    for _, row in metrics.iterrows():
+        conn.execute("""
+            INSERT INTO lob_metrics (timestamp, spread, effective_spread, roll_spread, corwin_schultz_spread,
+                                     ofi_1s, ofi_5s, ofi_1m, vpin, depth_imbalance, depth_weighted_mid,
+                                     bid_depth, ask_depth)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, [row['timestamp'], row['spread'], row['effective_spread'], row['roll_spread'],
+              row['corwin_schultz_spread'], row['ofi_1s'], row['ofi_5s'], row['ofi_1m'],
+              row['vpin'], row['depth_imbalance'], row['depth_weighted_mid'],
+              row['bid_depth'], row['ask_depth']])
 
     rows_inserted = conn.execute("SELECT COUNT(*) FROM lob_metrics").fetchone()[0]
     conn.close()

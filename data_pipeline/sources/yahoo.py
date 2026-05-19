@@ -37,23 +37,59 @@ class YahooSource(DataSource):
                 try:
                     yfobj = yf.Ticker(ticker)
 
-                    # Fetch daily data
-                    df_daily = yfobj.history(period=YAHOO_DAILY_PERIOD, interval="1d")
-                    if not df_daily.empty:
-                        df_daily = df_daily.reset_index()
-                        df_daily["ticker"] = ticker
-                        df_daily["interval"] = "1d"
-                        all_data.append(df_daily)
+                    # Fetch daily data using history() — more reliable than download()
+                    df = yfobj.history(period=YAHOO_DAILY_PERIOD, interval="1d", auto_adjust=True)
 
-                    # Fetch hourly data (last 60 days)
-                    df_hourly = yfobj.history(period=YAHOO_HOURLY_PERIOD, interval="1h")
-                    if not df_hourly.empty:
-                        df_hourly = df_hourly.reset_index()
-                        df_hourly["ticker"] = ticker
-                        df_hourly["interval"] = "1h"
-                        all_data.append(df_hourly)
+                    if df.empty:
+                        if attempt == self.max_retries - 1:
+                            self.mark_error(f"Empty data for {ticker}")
+                        else:
+                            time.sleep(self.retry_delay * (2 ** attempt))
+                        continue
 
+                    # Reset index — converts DatetimeIndex to 'Date' or 'Datetime' column
+                    df = df.reset_index()
+
+                    # Find date column (could be 'Date' or 'Datetime' depending on interval)
+                    date_col = None
+                    if 'Datetime' in df.columns:
+                        date_col = 'Datetime'
+                    elif 'Date' in df.columns:
+                        date_col = 'Date'
+                    else:
+                        raise ValueError(f"No date column found in {ticker} data: {df.columns.tolist()}")
+
+                    # Rename to timestamp
+                    df = df.rename(columns={date_col: 'timestamp'})
+
+                    # Lowercase all column names
+                    df.columns = [c.lower() for c in df.columns]
+
+                    # Strip timezone if present
+                    df['timestamp'] = pd.to_datetime(df['timestamp'])
+                    if hasattr(df['timestamp'].iloc[0], 'tzinfo') and df['timestamp'].iloc[0].tzinfo:
+                        df['timestamp'] = df['timestamp'].dt.tz_localize(None)
+
+                    # Keep only OHLCV + add metadata
+                    required_cols = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
+                    df = df[[c for c in required_cols if c in df.columns]].copy()
+
+                    # Validate basic sanity
+                    df = df.dropna(subset=['close'])
+                    df = df[df['close'] > 0]
+
+                    if df.empty:
+                        if attempt == self.max_retries - 1:
+                            self.mark_error(f"No valid data after cleaning {ticker}")
+                        continue
+
+                    df['source'] = ticker.lower().replace('=f', '_futures').replace('^', '')
+                    df['fetch_time'] = datetime.now()
+                    df['quality_score'] = 1.0
+
+                    all_data.append(df)
                     break  # success
+
                 except Exception as e:
                     if attempt == self.max_retries - 1:
                         self.mark_error(f"Failed to fetch {ticker}: {e}")
@@ -61,30 +97,25 @@ class YahooSource(DataSource):
                         time.sleep(self.retry_delay * (2 ** attempt))  # exponential backoff
 
         if not all_data:
-            raise RuntimeError("No data fetched from any Yahoo ticker")
+            raise RuntimeError("All Yahoo tickers failed")
 
         # Combine all data
         df = pd.concat(all_data, ignore_index=True)
 
-        # Standardize columns
-        df = df.rename(columns={
-            "Date": "timestamp",
-            "Datetime": "timestamp",
-            "Open": "open",
-            "High": "high",
-            "Low": "low",
-            "Close": "close",
-            "Volume": "volume",
-        })
-
-        # Keep only required columns
-        df = df[["timestamp", "open", "high", "low", "close", "volume"]]
+        # Ensure start/end are naive datetime
+        if start_date and hasattr(start_date, 'tzinfo') and start_date.tzinfo:
+            start_date = start_date.replace(tzinfo=None)
+        if end_date and hasattr(end_date, 'tzinfo') and end_date.tzinfo:
+            end_date = end_date.replace(tzinfo=None)
 
         # Filter by date range
-        df = df[(df["timestamp"] >= start_date) & (df["timestamp"] <= end_date)]
+        if start_date:
+            df = df[df["timestamp"] >= start_date]
+        if end_date:
+            df = df[df["timestamp"] <= end_date]
 
-        # Sort and deduplicate
-        df = df.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
+        # Sort and deduplicate by source+timestamp
+        df = df.sort_values("timestamp").drop_duplicates(["source", "timestamp"], keep="last")
 
         if self.validate(df):
             self.mark_success()
@@ -103,13 +134,15 @@ class YahooSource(DataSource):
             self.mark_error("NaN in close prices")
             return False
 
-        # Volume must be positive
-        if (df["volume"] <= 0).any():
-            self.mark_error("Non-positive volume")
-            return False
+        # Volume check — allow zero (illiquid days), but not negative
+        if 'volume' in df.columns:
+            if (df["volume"] < 0).any():
+                self.mark_error("Negative volume")
+                return False
 
-        # Price range check (500-5000 USD/oz is realistic for gold)
-        if (df["close"] < 500).any() or (df["close"] > 5000).any():
+        # Price range check (gold: 500-5000 $/oz for GC=F, 50-500 $/share for GLD)
+        # Accept anything in this wider range
+        if (df["close"] < 50).any() or (df["close"] > 6000).any():
             self.mark_error("Price outside realistic range")
             return False
 
