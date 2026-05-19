@@ -276,7 +276,7 @@ def test_native_scan_binary_helper_returns_path():
 
 def test_native_scan_falls_back_to_python_when_binary_missing(tmp_path, monkeypatch):
     """cmd_scan_native falls back to Python scan when binary is absent."""
-    import types, argparse
+    import argparse
     from dominion_loader.cli import cmd_scan_native
 
     # Patch binary path to a non-existent file
@@ -285,19 +285,21 @@ def test_native_scan_falls_back_to_python_when_binary_missing(tmp_path, monkeypa
         lambda: tmp_path / "no-such-binary",
     )
 
-    call_log = []
+    call_log: list[dict] = []
 
-    def fake_cmd_scan(args):
-        call_log.append(args)
+    def fake_scan_python(repo, *, dry_run, use_json):
+        call_log.append({"repo": repo, "dry_run": dry_run, "use_json": use_json})
         return 0
 
-    monkeypatch.setattr("dominion_loader.cli.cmd_scan", fake_cmd_scan)
+    monkeypatch.setattr("dominion_loader.cli._cmd_scan_python", fake_scan_python)
 
     args = argparse.Namespace(repo=str(tmp_path), dry_run=True, json=False, native=True)
     rc = cmd_scan_native(args)
     assert rc == 0
     assert len(call_log) == 1  # fell back to Python scan
-    assert call_log[0].native is False  # flag cleared before delegation
+    assert call_log[0]["dry_run"] is True
+    # args are NOT mutated — native flag stays as-is
+    assert args.native is True
 
 
 def test_native_scan_dry_run_discovers_files(tmp_path):

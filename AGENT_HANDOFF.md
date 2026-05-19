@@ -1,51 +1,91 @@
 # Dominion Agent Handoff
 
-## Architecture Truth Sprint — 2026-05-14
+## Current State — 2026-05-19
 
-Status: **ARCH_TRUE** — 6-phase sprint completed. All split-brain surfaces fixed.
+Status: **LIVE_GREEN** — All systems operational. RAGD daemon running, vault clean, 0 orphan chunks.
 
 Use now:
 
 ```bash
 # Verify platform
 bash scripts/verify_live.sh                                     # LIVE_GREEN 14/14
-python scripts/dominion_cli.py doctor --offline --json          # overall: warn/ok; exit 0
-python scripts/dominion_cli.py doctor --offline --json --strict # exit 1 on warn
-python scripts/dominion_cli.py scan --dry-run --json            # Python scan (1281 files)
-python scripts/dominion_cli.py scan --native --dry-run --json   # Native scan (~22ms)
-python dominion_agent/cli.py agent lock reap --json             # reap expired locks
-python domdata/check_no_trading.py                               # PASS: 0 violations
+python scripts/dominion_cli.py doctor --offline --json          # overall: warn; exit 0
+python scripts/dominion_cli.py doctor --json                    # overall: warn; RAGD reachable
+python scripts/dominion_cli.py scan --native --dry-run --json   # Native scan 1282 files ~18ms
+python scripts/dominion_cli.py scan --dry-run --json            # Python scan 1281 files ~201ms
+python domdata/check_no_trading.py                              # PASS: 0 violations
+python -m pytest -q                                             # 426/426 PASS
+ctest --test-dir ragd/build --output-on-failure                 # 24/24 PASS
 ```
 
-What changed this sprint (Architecture Truth):
+Current stats:
+- RAGD: 7159 active chunks, 8760 total, 0 orphan `/tmp/pytest*` chunks
+- Tests: 426 passed (2 deselected)
+- Native core: 24/24 ctest pass
+- Vault: 878 notes, 0 broken links
+- Trading safety: PASS
 
-1. **doctor exit semantics** — `doctor --json` now exits non-zero on `fail`. Added `--strict` flag for exit 1 on `warn`. Fixed `overall` computation to use worst check status. +5 tests.
+RAGD daemon:
+```bash
+tmux attach -t ragd  # view RAGD session
+curl http://127.0.0.1:7474/health
+```
 
-2. **Forbidden-token scanner** — `domdata/check_no_trading.py` refactored: loads allowlist from `config/forbidden_tokens.json` (not hardcoded), path-aware (e.g. `docs/` allowlisted via `allowlist_paths`), scans `.py,.sh,.cpp,.ts,.yaml,.md` etc. Added `allowlist_paths` to policy JSON. +18 tests.
+---
 
-3. **Native scan wiring** — `dominion scan --native` routes through `cmd_scan_native()` which runs `dominion-native-scan --json`, maps native kind→file_class, feeds manifest + RAGD bridge. Falls back to Python if binary absent. ~17x faster than Python scan. +5 tests.
+## Doctor Exit Code Fix — 2026-05-19
 
-4. **Agent OS lock reap** — Added `reap_expired_locks()` to `locks.py`: marks expired active locks as `reaped`. Fixed `acquire_lock()` to skip expired locks (`AND (expires_at IS NULL OR expires_at > ?)`). Added `lock reap` CLI subcommand. Exported via `api.py`/`__init__.py`. +5 tests.
+**Fixed**: `doctor --json` exit code regression from Architecture Truth sprint.
 
-5. **Vault doctor `.md` bug** — Fixed `ragd/src/native/vault_doctor.cpp` line 111: was `if (target.extension().empty()) target += ".md"` — hash-suffixed filenames like `-L31-5de41f6d` have extension `.5de41f6d` (non-empty), so `.md` was never appended. Fixed to `if (ext != ".md" && ext != ".canvas")`. Rebuilt. Result: **0 broken links** (was 17 false positives).
+Changes:
+1. **Offline overall computation** — `doctor --offline --json` now computes `overall` status only from foundation checks (manifest/cache/ignore/embed/vault/native), excluding platform (RAGD/domdata) and AI checks. Exit 0 on warn, 1 on fail.
+2. **Test updates** — 3 doctor tests now use `--offline` flag to avoid RAGD dependency.
 
-6. **Docs** — This file updated.
+Validation:
+- `doctor --offline --json`: exit 0, overall=warn ✓
+- `doctor --json` (live): exit 0, overall=warn, ragd_reachable=True ✓
+- All 9 doctor tests: PASS ✓
 
-Validation baseline after sprint:
+---
 
-- `python -m pytest -q`: 387+ passed.
-- `ctest --test-dir ragd/build`: 24/24 passed.
-- `python domdata/check_no_trading.py`: PASS.
-- `./ragd/build/dominion-native-vault-doctor --root . --json`: 0 broken links.
-- `python scripts/dominion_cli.py scan --native --dry-run --json`: native=true, ~22ms.
+## Architecture Truth Sprint — 2026-05-14
 
-## Live-Green Sprint — 2026-05-14
+Status: **ARCH_TRUE** — 6-phase sprint completed. All split-brain surfaces fixed.
 
-Status: **LIVE_GREEN** — `bash scripts/verify_live.sh` → 14/14 PASS (historical).
+What changed (Architecture Truth sprint):
+
+1. **doctor exit semantics** — `doctor --json` exits non-zero on `fail`. `--strict` flag added for exit 1 on `warn`. `overall` computation fixed. +5 tests. *Updated 2026-05-19: offline mode now excludes platform/AI checks from overall computation.*
+
+2. **Forbidden-token scanner** — `domdata/check_no_trading.py` refactored: loads allowlist from `config/forbidden_tokens.json`, path-aware, scans `.py,.sh,.cpp,.ts,.yaml,.md`. +18 tests.
+
+3. **Native scan wiring** — `dominion scan --native` runs `dominion-native-scan --json`, feeds manifest + RAGD. Falls back to Python if binary absent. 11x faster (18ms vs 201ms for 1282 files). +5 tests. *Verified live 2026-05-19.*
+
+4. **Agent OS lock reap** — `reap_expired_locks()` in `locks.py`, `lock reap` CLI subcommand. +5 tests.
+
+5. **Vault doctor `.md` bug** — Fixed `ragd/src/native/vault_doctor.cpp` line 111. Result: **0 broken links**. *Verified 878 notes, 0 broken links 2026-05-19.*
+
+Validation baseline:
+
+- `python -m pytest -q`: 426/426 passed (updated 2026-05-19)
+- `ctest --test-dir ragd/build`: 24/24 passed
+- `python domdata/check_no_trading.py`: PASS
+- `./ragd/build/dominion-native-vault-doctor --root . --json`: 0 broken links
+- `python scripts/dominion_cli.py scan --native --dry-run --json`: 1282 files, 18ms
+
+## Live-Green Sprint — 2026-05-19
+
+Status: **LIVE_GREEN** — `bash scripts/verify_live.sh` → 14/14 PASS.
+
+Tasks completed:
+1. ✓ Fixed doctor exit code regression (offline mode now excludes platform/AI checks from overall)
+2. ✓ Started RAGD daemon in tmux session `ragd` (PID 7408, 127.0.0.1:7474)
+3. ✓ Verified native scan wired and feeding RAGD (11x faster than Python: 18ms vs 201ms)
+4. ✓ Cleaned 16 orphan `/tmp/pytest*` chunks (7175 → 7159 active chunks)
+5. ✓ Updated AGENT_HANDOFF.md to reflect current live-green state
 
 ## Agent 5 Phase 5 Native Core — 2026-05-14
 
-Status: COMPLETE / LIVE-GREEN (upgraded this sprint). The native C++ spine is real and validated.
+Status: COMPLETE / LIVE-GREEN. The native C++ spine is real and validated.
 
 Use now:
 
@@ -80,11 +120,11 @@ Validation summary:
 - Native live doctor: exit 1 because RAGD loopback port is not reachable.
 - Native vault doctor: `warn`, 874 notes, 298 broken links, 278 stale/outside temp links, 0 secret references.
 
-Next best task:
+~~Next best task:~~ **COMPLETE 2026-05-19**
 
-1. Start or repair live RAGD on `127.0.0.1:7474`, then rerun native live doctor.
-2. Regenerate or repair vault notes so Python and native vault doctors are no longer stale.
-3. Wire native manifest output into loader/RAGD ingestion rather than using it only as a parallel manifest.
+1. ✓ Start or repair live RAGD on `127.0.0.1:7474` → running in tmux session `ragd`
+2. ✓ Regenerate or repair vault notes → 878 notes, 0 broken links
+3. ✓ Wire native manifest output into loader/RAGD ingestion → `dominion scan --native` fully operational
 
 ---
 

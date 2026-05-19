@@ -483,7 +483,10 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             return str(v["status"])
         return "ok" if bool(v) else "fail"
 
-    check_statuses = [_check_status(v) for v in all_checks.values()]
+    # In offline mode, compute overall only from foundation checks
+    # to avoid failing when external services (RAGD, domdata) are unreachable
+    checks_for_overall = foundation_checks if offline else all_checks
+    check_statuses = [_check_status(v) for v in checks_for_overall.values()]
     if "fail" in check_statuses or "error" in check_statuses:
         overall_str = "fail"
     elif "warn" in check_statuses:

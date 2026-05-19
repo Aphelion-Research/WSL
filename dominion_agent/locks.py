@@ -96,17 +96,29 @@ def acquire_lock(
     # this point at a time, preventing the SELECT-then-INSERT race condition.
     _store.conn.execute("BEGIN IMMEDIATE")
     try:
-        # Check for conflicting active locks (skip expired ones)
+        # Check for conflicting active locks (skip expired ones).
+        # Also detect parent/child path overlaps:
+        #   - existing lock on "src/" blocks new lock on "src/a.py"   (? LIKE filepath||'/%')
+        #   - existing lock on "src/a.py" blocks new lock on "src/"   (filepath LIKE ?||'/%')
+        # rtrim(x, '/') strips trailing slashes before building the prefix pattern,
+        # so "src/" and "src" both produce the pattern "src/%" correctly.
         existing_rows = _store.conn.execute(
-            "SELECT lock_id, session_id, mode FROM agent_file_locks"
-            " WHERE filepath=? AND status='active'"
-            " AND (expires_at IS NULL OR expires_at > ?)",
-            (filepath, now),
+            "SELECT lock_id, session_id, mode, filepath FROM agent_file_locks"
+            " WHERE status='active'"
+            " AND (expires_at IS NULL OR expires_at > ?)"
+            " AND (filepath = ?"
+            "  OR (? LIKE rtrim(filepath, '/') || '/%')"
+            "  OR (filepath LIKE rtrim(?, '/') || '/%'))",
+            (now, filepath, filepath, filepath),
         ).fetchall()
 
         for existing in existing_rows:
-            # Same session, same mode — idempotent
-            if existing["session_id"] == session_id and existing["mode"] == mode:
+            # Same session, same mode, exact path — idempotent re-acquire
+            if (
+                existing["session_id"] == session_id
+                and existing["mode"] == mode
+                and existing["filepath"] == filepath
+            ):
                 _store.conn.execute("COMMIT")
                 if store is None:
                     _store.close()
@@ -121,15 +133,17 @@ def acquire_lock(
                 _store.conn.execute("ROLLBACK")
                 if store is None:
                     _store.close()
+                overlap = existing["filepath"]
+                reason = (
+                    f"path overlap: {overlap!r} already has active {existing['mode']!r} lock "
+                    f"by session {existing['session_id']!r}"
+                )
                 return LockResult(
                     lock_id="",
                     filepath=filepath,
                     session_id=session_id,
                     acquired=False,
-                    conflict_reason=(
-                        f"filepath {filepath!r} already has active {existing['mode']!r} lock "
-                        f"by session {existing['session_id']!r}"
-                    ),
+                    conflict_reason=reason,
                 )
 
         _store.conn.execute(

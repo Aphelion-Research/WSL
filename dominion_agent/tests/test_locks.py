@@ -207,3 +207,76 @@ def test_reap_returns_count_of_reaped(tmp_path):
     )
     n = reap_expired_locks(store=store)
     assert n == 3
+
+
+# ---------------------------------------------------------------------------
+# Path-overlap detection (parent / child conflicts)
+# ---------------------------------------------------------------------------
+
+def test_parent_lock_blocks_child_write(tmp_path):
+    """Write lock on parent directory blocks write on child file."""
+    store = _store(tmp_path)
+    sess = _sess(store)
+    r = acquire_lock("src/", sess, mode="write", store=store)
+    assert r.acquired
+
+    sess2 = _sess(store)
+    r2 = acquire_lock("src/a.py", sess2, mode="write", store=store)
+    assert r2.acquired is False
+    assert "src/" in r2.conflict_reason
+
+
+def test_child_lock_blocks_parent_write(tmp_path):
+    """Write lock on child file blocks write lock on parent directory."""
+    store = _store(tmp_path)
+    sess = _sess(store)
+    r = acquire_lock("src/a.py", sess, mode="write", store=store)
+    assert r.acquired
+
+    sess2 = _sess(store)
+    r2 = acquire_lock("src/", sess2, mode="write", store=store)
+    assert r2.acquired is False
+    assert "src/a.py" in r2.conflict_reason
+
+
+def test_sibling_paths_do_not_conflict(tmp_path):
+    """Write lock on src/a.py does NOT block write on src/b.py (siblings)."""
+    store = _store(tmp_path)
+    sess = _sess(store)
+    acquire_lock("src/a.py", sess, mode="write", store=store)
+
+    sess2 = _sess(store)
+    r = acquire_lock("src/b.py", sess2, mode="write", store=store)
+    assert r.acquired is True
+
+
+def test_deep_parent_blocks_deep_child(tmp_path):
+    """Lock on pkg/ blocks pkg/sub/module.py (nested child)."""
+    store = _store(tmp_path)
+    sess = _sess(store)
+    acquire_lock("pkg/", sess, mode="write", store=store)
+
+    sess2 = _sess(store)
+    r = acquire_lock("pkg/sub/module.py", sess2, mode="write", store=store)
+    assert r.acquired is False
+
+
+def test_read_parent_does_not_block_read_child(tmp_path):
+    """Read lock on parent does not block read lock on child (compatible modes)."""
+    store = _store(tmp_path)
+    sess = _sess(store)
+    acquire_lock("src/", sess, mode="read", store=store)
+
+    sess2 = _sess(store)
+    r = acquire_lock("src/a.py", sess2, mode="read", store=store)
+    assert r.acquired is True
+
+
+def test_idempotent_exact_path_not_affected_by_overlap_check(tmp_path):
+    """Same session, same mode, exact path is still idempotent after overlap fix."""
+    store = _store(tmp_path)
+    sess = _sess(store)
+    r1 = acquire_lock("src/a.py", sess, mode="write", store=store)
+    r2 = acquire_lock("src/a.py", sess, mode="write", store=store)
+    assert r1.acquired and r2.acquired
+    assert r1.lock_id == r2.lock_id

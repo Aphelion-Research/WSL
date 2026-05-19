@@ -22,8 +22,9 @@ def test_doctor_runs_without_crash() -> None:
 
 
 def test_doctor_json_output_valid() -> None:
-    result = run_dominion("doctor", "--json")
-    assert result.returncode == 0, f"doctor --json crashed:\n{result.stderr}"
+    # Use --offline to avoid depending on RAGD/domdata being live
+    result = run_dominion("doctor", "--offline", "--json")
+    assert result.returncode == 0, f"doctor --offline --json crashed:\n{result.stderr}"
     data = json.loads(result.stdout)
     assert isinstance(data, dict)
     # Required top-level fields
@@ -32,7 +33,8 @@ def test_doctor_json_output_valid() -> None:
 
 
 def test_doctor_checks_foundation_components() -> None:
-    result = run_dominion("doctor", "--json")
+    # Use --offline to test foundation checks without external dependencies
+    result = run_dominion("doctor", "--offline", "--json")
     assert result.returncode == 0
     data = json.loads(result.stdout)
     checks = data.get("checks", {})
@@ -43,7 +45,7 @@ def test_doctor_checks_foundation_components() -> None:
 
 
 def test_doctor_ignore_rules_always_passes() -> None:
-    result = run_dominion("doctor", "--json")
+    result = run_dominion("doctor", "--offline", "--json")
     data = json.loads(result.stdout)
     ignore_check = data["checks"].get("ignore_rules", {})
     assert ignore_check.get("status") == "ok", f"ignore_rules check failed: {ignore_check}"

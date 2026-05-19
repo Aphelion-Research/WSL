@@ -1,0 +1,28 @@
+{
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest *)",
+      "Bash(python3 -m pytest *)",
+      "Bash(cmake --build *)",
+      "Bash(ctest *)",
+      "Bash(python scripts/dominion_cli.py doctor *)",
+      "Bash(python domdata/check_no_trading.py *)",
+      "Bash(bash scripts/verify_live.sh *)",
+      "Bash(python scripts/dominion_cli.py scan *)",
+      "Bash(python scripts/dominion_cli.py agent *)",
+      "Bash(python scripts/dominion_cli.py truth *)",
+      "Bash(python scripts/dominion_cli.py vault *)",
+      "Bash(python scripts/dominion_cli.py native *)",
+      "Bash(pkg-config *)"
+    ]
+  }
+}

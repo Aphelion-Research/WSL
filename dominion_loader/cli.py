@@ -11,7 +11,6 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from pathlib import Path
 
 
 ROOT = Path(os.environ.get("DOMINION_ROOT", str(Path.home() / "Dominion"))).expanduser()
@@ -79,8 +78,7 @@ def cmd_scan_native(args) -> int:
         native_data = _run_native_scan(repo)
     except (FileNotFoundError, RuntimeError) as exc:
         print(f"native scan unavailable, falling back to Python scan: {exc}", file=sys.stderr)
-        args.native = False  # clear flag then delegate
-        return cmd_scan(args)
+        return _cmd_scan_python(repo, dry_run=dry_run, use_json=getattr(args, "json", False))
 
     native_files: list[dict] = native_data.get("files", [])
     native_errors: list = native_data.get("errors", [])
@@ -204,11 +202,8 @@ def cmd_scan_native(args) -> int:
     return 0
 
 
-def cmd_scan(args) -> int:
-    """Run dominion_loader scan over the repo."""
-    if getattr(args, "native", False):
-        return cmd_scan_native(args)
-
+def _cmd_scan_python(repo: Path, *, dry_run: bool, use_json: bool) -> int:
+    """Pure Python scan — no args object, safe to call as a fallback."""
     from dominion_loader.scan import scan
     from dominion_loader.manifest import Manifest
     from dominion_loader.obs import _NullTracer, get_tracer, set_tracer
@@ -216,9 +211,6 @@ def cmd_scan(args) -> int:
     previous_tracer = get_tracer()
     set_tracer(_NullTracer())
     try:
-        repo = Path(getattr(args, "repo", None) or ROOT)
-        dry_run = getattr(args, "dry_run", False)
-
         manifest = Manifest()
         try:
             stats = scan(repo, dry_run=dry_run, manifest=manifest)
@@ -245,7 +237,7 @@ def cmd_scan(args) -> int:
         "dry_run": dry_run,
     }
 
-    if getattr(args, "json", False):
+    if use_json:
         _print_json(data)
     else:
         prefix = "[DRY RUN] " if dry_run else ""
@@ -257,6 +249,19 @@ def cmd_scan(args) -> int:
             f"ragd_deleted={stats.ragd_chunks_deleted} ({stats.duration_ms:.0f}ms)"
         )
     return 0
+
+
+def cmd_scan(args) -> int:
+    """Run dominion_loader scan over the repo."""
+    if getattr(args, "native", False):
+        return cmd_scan_native(args)
+
+    repo = Path(getattr(args, "repo", None) or ROOT)
+    return _cmd_scan_python(
+        repo,
+        dry_run=getattr(args, "dry_run", False),
+        use_json=getattr(args, "json", False),
+    )
 
 
 def cmd_cache(args) -> int:
