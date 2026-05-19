@@ -6,9 +6,10 @@ from pathlib import Path
 
 VOYAGE_MODEL = "voyage-code-2"
 OPENAI_MODEL = "text-embedding-3-small"
-BEDROCK_MODEL = "amazon.titan-embed-text-v2:0"
-MODEL_DIMS = {VOYAGE_MODEL: 3072, OPENAI_MODEL: 1536, BEDROCK_MODEL: 1024}
-PROVIDER_DEFAULT_MODELS = {"voyage": VOYAGE_MODEL, "openai": OPENAI_MODEL, "bedrock": BEDROCK_MODEL}
+OLLAMA_MODEL = "nomic-embed-text"
+OLLAMA_BASE_URL = "http://localhost:11434"
+MODEL_DIMS = {VOYAGE_MODEL: 3072, OPENAI_MODEL: 1536, OLLAMA_MODEL: 768}
+PROVIDER_DEFAULT_MODELS = {"voyage": VOYAGE_MODEL, "openai": OPENAI_MODEL, "ollama": OLLAMA_MODEL}
 
 
 @dataclass(frozen=True)
@@ -24,18 +25,18 @@ class EmbedConfig:
 
 
 def load_config(*, require_key: bool = True) -> EmbedConfig:
-    provider = os.environ.get("RAGD_EMBED_PROVIDER", "voyage").strip().lower()
+    provider = os.environ.get("RAGD_EMBED_PROVIDER", "ollama").strip().lower()
     if provider not in PROVIDER_DEFAULT_MODELS:
-        raise ValueError(f"Unsupported RAGD_EMBED_PROVIDER={provider!r}; expected voyage, openai, or bedrock")
+        raise ValueError(f"Unsupported RAGD_EMBED_PROVIDER={provider!r}; expected voyage, openai, or ollama")
     model = os.environ.get("RAGD_EMBED_MODEL", PROVIDER_DEFAULT_MODELS[provider]).strip()
     dim = MODEL_DIMS.get(model)
     if dim is None:
         raise ValueError(f"Unsupported RAGD_EMBED_MODEL={model!r}; known models: {', '.join(sorted(MODEL_DIMS))}")
     api_key_env = "RAGD_EMBED_API_KEY"
     api_key = os.environ.get(api_key_env, "").strip()
-    if require_key and not api_key:
+    if require_key and provider != "ollama" and not api_key:
         raise RuntimeError(f"{api_key_env} is required before code embeddings are sent to an external provider")
-    batch_size = int(os.environ.get("RAGD_EMBED_BATCH_SIZE", "128"))
+    batch_size = int(os.environ.get("RAGD_EMBED_BATCH_SIZE", "128" if provider == "ollama" else "128"))
     home = Path(os.environ.get("RAGD_HOME", str(Path.home() / ".ragd"))).expanduser()
     return EmbedConfig(
         provider=provider,

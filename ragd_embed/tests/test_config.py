@@ -17,16 +17,19 @@ def test_provider_resolved_from_env(monkeypatch, tmp_path):
 
 
 def test_missing_key_raises_clear_error(monkeypatch):
+    monkeypatch.setenv("RAGD_EMBED_PROVIDER", "openai")
     monkeypatch.delenv("RAGD_EMBED_API_KEY", raising=False)
     with pytest.raises(RuntimeError, match="RAGD_EMBED_API_KEY"):
         load_config(require_key=True)
 
 
-def test_bedrock_provider_config(monkeypatch, tmp_path):
-    monkeypatch.setenv("RAGD_EMBED_PROVIDER", "bedrock")
-    monkeypatch.setenv("RAGD_EMBED_API_KEY", "test-key")
+def test_ollama_provider_config(monkeypatch, tmp_path):
+    monkeypatch.setenv("RAGD_EMBED_PROVIDER", "ollama")
+    monkeypatch.delenv("RAGD_EMBED_MODEL", raising=False)
+    monkeypatch.delenv("RAGD_EMBED_API_KEY", raising=False)
     monkeypatch.setenv("RAGD_EMBED_CACHE", str(tmp_path / "cache.db"))
     cfg = load_config()
-    assert cfg.provider == "bedrock"
-    assert cfg.model == "amazon.titan-embed-text-v2:0"
-    assert cfg.dim == 1024
+    assert cfg.provider == "ollama"
+    assert cfg.model == "nomic-embed-text"
+    assert cfg.dim == 768
+    assert cfg.batch_size == 512

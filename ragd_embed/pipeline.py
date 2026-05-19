@@ -16,7 +16,7 @@ from .batcher import EmbedBatcher
 from .cache import EmbeddingCache
 from .config import EmbedConfig, load_config
 from .providers import EmbedProvider
-from .providers.bedrock import BedrockProvider
+from .providers.ollama import OllamaProvider
 from .providers.openai import OpenAIProvider
 from .providers.voyage import VoyageProvider
 
@@ -47,8 +47,8 @@ def provider_from_config(cfg: EmbedConfig) -> EmbedProvider:
         return VoyageProvider(api_key=cfg.api_key, model=cfg.model)
     if cfg.provider == "openai":
         return OpenAIProvider(api_key=cfg.api_key, model=cfg.model)
-    if cfg.provider == "bedrock":
-        return BedrockProvider(api_key=cfg.api_key, model=cfg.model)
+    if cfg.provider == "ollama":
+        return OllamaProvider(api_key=cfg.api_key, model=cfg.model)
     raise ValueError(f"unsupported provider: {cfg.provider}")
 
 
