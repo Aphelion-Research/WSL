@@ -1,4 +1,7 @@
 {
+  "font": {
+    "text": "Inter"
+  },
   "defaultViewMode": "preview",
   "livePreview": true
 }

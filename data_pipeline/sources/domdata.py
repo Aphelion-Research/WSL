@@ -19,9 +19,9 @@ class DomdataSource(DataSource):
     def fetch(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Fetch XAU/USD data via domdata CLI."""
         try:
-            # Fetch rates (OHLCV bars)
+            # Use domdata CLI wrapper (installed in PATH) instead of python script
             result = subprocess.run(
-                ["python", str(self.cli), "xaurates", "--count", "1000"],
+                ["domdata", "rates", "XAUUSD", "D1", "--count", "1000"],
                 capture_output=True,
                 text=True,
                 timeout=30,
@@ -30,25 +30,27 @@ class DomdataSource(DataSource):
             if result.returncode != 0:
                 raise RuntimeError(f"domdata failed: {result.stderr}")
 
-            # Parse JSON output
+            # Parse JSON output — domdata returns flat array, not nested
             data = json.loads(result.stdout)
 
-            if not data or "rates" not in data:
+            if not data:
                 raise RuntimeError("No rates data from domdata")
 
-            rates = data["rates"]
-            rows = []
-            for rate in rates:
-                rows.append({
-                    "timestamp": pd.to_datetime(rate["time"], unit="s"),
-                    "open": rate["open"],
-                    "high": rate["high"],
-                    "low": rate["low"],
-                    "close": rate["close"],
-                    "volume": rate.get("tick_volume", rate.get("real_volume", 0)),
-                })
+            # Convert directly to DataFrame
+            df = pd.DataFrame(data)
 
-            df = pd.DataFrame(rows)
+            # Rename/standardize columns
+            df['timestamp'] = pd.to_datetime(df['time'], unit='s')
+            df = df.rename(columns={
+                'tick_volume': 'volume'
+            })
+
+            # Keep only OHLCV + add metadata
+            df = df[['timestamp', 'open', 'high', 'low', 'close', 'volume']].copy()
+            df = df.dropna(subset=['close'])
+            df['source'] = 'mt5'
+            df['fetch_time'] = datetime.now()
+            df['quality_score'] = 1.0
 
             # Filter by date range
             if start_date:
@@ -84,8 +86,8 @@ class DomdataSource(DataSource):
             self.mark_error("NaN in close prices")
             return False
 
-        # Price range check
-        if (df["close"] < 500).any() or (df["close"] > 5000).any():
+        # Price range check (MT5 quotes gold in $/oz, wider range than GLD ETF)
+        if (df["close"] < 500).any() or (df["close"] > 6000).any():
             self.mark_error("Price outside realistic range")
             return False
 
