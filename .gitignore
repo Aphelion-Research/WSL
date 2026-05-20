@@ -50,5 +50,18 @@ vault/files/
 vault/symbols/
 # transient working files
 tmp/
+# HYDRA model artifacts (weights, scalers, ONNX)
+artifacts/hydra/
 # binary archives (no committed zip fixtures in this repo)
 *.zip
+# HYDRA runtime (runs, fetched data, parquet datasets)
+runs/
+data/fetched/
+data/raw/provider=dukascopy/
+data/raw/provider=yahoo/
+data/canonical/provider=dukascopy/
+data/mt5_history/*.parquet
+data/mt5_history/*.json
+data/mt5_history/_fetch_temp.py
+*.parquet
+catboost_info/
