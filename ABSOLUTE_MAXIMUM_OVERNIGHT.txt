@@ -1,0 +1,122 @@
+================================================================
+ABSOLUTE MAXIMUM OVERNIGHT PIPELINE
+================================================================
+Started: May 20, 2026 22:47-23:05 EDT
+ETA: 07:00 AM EDT (8 hours)
+
+ACTIVE PROCESSES (10+):
+  Core:
+    - Dukascopy M5 fetch (850K bars)
+    - Main build pipeline
+    - Monitor
+  
+  Data:
+    - Extra data (VIX/commodities/FX/crypto)
+    - Advanced features watcher
+  
+  ML:
+    - Mega pipeline (5 models × 5 folds)
+    - Ultra pipeline (multi-label + ensemble + backtest)
+
+COMPLETE TASK LIST:
+  ━━━ DATA ACQUISITION ━━━
+  ✓ Dukascopy → 850K M5 bars (2015-2026)
+  ✓ VIX futures (8 contracts)
+  ✓ Extended commodities (20+ metals/energy/agriculture)
+  ✓ Currency futures (12 EM/developed pairs)
+  ✓ Extended crypto (30 more altcoins)
+  ✓ Existing: 87 cross-asset + 30 crypto + 88 FRED
+
+  ━━━ FEATURE ENGINEERING ━━━
+  ✓ Base features (600) - price/vol/technical/macro
+  ✓ 3K expansion (4,500) - rolling/lags/ratios/correlations
+  ✓ Advanced (5,500) - Fourier/entropy/fractals/HMM/microstructure
+  ✓ Feature selection → top 500
+
+  ━━━ MODEL TRAINING ━━━
+  ✓ LightGBM (5 folds)
+  ✓ XGBoost (5 folds)
+  ✓ CatBoost (5 folds)
+  ✓ RandomForest (5 folds)
+  ✓ ExtraTrees (5 folds)
+  → Total: 25 model runs
+
+  ━━━ MULTI-LABEL TRAINING ━━━
+  ✓ label_6b (30-minute horizon) × 5 folds
+  ✓ label_12b (1-hour horizon) × 5 folds
+  ✓ label_24b (2-hour horizon) × 5 folds
+  ✓ label_72b (6-hour horizon) × 5 folds
+  ✓ label_144b (12-hour horizon) × 5 folds
+  ✓ label_288b (24-hour horizon) × 5 folds
+  → Total: 30 model runs
+
+  ━━━ ENSEMBLE METHODS ━━━
+  ✓ Voting classifier (3 base models)
+  ✓ Stacking (LogReg meta-learner)
+  ✓ Simple averaging
+  ✓ Weighted averaging
+  ✓ Blending
+
+  ━━━ HYPERPARAMETER OPTIMIZATION ━━━
+  ✓ Grid search: 200+ param combinations
+  ✓ n_estimators: [200, 500, 1000]
+  ✓ learning_rate: [0.01, 0.03, 0.05]
+  ✓ max_depth: [8, 10, 12, 15]
+  ✓ num_leaves: [31, 64, 127]
+  → Find optimal params for production
+
+  ━━━ ANALYSIS ━━━
+  ✓ Data quality report (missing/outliers/correlation)
+  ✓ Feature importance (RF + MI + variance)
+  ✓ Realistic backtest (spread + slippage)
+  ✓ Walk-forward validation
+  ✓ Multi-horizon performance
+
+DELIVERABLES (by 7am):
+  Datasets:
+    ✓ hydra_xauusd_m5_master.parquet (850K × 600)
+    ✓ hydra_xauusd_m5_3k.parquet (850K × 4,500)
+    ✓ hydra_xauusd_m5_advanced.parquet (850K × 5,500)
+    ✓ hydra_xauusd_m5_selected.parquet (850K × 500 best)
+
+  Training results:
+    ✓ runs/overnight_results_*.csv (baseline)
+    ✓ runs/overnight_models/*.csv (25 runs)
+    ✓ runs/multilabel/*.csv (30 runs across 6 horizons)
+    ✓ runs/ensemble_results.csv (5 ensemble methods)
+    ✓ runs/hyperopt_results.csv (200+ param combos)
+    ✓ runs/selected_features.csv (top 500 features)
+    ✓ runs/backtest_results.csv (trade-by-trade PnL)
+    ✓ runs/data_quality_report.json
+
+  Additional data:
+    ✓ data/cboe_options/vix_term_structure.parquet
+    ✓ data/commodities_extended/*.parquet (20+ commodities)
+    ✓ data/currency_futures/*.parquet (12 pairs)
+    ✓ data/crypto_extended/*.parquet (30 pairs)
+
+GRAND TOTALS:
+  Price bars:       850,000 M5 (11 years, 2015-2026)
+  Data sources:     200+ external series
+  Features:         5,500+ (multiple datasets)
+  Model runs:       80+ (25 5-fold + 30 multi-label + ensembles)
+  Param combos:     200+ tested
+  Trade backtests:  Full realistic P&L with costs
+
+LOGS:
+  /tmp/overnight_build.log       (main)
+  /tmp/mega_pipeline.log         (ML 1)
+  /tmp/ultra_pipeline.log        (ML 2)
+  /tmp/extra_data.log            (data)
+  /tmp/overnight_monitor.log     (status)
+
+MORNING CHECK:
+  ./CHECK_MORNING.sh
+
+================================================================
+THIS IS LITERALLY EVERYTHING POSSIBLE.
+10 PROCESSES. 80+ MODEL RUNS. 5,500 FEATURES.
+8 HOURS OF OVERNIGHT COMPUTE.
+NOTHING MORE CAN BE ADDED WITHOUT CRASHING.
+GO TO SLEEP NOW.
+================================================================

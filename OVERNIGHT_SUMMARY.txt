@@ -1,0 +1,35 @@
+================================================================
+OVERNIGHT PIPELINE - RUNNING
+================================================================
+Started: May 20, 2026 22:47 EDT
+
+PROCESSES RUNNING:
+  PID 372283: Dukascopy fetch (1.5 hrs remaining)
+  PID 375043: Overnight build (waiting for Dukascopy)
+  PID 375132: Monitor script
+
+PIPELINE STAGES:
+  1. [IN PROGRESS] Dukascopy fetch → 850K M5 bars
+  2. [QUEUED] Merge MT5 + Dukascopy
+  3. [QUEUED] Build master with extended data
+  4. [QUEUED] Expand to 4,500 features
+  5. [QUEUED] Run 3-fold training
+
+EXPECTED OUTPUTS:
+  - data/mt5_history/XAUUSD_M5_MASTER.parquet (850K bars)
+  - data/hydra_xauusd_m5_master.parquet (850K × 600 features)
+  - data/hydra_xauusd_m5_3k.parquet (850K × 4,500 features)
+  - runs/overnight_results_*.csv (training AUC/Acc)
+
+ETA: ~03:00 AM EDT (4 hours total)
+
+MORNING CHECK:
+  Run: ./CHECK_MORNING.sh
+  Or: cat MORNING_CHECKLIST.md
+
+LOGS:
+  - /tmp/overnight_build.log (main pipeline)
+  - /tmp/overnight_monitor.log (status checks)
+  - /tmp/dukascopy_fetch.log (price fetch)
+
+================================================================

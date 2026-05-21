@@ -1,0 +1,54 @@
+================================================================
+OVERNIGHT PROCESSES - ALL RUNNING
+================================================================
+Started: May 20, 2026 22:47 EDT
+
+ACTIVE PROCESSES:
+  PID 372283: Dukascopy M5 fetch (850K bars, ETA 00:30)
+  PID 375043: Main overnight build pipeline
+  PID 375132: Monitor script
+  PID 375402: Extra data sources (VIX futures, commodities, FX, crypto)
+  PID 375405: Advanced feature engineering (runs after 3K complete)
+
+FULL PIPELINE:
+  [RUNNING] Dukascopy → 2970 days of M5 bars
+  [QUEUED]  Merge MT5 + Dukascopy → MASTER
+  [QUEUED]  Build master with extended data → 600 features
+  [QUEUED]  Expand to 3K features → 4,500 features
+  [QUEUED]  3-fold training
+  [RUNNING] Fetch VIX term structure (8 futures)
+  [RUNNING] Fetch 20+ commodities (metals, energy, agriculture)
+  [RUNNING] Fetch 12 currency pairs
+  [RUNNING] Fetch 30 more crypto pairs
+  [QUEUED]  Advanced features (Fourier, entropy, fractals, HMM)
+
+FINAL OUTPUTS:
+  Primary:
+    - data/hydra_xauusd_m5_3k.parquet (850K × 4,500 features)
+    - runs/overnight_results_*.csv (3-fold training)
+
+  Advanced:
+    - data/hydra_xauusd_m5_advanced.parquet (850K × 5,000+ features)
+    - data/cboe_options/vix_term_structure.parquet
+    - data/commodities_extended/commodities_extended.parquet
+    - data/currency_futures/currency_futures.parquet
+    - data/crypto_extended/crypto_extended.parquet
+
+ETA: ~04:00 AM EDT (5 hours total with advanced features)
+
+MORNING CHECK:
+  ./CHECK_MORNING.sh
+
+LOGS:
+  /tmp/overnight_build.log (main)
+  /tmp/overnight_monitor.log (status)
+  /tmp/extra_data.log (extra sources)
+  /tmp/dukascopy_fetch.log (price data)
+
+================================================================
+Total additional features from extra data: ~100
+Total advanced features: ~400-600
+GRAND TOTAL: ~5,500-6,000 features
+
+ALL SYSTEMS RUNNING. SLEEP WELL.
+================================================================

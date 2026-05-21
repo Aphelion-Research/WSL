@@ -1,0 +1,42 @@
+================================================================
+OVERNIGHT STATUS - 01:48 AM
+================================================================
+
+✓ COMPLETED:
+  - Dukascopy fetch: 789,257 M5 bars (2015-2026)
+  - MASTER price file created
+  - 3K dataset (100K rows): EXISTS but on OLD data
+  - Extra data sources: VIX/commodities/FX/crypto
+
+⏳ IN PROGRESS:
+  - Master rebuild on 789K bars → 600 features
+    (started 01:47, ETA 30-60 min)
+  
+  - Multi-label training (30 model runs)
+    (started 01:03, running 7+ hrs, ~428 min CPU)
+  
+  - Hyperopt (200 param combos)
+    (started 01:00, running 8+ hrs, ~509 min CPU)
+
+⏱ QUEUED (after master rebuild):
+  - 3K expansion on 789K dataset
+  - Advanced features (Fourier/entropy/HMM)
+  - 5 model × 5 fold training
+  - Feature selection
+  - Ensemble methods
+  - Data quality analysis
+  - Realistic backtest
+
+EXPECTED COMPLETION:
+  Master rebuild: ~02:30 AM
+  3K expansion: ~03:30 AM  
+  All training: ~06:00 AM
+  Full pipeline: ~07:00 AM
+
+KEY FILES READY:
+  ✓ data/mt5_history/XAUUSD_M5_MASTER.parquet (789K bars)
+  ⏳ data/hydra_xauusd_m5_master.parquet (rebuilding with 789K)
+  ⏳ data/hydra_xauusd_m5_3k.parquet (will rebuild after master)
+
+Morning check: ./CHECK_MORNING.sh
+================================================================
