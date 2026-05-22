@@ -782,6 +782,19 @@ def write_equity_csv(path: Path, curve: list[dict]) -> None:
             writer.writerow({k: round(v, 8) if isinstance(v, float) else v for k, v in row.items()})
 
 
+
+def fmt_metric(value, digits: int = 4) -> str:
+    """Format optional numeric metric without treating 0.0 as missing."""
+    if value is None:
+        return "N/A"
+    try:
+        if isinstance(value, float) and (value != value):
+            return "N/A"
+        return f"{float(value):.{digits}f}"
+    except Exception:
+        return str(value)
+
+
 def write_summary_md(path: Path, summary: dict) -> None:
     m = summary["model_results"]
     c = summary["config"]
@@ -829,8 +842,8 @@ def write_summary_md(path: Path, summary: dict) -> None:
         tc = bm.get("trade_count", 0)
         lines.append(
             f"- `{name}`: trades={tc}, "
-            f"win_rate={wr:.4f if wr else 'N/A'}, "
-            f"return_net={ret:.6f if ret else 'N/A'}"
+            f"win_rate={fmt_metric(wr)}, "
+            f"return_net={fmt_metric(ret, 6)}"
         )
 
     lines.extend([
@@ -890,9 +903,9 @@ def main() -> int:
     m = results["summary"]["model_results"]
     print(f"\n{'=' * 70}")
     print(f"TRADE COUNT:    {m['trade_count']}")
-    print(f"WIN RATE:       {m['win_rate']:.4f}" if m['win_rate'] else "WIN RATE:       N/A")
-    print(f"TOTAL NET:      {m['total_return_net']:.6f}" if m['total_return_net'] else "TOTAL NET:      N/A")
-    print(f"MAX DRAWDOWN:   {m['max_drawdown']:.6f}" if m['max_drawdown'] else "MAX DRAWDOWN:   N/A")
+    print(f"WIN RATE:       {fmt_metric(m.get('win_rate'))}")
+    print(f"TOTAL NET:      {fmt_metric(m.get('total_return_net'), 6)}")
+    print(f"MAX DRAWDOWN:   {fmt_metric(m.get('max_drawdown'), 6)}")
     print(f"EXCESS/BEST BL: {results['summary']['excess_over_best_baseline']:.6f}"
           if results['summary']['excess_over_best_baseline'] is not None else "EXCESS/BEST BL: N/A")
     print(f"{'=' * 70}")
