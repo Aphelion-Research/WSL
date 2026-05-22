@@ -1,0 +1,6907 @@
+{
+  "version": "1.0_clean",
+  "created": "2026-05-22T13:16:20.920606",
+  "dataset": "data/hydra_xauusd_m5_master_clean.parquet",
+  "raw_source": "data/mt5_history/XAUUSD_M5_dukascopy.parquet",
+  "n_rows": 782825,
+  "n_features": 1076,
+  "n_labels": 48,
+  "time_range": {
+    "min": "2015-01-01 23:00:00",
+    "max": "2026-05-20 23:55:00"
+  },
+  "columns": [
+    {
+      "name": "log_ret_1b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "pct_ret_1b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "log_ret_2b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "pct_ret_2b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "log_ret_3b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "pct_ret_3b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "log_ret_5b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "pct_ret_5b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "log_ret_8b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "pct_ret_8b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "log_ret_13b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "pct_ret_13b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "log_ret_21b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "pct_ret_21b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "log_ret_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "pct_ret_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "log_ret_55b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "pct_ret_55b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "log_ret_89b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "pct_ret_89b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "log_ret_144b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "pct_ret_144b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "log_ret_288b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "pct_ret_288b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "zscore_5b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawdown_5b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawup_5b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "zscore_10b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawdown_10b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawup_10b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "zscore_14b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawdown_14b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawup_14b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "zscore_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawdown_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawup_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "zscore_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawdown_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawup_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "zscore_55b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawdown_55b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawup_55b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "zscore_72b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawdown_72b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawup_72b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "zscore_144b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawdown_144b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawup_144b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "zscore_288b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawdown_288b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawup_288b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "zscore_576b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawdown_576b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "drawup_576b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "realized_vol_5b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "atr_5b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "parkinson_5b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "realized_vol_10b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "atr_10b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "parkinson_10b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "realized_vol_14b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "atr_14b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "parkinson_14b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "realized_vol_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "atr_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "parkinson_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "realized_vol_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "atr_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "parkinson_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "realized_vol_55b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "atr_55b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "parkinson_55b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "realized_vol_72b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "atr_72b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "parkinson_72b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "realized_vol_144b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "atr_144b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "parkinson_144b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "realized_vol_288b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "atr_288b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "parkinson_288b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "realized_vol_576b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "atr_576b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "parkinson_576b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_5_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_8_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_13_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_21_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_34_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_55_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_89_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_144_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_200_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_233_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_377_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_cross_5_13",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_cross_8_21",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_cross_13_34",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_cross_21_55",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_cross_34_89",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_cross_55_144",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_cross_89_233",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ema_cross_50_200",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "rsi_5b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "rsi_7b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "rsi_10b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "rsi_14b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "rsi_21b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "rsi_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "rsi_50b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "rsi_72b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macd_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macd_sig_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macd_hist_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bb_pos_10b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bb_width_10b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bb_pos_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bb_width_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bb_pos_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bb_width_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bb_pos_55b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bb_width_55b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bb_pos_89b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bb_width_89b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "adx_7b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "di_plus_7b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "di_minus_7b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "adx_14b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "di_plus_14b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "di_minus_14b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "adx_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "di_plus_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "di_minus_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "adx_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "di_plus_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "di_minus_34b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "stoch_k_5",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "stoch_d_5",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "stoch_k_14",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "stoch_d_14",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "williams_r",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cci_14b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cci_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vol_ratio_5b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vol_ratio_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vol_ratio_60b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vol_zscore_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "obv_zscore",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "obv_slope_5b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "obv_slope_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cmf_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vol_mom_5b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "abnormal_vol",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "body_pct",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "upper_shad_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "lower_shad_pct",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "close_in_range",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "body_to_range",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "pin_bar",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "doji",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "inside_bar",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "engulf_bull",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "engulf_bear",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bull_streak",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bear_streak",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "autocorr_1b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "skew_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "kurt_20b",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "price_accel",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "new_high_20",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "new_low_20",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sin_hour",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cos_hour",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sin_dow",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cos_dow",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sin_month",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cos_month",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sin_doy",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cos_doy",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "is_monday",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "is_friday",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "is_london",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "is_ny",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "is_overlap",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gold_seasonal",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "days_to_qend",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "days_to_yend",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS1",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS1_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS1_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS1_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS1_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS1MO",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS1MO_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS1MO_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS1MO_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS1MO_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS3MO",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS3MO_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS3MO_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS3MO_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS3MO_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS6MO",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS6MO_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS6MO_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS6MO_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS6MO_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFF",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFF_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFF_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFF_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFF_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS10",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS10_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS10_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS10_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS10_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS5",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS5_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS5_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS5_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS5_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS30",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS30_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS30_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS30_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS30_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII10",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII10_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII10_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII10_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII10_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII20",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII20_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII20_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII20_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII20_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS20",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS20_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS20_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS20_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS20_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T5YIFR",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T5YIFR_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T5YIFR_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T5YIFR_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T5YIFR_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS2",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS2_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS2_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS2_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGS2_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T10Y2Y",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T10Y2Y_chg1d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "macro_T10Y2Y_chg5d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "macro_T10Y2Y_chg20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "macro_T10Y2Y_z252",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "macro_DFII30",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII30_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII30_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII30_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII30_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A0CM",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A0CM_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A0CM_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A0CM_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A0CM_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLH0A0HYM2",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLH0A0HYM2_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLH0A0HYM2_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLH0A0HYM2_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLH0A0HYM2_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A4CBBB",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A4CBBB_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A4CBBB_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A4CBBB_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A4CBBB_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T10Y3M",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T10Y3M_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T10Y3M_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T10Y3M_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T10Y3M_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A1CAAA",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A1CAAA_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A1CAAA_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A1CAAA_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLC0A1CAAA_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLH0A1HYBB",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLH0A1HYBB_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLH0A1HYBB_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLH0A1HYBB_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BAMLH0A1HYBB_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DBAA",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DBAA_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DBAA_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DBAA_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DBAA_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CPIAUCSL",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CPIAUCSL_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CPIAUCSL_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CPIAUCSL_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CPIAUCSL_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII5",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII5_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII5_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII5_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DFII5_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CPILFESL",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CPILFESL_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CPILFESL_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CPILFESL_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CPILFESL_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PCEPI",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PCEPI_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PCEPI_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PCEPI_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PCEPI_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DAAA",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DAAA_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DAAA_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DAAA_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DAAA_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DCOILWTICO",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DCOILWTICO_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DCOILWTICO_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DCOILWTICO_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DCOILWTICO_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T5YIE",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T5YIE_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T5YIE_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T5YIE_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T5YIE_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PCEPILFE",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PCEPILFE_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PCEPILFE_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PCEPILFE_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PCEPILFE_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPINF5YR",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPINF5YR_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPINF5YR_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPINF5YR_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPINF5YR_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CORESTICKM159SFRBATL",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CORESTICKM159SFRBATL_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CORESTICKM159SFRBATL_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CORESTICKM159SFRBATL_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CORESTICKM159SFRBATL_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MICH",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MICH_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MICH_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MICH_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MICH_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T10YIE",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T10YIE_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T10YIE_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T10YIE_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_T10YIE_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPINF10YR",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPINF10YR_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPINF10YR_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPINF10YR_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPINF10YR_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_GDPC1",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_GDPC1_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_GDPC1_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_GDPC1_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_GDPC1_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_A191RL1Q225SBEA",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_A191RL1Q225SBEA_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_A191RL1Q225SBEA_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_A191RL1Q225SBEA_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_A191RL1Q225SBEA_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_RSAFS",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_RSAFS_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_RSAFS_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_RSAFS_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_RSAFS_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TCU",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TCU_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TCU_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TCU_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TCU_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_INDPRO",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_INDPRO_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_INDPRO_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_INDPRO_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_INDPRO_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_UMCSENT",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_UMCSENT_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_UMCSENT_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_UMCSENT_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_UMCSENT_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_HOUST",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_HOUST_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_HOUST_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_HOUST_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_HOUST_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PERMIT",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PERMIT_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PERMIT_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PERMIT_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PERMIT_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MORTGAGE30US",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MORTGAGE30US_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MORTGAGE30US_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MORTGAGE30US_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MORTGAGE30US_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PAYEMS",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PAYEMS_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PAYEMS_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PAYEMS_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PAYEMS_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PSAVERT",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PSAVERT_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PSAVERT_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PSAVERT_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PSAVERT_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DSPIC96",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DSPIC96_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DSPIC96_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DSPIC96_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DSPIC96_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_UNRATE",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_UNRATE_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_UNRATE_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_UNRATE_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_UNRATE_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EMRATIO",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EMRATIO_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EMRATIO_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EMRATIO_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EMRATIO_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CIVPART",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CIVPART_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CIVPART_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CIVPART_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CIVPART_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ICSA",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ICSA_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ICSA_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ICSA_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ICSA_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_U6RATE",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_U6RATE_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_U6RATE_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_U6RATE_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_U6RATE_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_AHETPI",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_AHETPI_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_AHETPI_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_AHETPI_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_AHETPI_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_M2SL",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_M2SL_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_M2SL_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_M2SL_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_M2SL_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_LNS14000006",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_LNS14000006_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_LNS14000006_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_LNS14000006_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_LNS14000006_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CCSA",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CCSA_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CCSA_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CCSA_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CCSA_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_M1SL",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_M1SL_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_M1SL_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_M1SL_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_M1SL_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_WALCL",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_WALCL_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_WALCL_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_WALCL_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_WALCL_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_WRESBAL",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_WRESBAL_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_WRESBAL_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_WRESBAL_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_WRESBAL_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BUSLOANS",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BUSLOANS_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BUSLOANS_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BUSLOANS_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BUSLOANS_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TOTRESNS",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TOTRESNS_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TOTRESNS_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TOTRESNS_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TOTRESNS_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_REVOLSL",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_REVOLSL_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_REVOLSL_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_REVOLSL_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_REVOLSL_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CONSUMER",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CONSUMER_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CONSUMER_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CONSUMER_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CONSUMER_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_RRVRUSQ156N",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_RRVRUSQ156N_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_RRVRUSQ156N_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_RRVRUSQ156N_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_RRVRUSQ156N_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CSUSHPISA",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CSUSHPISA_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CSUSHPISA_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CSUSHPISA_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_CSUSHPISA_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MSPUS",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MSPUS_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MSPUS_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MSPUS_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MSPUS_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ACTLISCOUUS",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ACTLISCOUUS_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ACTLISCOUUS_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ACTLISCOUUS_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ACTLISCOUUS_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DPCREDIT",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DPCREDIT_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DPCREDIT_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DPCREDIT_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DPCREDIT_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGORDER",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGORDER_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGORDER_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGORDER_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DGORDER_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NEWORDER",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NEWORDER_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NEWORDER_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NEWORDER_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NEWORDER_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MORTGAGE15US",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MORTGAGE15US_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MORTGAGE15US_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MORTGAGE15US_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_MORTGAGE15US_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BUSINV",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BUSINV_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BUSINV_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BUSINV_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BUSINV_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NETEXP",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NETEXP_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NETEXP_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NETEXP_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NETEXP_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ISRATIO",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ISRATIO_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ISRATIO_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ISRATIO_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ISRATIO_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPCH",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPCH_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPCH_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPCH_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_EXPCH_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BOPGSTB",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BOPGSTB_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BOPGSTB_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BOPGSTB_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_BOPGSTB_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_IMPCH",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_IMPCH_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_IMPCH_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_IMPCH_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_IMPCH_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_GASREGW",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_GASREGW_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_GASREGW_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_GASREGW_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_GASREGW_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PPIFIS",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PPIFIS_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PPIFIS_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PPIFIS_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PPIFIS_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PPIACO",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PPIACO_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PPIACO_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PPIACO_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_PPIACO_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_STLFSI",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_STLFSI_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_STLFSI_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_STLFSI_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_STLFSI_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ANFCI",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ANFCI_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ANFCI_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ANFCI_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_ANFCI_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NFCI",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NFCI_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NFCI_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NFCI_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_NFCI_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_VIXCLS",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_VIXCLS_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_VIXCLS_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_VIXCLS_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_VIXCLS_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DEXCHUS",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DEXCHUS_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DEXCHUS_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DEXCHUS_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DEXCHUS_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TEDRATE",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TEDRATE_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TEDRATE_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TEDRATE_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_TEDRATE_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DEXJPUS",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DEXJPUS_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DEXJPUS_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DEXJPUS_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DEXJPUS_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DCOILBRENTEU",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DCOILBRENTEU_chg1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DCOILBRENTEU_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DCOILBRENTEU_chg20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_DCOILBRENTEU_z252",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "yield_curve_2s10s",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "yield_curve_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "yield_curve_3m10y",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "real_yield_10y",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "real_yield_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "breakeven_10y",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "breakeven_chg5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dxy_ret1d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "dxy_ret5d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "dxy_ret20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "dxy_z20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "dxy_z60d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "eurusd_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eurusd_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eurusd_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eurusd_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eurusd_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "usdjpy_ret1d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "usdjpy_ret5d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "usdjpy_ret20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "usdjpy_z20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "usdjpy_z60d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "gbpusd_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gbpusd_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gbpusd_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gbpusd_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gbpusd_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "audusd_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "audusd_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "audusd_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "audusd_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "audusd_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "usdchf_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "usdchf_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "usdchf_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "usdchf_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "usdchf_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "usdcad_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "usdcad_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "usdcad_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "usdcad_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "usdcad_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nzdusd_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nzdusd_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nzdusd_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nzdusd_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nzdusd_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eurgbp_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eurgbp_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eurgbp_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eurgbp_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eurgbp_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eurjpy_ret1d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "eurjpy_ret5d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "eurjpy_ret20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "eurjpy_z20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "eurjpy_z60d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "gbpjpy_ret1d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "gbpjpy_ret5d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "gbpjpy_ret20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "gbpjpy_z20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "gbpjpy_z60d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "silver_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "silver_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "silver_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "silver_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "silver_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "copper_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "copper_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "copper_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "copper_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "copper_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "platinum_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "platinum_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "platinum_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "platinum_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "platinum_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "palladium_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "palladium_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "palladium_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "palladium_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "palladium_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "aluminum_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "aluminum_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "aluminum_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "aluminum_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "aluminum_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "spx_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "spx_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "spx_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "spx_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "spx_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nasdaq_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nasdaq_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nasdaq_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nasdaq_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nasdaq_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "russell_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "russell_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "russell_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "russell_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "russell_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dow_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dow_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dow_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dow_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dow_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sp400_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sp400_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sp400_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sp400_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sp400_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sp600_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sp600_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sp600_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sp600_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sp600_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ftse_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ftse_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ftse_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ftse_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ftse_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dax_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dax_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dax_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dax_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dax_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cac_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cac_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cac_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cac_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cac_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nikkei_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nikkei_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nikkei_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nikkei_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "nikkei_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "hang_seng_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "hang_seng_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "hang_seng_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "hang_seng_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "hang_seng_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "shanghai_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "shanghai_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "shanghai_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "shanghai_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "shanghai_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "asx_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "asx_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "asx_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "asx_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "asx_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "tsx_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "tsx_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "tsx_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "tsx_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "tsx_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlk_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlk_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlk_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlk_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlk_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlf_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlf_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlf_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlf_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlf_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xle_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xle_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xle_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xle_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xle_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlv_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlv_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlv_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlv_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlv_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xly_ret1d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "xly_ret5d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "xly_ret20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "xly_z20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "xly_z60d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "xlp_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlp_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlp_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlp_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlp_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xli_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xli_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xli_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xli_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xli_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlb_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlb_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlb_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlb_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlb_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlu_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlu_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlu_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlu_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlu_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlre_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlre_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlre_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlre_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xlre_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix3m_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix3m_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix3m_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix3m_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix3m_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix6m_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix6m_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix6m_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix6m_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vix6m_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gvz_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gvz_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gvz_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gvz_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gvz_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ovx_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ovx_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ovx_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ovx_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ovx_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vxn_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vxn_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vxn_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vxn_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vxn_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vxd_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vxd_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vxd_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vxd_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vxd_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "tlt_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "tlt_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "tlt_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "tlt_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "tlt_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ief_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ief_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ief_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ief_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ief_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "shy_ret1d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "shy_ret5d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "shy_ret20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "shy_z20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "shy_z60d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "hyg_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "hyg_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "hyg_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "hyg_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "hyg_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "lqd_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "lqd_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "lqd_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "lqd_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "lqd_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "emb_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "emb_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "emb_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "emb_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "emb_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "jnk_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "jnk_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "jnk_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "jnk_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "jnk_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bnd_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bnd_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bnd_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bnd_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bnd_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "agg_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "agg_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "agg_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "agg_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "agg_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "wti_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "wti_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "wti_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "wti_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "wti_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "brent_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "brent_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "brent_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "brent_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "brent_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "natgas_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "natgas_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "natgas_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "natgas_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "natgas_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "heating_oil_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "heating_oil_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "heating_oil_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "heating_oil_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "heating_oil_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gasoline_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gasoline_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gasoline_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gasoline_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gasoline_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corn_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corn_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corn_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corn_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corn_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "wheat_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "wheat_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "wheat_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "wheat_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "wheat_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "soybeans_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "soybeans_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "soybeans_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "soybeans_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "soybeans_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sugar_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sugar_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sugar_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sugar_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sugar_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "coffee_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "coffee_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "coffee_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "coffee_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "coffee_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cotton_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cotton_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cotton_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cotton_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cotton_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "lumber_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "lumber_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "lumber_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "lumber_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "lumber_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "btc_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "btc_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "btc_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "btc_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "btc_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eth_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eth_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eth_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eth_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "eth_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bnb_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bnb_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bnb_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bnb_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "bnb_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xrp_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xrp_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xrp_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xrp_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "xrp_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ada_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ada_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ada_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ada_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ada_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sol_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sol_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sol_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sol_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "sol_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dot_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dot_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dot_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dot_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dot_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "doge_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "doge_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "doge_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "doge_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "doge_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "avax_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "avax_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "avax_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "avax_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "avax_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "matic_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "matic_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "matic_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "matic_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "matic_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "link_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "link_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "link_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "link_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "link_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ltc_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ltc_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ltc_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ltc_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "ltc_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gld_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gld_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gld_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gld_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gld_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "iau_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "iau_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "iau_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "iau_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "iau_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "slv_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "slv_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "slv_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "slv_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "slv_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gdx_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gdx_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gdx_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gdx_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gdx_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gdxj_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gdxj_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gdxj_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gdxj_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gdxj_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "move_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "move_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "move_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "move_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "move_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "skew_ret1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "skew_ret5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "skew_ret20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "skew_z20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "skew_z60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gold_silver_ratio_z20",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gold_copper_ratio_z20",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "oil_gold_ratio_z20",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "btc_gold_ratio_z20",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_dxy_20d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "corr_dxy_60d",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "corr_silver_20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_silver_60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_spx_20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_spx_60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_vix_20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_vix_60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_tlt_20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_tlt_60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_btc_20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_btc_60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_wti_20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_wti_60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_copper_20d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "corr_copper_60d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "risk_on_composite",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "dollar_composite",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "commodity_composite",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "vix_regime",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_mm_long",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_mm_long_chg1w",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_mm_long_chg4w",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_mm_long_z52w",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_mm_long_pct52",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_mm_short",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_mm_short_chg1w",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_mm_short_chg4w",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_mm_short_z52w",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_mm_short_pct52",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_open_interest",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_open_interest_chg1w",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_open_interest_chg4w",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_open_interest_z52w",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "cot_open_interest_pct52",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gld_level",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gld_flow1d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gld_flow5d",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "gld_flow_z20",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "vol_regime",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "trend_regime",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "macro_composite",
+      "role": "feature",
+      "is_forward_looking": false,
+      "allowed_for_training": true
+    },
+    {
+      "name": "label_6b",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "label_12b",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "label_24b",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "label_72b",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "label_144b",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "label_288b",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "fwd_ret_5b",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "fwd_ret_20b",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "fwd_ret_72b",
+      "role": "label",
+      "is_forward_looking": true,
+      "allowed_for_training": false
+    },
+    {
+      "name": "time",
+      "role": "metadata",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    }
+  ],
+  "excluded_columns": [
+    {
+      "name": "h1_ret_1b",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "h1_ret_3b",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "h1_atr_pct",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "h1_ema20_pct",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "h1_rsi14",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "h1_zscore20",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "h4_ret_1b",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "h4_ret_3b",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "h4_atr_pct",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "h4_ema20_pct",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "h4_rsi14",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "h4_zscore20",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "d1_ret_1b",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "d1_ret_3b",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "d1_atr_pct",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "d1_ema20_pct",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "d1_rsi14",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "d1_zscore20",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "gpr_level",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "gpr_chg3m",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "gpr_z12m",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    },
+    {
+      "name": "gpr_spike",
+      "role": "dead_feature",
+      "is_forward_looking": false,
+      "allowed_for_training": false
+    }
+  ],
+  "validation": {
+    "time_min_year": 2015,
+    "time_max_year": 2026,
+    "duplicate_times": false,
+    "constant_features": 0,
+    "forward_looking_features": 0,
+    "null_rate_pct": 0.05065664597948314
+  }
+}
