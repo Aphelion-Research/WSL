@@ -8,14 +8,14 @@
   },
   "storage": {
     "db_path": "~/.ragd/ragd.db",
-    "vector_index_path": "~/.ragd/hnsw_voyage_voyage-code-2_3072.bin",
-    "embed_dim": 3072,
+    "vector_index_path": "~/.ragd/hnsw_ollama_nomic-embed-text_768.bin",
+    "embed_dim": 768,
     "hnsw_M": 16,
     "hnsw_ef_construction": 200
   },
   "embedding": {
-    "provider": "voyage",
-    "model": "voyage-code-2",
+    "provider": "ollama",
+    "model": "nomic-embed-text",
     "api_key_env": "RAGD_EMBED_API_KEY",
     "batch_size": 128,
     "cache_embeddings": true

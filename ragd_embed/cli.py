@@ -51,17 +51,26 @@ def cmd_stats(args: argparse.Namespace) -> int:
 
 def cmd_doctor(args: argparse.Namespace) -> int:
     cfg = load_config(require_key=False)
+
+    # API key only required for external providers (not ollama)
+    api_key_required = cfg.provider != "ollama"
+    api_key_ok = bool(cfg.api_key) if api_key_required else True
+
     payload = {
-        "ok": bool(cfg.api_key),
+        "ok": api_key_ok,
         "provider": cfg.provider,
         "model": cfg.model,
         "dim": cfg.dim,
         "api_key_env": cfg.api_key_env,
         "api_key_present": bool(cfg.api_key),
+        "api_key_required": api_key_required,
+        "local_provider": cfg.provider == "ollama",
         "cache": EmbeddingCache(cfg.cache_path).stats(),
     }
-    if not cfg.api_key:
+
+    if api_key_required and not cfg.api_key:
         payload["error"] = f"{cfg.api_key_env} is not set; dominion embed run will fail closed"
+
     if args.json:
         _json(payload)
     else:

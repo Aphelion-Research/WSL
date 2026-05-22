@@ -1,96 +1,40 @@
-"""Regime detection via HMM and calendar-based regimes."""
+"""Regime detection via HMM and calendar-based regimes.
+
+DEPRECATED: This module contains LEAKY HMM code.
+Use data_pipeline.features.regime_safe instead.
+"""
+import warnings
 import numpy as np
 import pandas as pd
 from datetime import datetime
 
+# Import safe API
+from data_pipeline.features.regime_safe import (
+    fit_regime_hmm_model,
+    transform_regime_hmm,
+    fit_transform_split,
+    detect_tactical_regime_hmm as _detect_tactical_regime_hmm_safe,
+)
+
 
 def detect_tactical_regime_hmm(df: pd.DataFrame, n_states: int = 4) -> pd.DataFrame:
-    """Detect tactical regime via Hidden Markov Model.
+    """DEPRECATED: Detect tactical regime via Hidden Markov Model.
+
+    WARNING: This function fits HMM on the FULL dataset (train+OOS together).
+    This LEAKS future information into past regime labels.
+
+    Use fit_transform_split(train_df, oos_df) from regime_safe.py instead.
 
     States: trending_up, trending_down, ranging, crisis
     """
-    try:
-        from hmmlearn import hmm as hmmlearn_hmm
-    except ImportError:
-        # Graceful degradation if hmmlearn not available
-        features = pd.DataFrame(index=df.index)
-        features["regime_tactical"] = "unknown"
-        features["regime_prob_trend_up"] = 0.25
-        features["regime_prob_trend_down"] = 0.25
-        features["regime_prob_ranging"] = 0.25
-        features["regime_prob_crisis"] = 0.25
-        return features
+    warnings.warn(
+        "detect_tactical_regime_hmm() fits HMM on full data (LEAKS FUTURE). "
+        "Use fit_transform_split(train, oos) from data_pipeline.features.regime_safe instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
 
-    features = pd.DataFrame(index=df.index)
-
-    # Prepare HMM features: returns, volatility, volume
-    returns = df["close"].pct_change()
-    volatility = returns.rolling(20).std()
-    volume = df["volume"]
-
-    # Normalize features
-    X = np.column_stack([
-        (returns - returns.mean()) / (returns.std() + 1e-10),
-        (volatility - volatility.mean()) / (volatility.std() + 1e-10),
-        (volume - volume.mean()) / (volume.std() + 1e-10),
-    ])
-
-    # Remove NaNs
-    valid_mask = ~np.isnan(X).any(axis=1)
-    X_valid = X[valid_mask]
-
-    if len(X_valid) < 100:
-        # Not enough data
-        features["regime_tactical"] = "unknown"
-        features["regime_prob_trend_up"] = 0.25
-        features["regime_prob_trend_down"] = 0.25
-        features["regime_prob_ranging"] = 0.25
-        features["regime_prob_crisis"] = 0.25
-        return features
-
-    # Fit HMM
-    model = hmmlearn_hmm.GaussianHMM(n_components=n_states, covariance_type="full", n_iter=100)
-    model.fit(X_valid)
-
-    # Predict states
-    states = np.full(len(X), -1)
-    states[valid_mask] = model.predict(X_valid)
-
-    # Predict probabilities
-    probs = np.full((len(X), n_states), 0.25)
-    probs[valid_mask] = model.predict_proba(X_valid)
-
-    # Map states to regime names based on mean returns
-    state_means = []
-    for i in range(n_states):
-        state_returns = returns.values[states == i]
-        if len(state_returns) > 0:
-            state_means.append((i, np.mean(state_returns)))
-        else:
-            state_means.append((i, 0))
-
-    state_means.sort(key=lambda x: x[1], reverse=True)
-
-    # Map: highest mean = trending_up, lowest = trending_down, middle = ranging/crisis
-    state_map = {}
-    regime_names = ["trending_up", "trending_down", "ranging", "crisis"]
-    for idx, (state, _) in enumerate(state_means):
-        if idx < len(regime_names):
-            state_map[state] = regime_names[idx]
-        else:
-            state_map[state] = "unknown"
-
-    # Apply mapping
-    regime_labels = [state_map.get(s, "unknown") for s in states]
-    features["regime_tactical"] = regime_labels
-
-    # Probability columns
-    features["regime_prob_trend_up"] = probs[:, state_means[0][0]] if len(state_means) > 0 else 0.25
-    features["regime_prob_trend_down"] = probs[:, state_means[-1][0]] if len(state_means) > 0 else 0.25
-    features["regime_prob_ranging"] = probs[:, state_means[1][0] if len(state_means) > 1 else 0] if len(state_means) > 1 else 0.25
-    features["regime_prob_crisis"] = probs[:, state_means[2][0] if len(state_means) > 2 else 0] if len(state_means) > 2 else 0.25
-
-    return features
+    return _detect_tactical_regime_hmm_safe(df, n_states=n_states)
 
 
 def detect_micro_regime(timestamps: pd.DatetimeIndex) -> pd.DataFrame:
@@ -168,11 +112,26 @@ def compute_historical_return_by_regime(df: pd.DataFrame, regime_series: pd.Seri
 
 
 def compute_all_regime_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Compute all regime features (~40 features)."""
-    # Tactical regime via HMM
+    """Compute all regime features (~40 features).
+
+    DEPRECATED: This function calls detect_tactical_regime_hmm() which LEAKS.
+    For point-in-time safe regime features, use:
+        from data_pipeline.features.regime_safe import fit_transform_split
+        train_regimes, oos_regimes = fit_transform_split(train_df, oos_df)
+
+    This function is kept for backward compatibility but prints a warning.
+    """
+    warnings.warn(
+        "compute_all_regime_features() uses leaky HMM (fits on full data). "
+        "For backtest/research, use fit_transform_split(train, oos) from regime_safe.py instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
+    # Tactical regime via HMM (LEAKY)
     tactical = detect_tactical_regime_hmm(df)
 
-    # Micro regime (time-based)
+    # Micro regime (time-based, safe)
     micro = detect_micro_regime(df.index)
 
     # Duration and transition

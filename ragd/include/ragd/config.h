@@ -17,7 +17,7 @@ struct Config {
   int port = 7474;
   int max_connections = 64;
   int request_timeout_ms = 30000;
-  int embed_dim = 3072;
+  int embed_dim = 768;
   int bm25_candidates = 50;
   int vector_candidates = 50;
   int rrf_k = 60;
@@ -25,9 +25,9 @@ struct Config {
   int temporal_commits = 50;
   int dead_zone_scan_hours = 6;
   std::size_t max_file_bytes = 10 * 1024 * 1024;
-  std::string embedding_provider = "voyage";
+  std::string embedding_provider = "ollama";
   std::string embed_backend_selected = "external";
-  std::string embedding_model = "voyage-code-2";
+  std::string embedding_model = "nomic-embed-text";
   std::string embedding_api_key_env = "RAGD_EMBED_API_KEY";
   std::string log_level = "info";
   std::string log_file;

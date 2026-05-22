@@ -407,7 +407,19 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         from ragd_embed.config import load_config
         from ragd_embed.cache import EmbeddingCache
         cfg = load_config(require_key=False)
-        foundation_checks["ragd_embed"] = {"status": "ok" if cfg.api_key else "warn", "provider": cfg.provider, "model": cfg.model, "api_key_present": bool(cfg.api_key), "cache": EmbeddingCache(cfg.cache_path).stats()}
+        # API key only required for external providers (not ollama)
+        api_key_required = cfg.provider != "ollama"
+        api_key_ok = bool(cfg.api_key) if api_key_required else True
+        status = "ok" if api_key_ok else "warn"
+        foundation_checks["ragd_embed"] = {
+            "status": status,
+            "provider": cfg.provider,
+            "model": cfg.model,
+            "api_key_present": bool(cfg.api_key),
+            "api_key_required": api_key_required,
+            "local_provider": cfg.provider == "ollama",
+            "cache": EmbeddingCache(cfg.cache_path).stats(),
+        }
     except Exception as exc:
         foundation_checks["ragd_embed"] = {"status": "error", "error": str(exc)}
 
@@ -827,11 +839,16 @@ def cmd_truth(args: argparse.Namespace) -> int:
         cfg = load_config(require_key=False)
         index_path = default_index_path(cfg.provider, cfg.model, cfg.dim)
         vault_report = inspect_vault(ROOT / "vault")
+        # API key only required for external providers (not ollama)
+        api_key_required = cfg.provider != "ollama"
+        api_key_ok = bool(cfg.api_key) if api_key_required else True
         sections["rag_infra"] = {
-            "status": "warn" if not cfg.api_key else "ok",
+            "status": "ok" if api_key_ok else "warn",
             "embedding_provider": cfg.provider,
             "embedding_model": cfg.model,
             "api_key_present": bool(cfg.api_key),
+            "api_key_required": api_key_required,
+            "local_provider": cfg.provider == "ollama",
             "embed_cache": EmbeddingCache().stats(),
             "hnsw_index_exists": index_path.exists(),
             "vault_notes": vault_report.total_notes,

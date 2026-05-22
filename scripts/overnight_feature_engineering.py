@@ -135,8 +135,15 @@ def add_microstructure_proxies(X):
 
 
 def add_market_regime_hmm(X):
-    """Add HMM-based regime features."""
+    """Add HMM-based regime features.
+
+    WARNING: This function fits HMM on FULL data (train+OOS together).
+    For backtest/research, use fit_transform_split() from regime_safe.py instead.
+
+    This function is for OFFLINE feature engineering only (not point-in-time safe).
+    """
     print("Adding HMM regime features...")
+    print("  WARNING: Fitting HMM on full data (NOT point-in-time safe)")
 
     try:
         from hmmlearn import hmm
@@ -149,10 +156,20 @@ def add_market_regime_hmm(X):
         for col in vol_cols:
             s = X[col].fillna(0).values.reshape(-1, 1)
 
-            # Fit 3-state HMM
-            model = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=100)
-            model.fit(s[::10])  # Subsample for speed
+            # Fit 3-state HMM on subsampled data (LEAKY but fast for offline features)
+            model = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=100, random_state=42)
 
+            # Fit on first 80% of data only (train proxy)
+            train_len = int(len(s) * 0.8)
+            s_train = s[:train_len][::10]  # Subsample for speed
+
+            if len(s_train) < 100:
+                print(f"  Skipping {col}: insufficient data")
+                continue
+
+            model.fit(s_train)
+
+            # Transform full data (train + OOS)
             states = model.predict(s)
             regime_df[f'{col}_hmm_state'] = states
 

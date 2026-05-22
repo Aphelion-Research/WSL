@@ -34,8 +34,8 @@ prompt AWS_DEFAULT_REGION    "us-east-1"   ""
 
 echo ""
 echo "[ RAGD Embeddings ]"
-prompt RAGD_EMBED_PROVIDER   "bedrock"                        ""
-prompt RAGD_EMBED_MODEL      "amazon.titan-embed-text-v2:0"   ""
+prompt RAGD_EMBED_PROVIDER   "ollama"                         ""
+prompt RAGD_EMBED_MODEL      "nomic-embed-text"               ""
 
 echo ""
 echo "[ GitHub ]"

@@ -33,3 +33,32 @@ def test_ollama_provider_config(monkeypatch, tmp_path):
     assert cfg.model == "nomic-embed-text"
     assert cfg.dim == 768
     assert cfg.batch_size == 128
+
+
+def test_ollama_does_not_require_api_key(monkeypatch, tmp_path):
+    """Ollama provider should NOT require RAGD_EMBED_API_KEY."""
+    monkeypatch.setenv("RAGD_EMBED_PROVIDER", "ollama")
+    monkeypatch.delenv("RAGD_EMBED_API_KEY", raising=False)
+    monkeypatch.setenv("RAGD_EMBED_CACHE", str(tmp_path / "cache.db"))
+    # Should NOT raise even with require_key=True
+    cfg = load_config(require_key=True)
+    assert cfg.provider == "ollama"
+    assert cfg.api_key == ""
+
+
+def test_external_provider_requires_api_key(monkeypatch):
+    """OpenAI/Voyage providers MUST have RAGD_EMBED_API_KEY."""
+    monkeypatch.setenv("RAGD_EMBED_PROVIDER", "openai")
+    monkeypatch.delenv("RAGD_EMBED_API_KEY", raising=False)
+    # Should raise for external provider
+    with pytest.raises(RuntimeError, match="RAGD_EMBED_API_KEY"):
+        load_config(require_key=True)
+
+
+def test_voyage_provider_requires_api_key(monkeypatch):
+    """Voyage provider MUST have RAGD_EMBED_API_KEY."""
+    monkeypatch.setenv("RAGD_EMBED_PROVIDER", "voyage")
+    monkeypatch.delenv("RAGD_EMBED_API_KEY", raising=False)
+    # Should raise for external provider
+    with pytest.raises(RuntimeError, match="RAGD_EMBED_API_KEY"):
+        load_config(require_key=True)
