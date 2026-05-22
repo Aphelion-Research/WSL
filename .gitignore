@@ -11,6 +11,7 @@ data/normalized/
 data/canonical/
 data/quality_reports/
 data/*.duckdb
+data/hydra_binary_288b/
 *.duckdb
 secrets/
 *.env
