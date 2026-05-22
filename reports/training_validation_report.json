@@ -1,0 +1,82 @@
+{
+  "timestamp": "2026-05-21T09:52:03.646348",
+  "dataset": "data/hydra_xauusd_m5_master.parquet",
+  "n_rows": 499921,
+  "n_features": 812,
+  "label_column": "label_6b",
+  "label_balance": 0.4997529609678329,
+  "train_test_split": {
+    "train": 299952,
+    "val": 99984,
+    "test": 99985
+  },
+  "baselines": {
+    "always_long": {
+      "auc": 0.5,
+      "balanced_accuracy": 0.5,
+      "net_return": 50764.0,
+      "sharpe": 273.58936756307105,
+      "max_drawdown": 0.0,
+      "avg_pnl_per_bar": 0.5077161574236135
+    },
+    "always_short": {
+      "auc": 0.5,
+      "balanced_accuracy": 0.5,
+      "net_return": -50764.0,
+      "sharpe": -273.58936756307105,
+      "max_drawdown": 50764.0,
+      "avg_pnl_per_bar": -0.5077161574236135
+    },
+    "previous_bar": {
+      "auc": 0.8048642637974531,
+      "balanced_accuracy": 0.804864263797453,
+      "net_return": 31258.0,
+      "sharpe": 131.53496270596355,
+      "max_drawdown": 8.0,
+      "avg_pnl_per_bar": 0.3126268940341051
+    },
+    "momentum_20": {
+      "auc": 0.666240334273236,
+      "balanced_accuracy": 0.5057643681897827,
+      "net_return": 50734.0,
+      "sharpe": 273.2612327554728,
+      "max_drawdown": 15.0,
+      "avg_pnl_per_bar": 0.5074161124168626
+    },
+    "mean_reversion": {
+      "auc": 2.3812812779196334e-08,
+      "balanced_accuracy": 0.00017269051827472015,
+      "net_return": -50764.0,
+      "sharpe": -273.58936756307105,
+      "max_drawdown": 50764.0,
+      "avg_pnl_per_bar": -0.5077161574236135
+    }
+  },
+  "models": {
+    "top_100": {
+      "auc": 0.537972363501039,
+      "balanced_accuracy": 0.5242663324010509,
+      "net_return": -5088.0,
+      "sharpe": -19.288952503136855,
+      "max_drawdown": 5110.0,
+      "avg_pnl_per_bar": -0.050887633144971745
+    },
+    "top_200": {
+      "auc": 0.5392079313136218,
+      "balanced_accuracy": 0.525637303469034,
+      "net_return": -8178.0,
+      "sharpe": -31.129959722289986,
+      "max_drawdown": 8180.0,
+      "avg_pnl_per_bar": -0.08179226884032605
+    },
+    "all": {
+      "auc": 0.5287029315682467,
+      "balanced_accuracy": 0.5211281288517176,
+      "net_return": -15094.0,
+      "sharpe": -58.402048150593174,
+      "max_drawdown": 15121.0,
+      "avg_pnl_per_bar": -0.1509626443966595
+    }
+  },
+  "verdict": "DATASET_NEEDS_REPAIR"
+}

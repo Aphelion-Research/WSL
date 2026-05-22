@@ -1,0 +1,54 @@
+{
+  "timestamp": "2026-05-21T10:00:19.519704",
+  "dataset": "data/hydra_xauusd_m5_master_clean.parquet",
+  "schema": "data/hydra_xauusd_m5_master_schema.json",
+  "n_rows": 498705,
+  "n_features": 1076,
+  "label_column": "label_6b",
+  "label_balance": 0.501023651256755,
+  "baselines": {
+    "always_long": {
+      "auc": 0.5,
+      "balanced_accuracy": 0.5,
+      "net_return": 50826.0,
+      "sharpe": 274.6113298655557,
+      "max_drawdown": 0.0,
+      "avg_pnl_per_bar": 0.5095798117123349
+    },
+    "previous_bar": {
+      "auc": 0.8716806700441487,
+      "balanced_accuracy": 0.8716806700441488,
+      "net_return": 38032.0,
+      "sharpe": 170.22029124016817,
+      "max_drawdown": 8.0,
+      "avg_pnl_per_bar": 0.381307586649422
+    }
+  },
+  "models": {
+    "top_100": {
+      "auc": 0.5383399137991379,
+      "balanced_accuracy": 0.5293983955433424,
+      "net_return": 4652.0,
+      "sharpe": 17.639463309368534,
+      "max_drawdown": 856.0,
+      "avg_pnl_per_bar": 0.04664079967114827
+    },
+    "top_200": {
+      "auc": 0.5351318805583624,
+      "balanced_accuracy": 0.5291387221463882,
+      "net_return": 684.0,
+      "sharpe": 2.5881701981335494,
+      "max_drawdown": 1040.0,
+      "avg_pnl_per_bar": 0.006857761602550606
+    },
+    "all": {
+      "auc": 0.531189435791098,
+      "balanced_accuracy": 0.5244075110092044,
+      "net_return": -3526.0,
+      "sharpe": -13.357715820079552,
+      "max_drawdown": 4036.0,
+      "avg_pnl_per_bar": -0.03535156054180327
+    }
+  },
+  "verdict": "MASTER_STILL_NEEDS_REPAIR"
+}

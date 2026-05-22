@@ -1,0 +1,90 @@
+================================================================================
+MASTER DATASET REPAIR
+================================================================================
+
+[1] Loading clean raw source...
+Loaded: 782,825 rows × 9 cols
+Time range: 2015-01-01 23:00:00 → 2026-05-20 23:55:00
+✓ Time range valid: 2015 - 2026
+✓ No duplicate timestamps
+✓ Time monotonic
+
+[2] Loading broken master dataset...
+Master: 789,257 rows × 1,147 cols
+
+[3] Classifying columns...
+Column roles:
+  feature: 1098
+  label: 48
+  metadata: 1
+✓ No forward-looking features
+
+[4] Detecting constant features...
+Constant features: 22
+  Examples: ['h1_ret_1b', 'h1_ret_3b', 'h1_atr_pct', 'h1_ema20_pct', 'h1_rsi14', 'h1_zscore20', 'h4_ret_1b', 'h4_ret_3b', 'h4_atr_pct', 'h4_ema20_pct']
+  H1 features: 6
+⚠ WARNING: 22 constant features (threshold: 5)
+  Removing constant features...
+
+[5] Fixing time alignment...
+  Raw times: 782825
+  Master times: 789257
+  Merged: 782825 rows
+  Time range: 2015-01-01 23:00:00 → 2026-05-20 23:55:00
+✓ Merged time range valid
+
+[6] Applying schema filter...
+Clean dataset: 782825 rows × 1077 cols
+Features: 1076
+Labels: 48
+
+[7] Final validation...
+Null rate: 0.05%
+✓ No constant features in clean set
+✓ Time valid (no 1970 bug, no duplicates)
+
+[8] Saving clean dataset...
+✓ Saved: data/hydra_xauusd_m5_master_clean.parquet
+  Size: 655.7 MB
+
+[9] Saving schema manifest...
+✓ Saved: data/hydra_xauusd_m5_master_schema.json
+
+================================================================================
+REPAIR COMPLETE
+================================================================================
+
+OLD (BROKEN):
+  File: data/hydra_xauusd_m5_master.parquet
+  Time: 1970-01-01 → 2026-05-20 (UNIX BUG)
+  Rows: 789,257
+  Cols: 1,147
+  Constant features: 22
+  Forward features: (mixed with labels)
+
+NEW (CLEAN):
+  File: data/hydra_xauusd_m5_master_clean.parquet
+  Time: 2015-01-01 23:00:00 → 2026-05-20 23:55:00
+  Rows: 782,825
+  Features: 1076
+  Labels: 48
+  Constant features: 0
+  Forward features: 0 (moved to labels)
+  Null rate: 0.05%
+
+ROOT CAUSE:
+  1. Wrong source file (XAUUSD_M5.parquet vs XAUUSD_M5_dukascopy.parquet)
+  2. HTF merge with misaligned times
+  3. Forward features not separated from labels
+  4. H1 pipeline dead (22 constant features)
+
+SCHEMA:
+  Manifest: data/hydra_xauusd_m5_master_schema.json
+  Columns classified: 1147
+  - features: 1076
+  - labels: 48
+  - metadata: 1
+  - dead: 22
+================================================================================
+Next: Run validation script on clean dataset
+================================================================================

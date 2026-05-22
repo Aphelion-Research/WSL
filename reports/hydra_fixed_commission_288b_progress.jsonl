@@ -1,0 +1,20 @@
+{"timestamp": "2026-05-21T13:29:15.335345", "elapsed_seconds": 0.0, "event": "run_start", "memory_mb": 224.8, "mode": "dry_run", "resume": false}
+{"timestamp": "2026-05-21T13:29:15.335921", "elapsed_seconds": 0.0, "event": "validation_start", "memory_mb": 224.8, "dataset": "data/hydra_xauusd_m5_master_clean.parquet", "schema": "data/hydra_xauusd_m5_master_schema.json"}
+{"timestamp": "2026-05-21T13:29:15.337296", "elapsed_seconds": 0.0, "event": "schema_loaded", "memory_mb": 224.9, "columns": 1125}
+{"timestamp": "2026-05-21T13:29:15.338251", "elapsed_seconds": 0.0, "event": "feature_selection", "memory_mb": 224.9, "total": 1076, "forbidden_blocked": 0}
+{"timestamp": "2026-05-21T13:29:16.140718", "elapsed_seconds": 0.81, "event": "dataset_loaded", "memory_mb": 4125.9, "rows": 782825, "cols": 1125}
+{"timestamp": "2026-05-21T13:29:16.177774", "elapsed_seconds": 0.84, "event": "validation_passed", "memory_mb": 3823.9}
+{"timestamp": "2026-05-21T13:29:31.198305", "elapsed_seconds": 15.86, "event": "folds_configured", "memory_mb": 9750.2, "n_folds": 4}
+{"timestamp": "2026-05-21T13:29:31.199941", "elapsed_seconds": 15.87, "event": "configs_configured", "memory_mb": 9750.2, "n_configs": 10}
+{"timestamp": "2026-05-21T13:29:31.200401", "elapsed_seconds": 15.87, "event": "dry_run_complete", "memory_mb": 9750.2}
+{"timestamp": "2026-05-21T13:36:28.738521", "elapsed_seconds": 0.0, "event": "run_start", "memory_mb": 224.1, "mode": "full", "resume": false}
+{"timestamp": "2026-05-21T13:36:28.738909", "elapsed_seconds": 0.0, "event": "validation_start", "memory_mb": 224.1, "dataset": "data/hydra_xauusd_m5_master_clean.parquet", "schema": "data/hydra_xauusd_m5_master_schema.json"}
+{"timestamp": "2026-05-21T13:36:28.740085", "elapsed_seconds": 0.0, "event": "schema_loaded", "memory_mb": 224.2, "columns": 1125}
+{"timestamp": "2026-05-21T13:36:28.741052", "elapsed_seconds": 0.0, "event": "feature_selection", "memory_mb": 224.2, "total": 1076, "forbidden_blocked": 0}
+{"timestamp": "2026-05-21T13:36:29.252086", "elapsed_seconds": 0.51, "event": "dataset_loaded", "memory_mb": 4183.0, "rows": 782825, "cols": 1125}
+{"timestamp": "2026-05-21T13:36:29.287057", "elapsed_seconds": 0.55, "event": "validation_passed", "memory_mb": 3823.1}
+{"timestamp": "2026-05-21T13:36:36.277756", "elapsed_seconds": 7.54, "event": "folds_configured", "memory_mb": 10169.1, "n_folds": 4}
+{"timestamp": "2026-05-21T13:36:36.278874", "elapsed_seconds": 7.54, "event": "configs_configured", "memory_mb": 10169.1, "n_configs": 10}
+{"timestamp": "2026-05-21T13:36:36.296357", "elapsed_seconds": 7.56, "event": "config_start", "memory_mb": 10169.6, "config": "hydra_lgbm_top100_balanced", "index": 1, "total": 10}
+{"timestamp": "2026-05-21T13:36:36.301428", "elapsed_seconds": 7.56, "event": "fold_start", "memory_mb": 10169.6, "fold": 1, "config": "hydra_lgbm_top100_balanced"}
+{"timestamp": "2026-05-21T13:36:36.658908", "elapsed_seconds": 7.92, "event": "feature_ranking_start", "memory_mb": 11554.1, "fold": 1}

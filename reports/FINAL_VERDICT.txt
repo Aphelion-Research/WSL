@@ -1,0 +1,210 @@
+================================================================================
+                    DATASET REPAIR - FINAL VERDICT
+================================================================================
+
+Dataset: hydra_xauusd_m5_master → hydra_xauusd_m5_master_clean
+Date: 2026-05-21
+Repair Status: STRUCTURAL REPAIR COMPLETE
+Training Status: INSUFFICIENT SIGNAL
+
+================================================================================
+FINAL VERDICT: MASTER_STILL_NEEDS_REPAIR
+================================================================================
+
+REASON: Clean dataset has no predictive power for M5 directional prediction.
+
+
+STRUCTURAL VALIDATION: PASSED (17/17 checks)
+────────────────────────────────────────────────────────────────────────────
+
+✓ Time range: 2015-01-01 → 2026-05-20 (NO 1970 BUG)
+✓ Rows: 782,825 M5 bars
+✓ Features: 1,076 (trainable, no leakage)
+✓ Labels: 48 (separated)
+✓ No constant features (22 removed)
+✓ No forward-looking features in trainable set
+✓ No duplicate timestamps
+✓ Time monotonic
+✓ Null rate: 0.05%
+✓ No infinite values
+✓ Schema manifest created
+
+
+TRAINING VALIDATION: FAILED
+────────────────────────────────────────────────────────────────────────────
+
+Test Set: 99,741 M5 bars (20% split, temporal)
+Label: label_6b (6-bar forward return, binary)
+
+BASELINES:
+  Previous Bar:   AUC=0.872  Sharpe=170.2  Return=+38K
+  Always Long:    AUC=0.500  Sharpe=274.6  Return=+51K
+
+ML MODELS (CLEAN, SCHEMA-DRIVEN):
+  Top 100:        AUC=0.538  Sharpe= 17.6  Return=+4.7K
+  Top 200:        AUC=0.535  Sharpe=  2.6  Return=+0.7K
+  All 1076:       AUC=0.531  Sharpe=-13.4  Return=-3.5K
+
+ANALYSIS:
+  • ML at random chance (AUC ≈ 0.54)
+  • Cannot beat previous-bar baseline (AUC=0.87)
+  • Positive Sharpe (17.6) only with top 100 features
+  • More features = worse performance
+
+
+ROOT CAUSE: FEATURE/LABEL TIMESCALE MISMATCH
+────────────────────────────────────────────────────────────────────────────
+
+FEATURES (top 5 by importance):
+  1. iau_z60d         (IAU ETF 60-day z-score)
+  2. gdx_z60d         (GDX miners 60-day z-score)
+  3. iau_ret20d       (IAU 20-day return)
+  4. gld_z60d         (GLD 60-day z-score)
+  5. macro_DGS5_z252  (5Y Treasury 1Y z-score)
+
+LABEL:
+  label_6b (6-bar M5 forward = 30 minutes ahead)
+
+MISMATCH:
+  • Features = 20d-252d windows (SLOW macro indicators)
+  • Label = 30 minutes (FAST intraday moves)
+  • Slow features cannot predict fast moves
+
+
+COMPARISON: LEAKED vs CLEAN
+────────────────────────────────────────────────────────────────────────────
+
+                    AUC     Sharpe   Return
+LEAKED (fwd_ret_*)  0.934   189.5    +41K    ← model sees future
+CLEAN (no leak)     0.538    17.6    +4.7K   ← no predictive power
+
+Delta: AUC drops 0.93 → 0.54 when leakage removed.
+Original 0.93 was model seeing future, not real signal.
+
+
+OLD vs NEW DATASET
+────────────────────────────────────────────────────────────────────────────
+
+                    OLD (BROKEN)         NEW (CLEAN)         FIXED?
+Time start          1970-01-01           2015-01-01          ✓
+Time end            2026-05-20           2026-05-20          =
+Rows                789,257              782,825             ✓
+Features            1,147 (mixed)        1,076 (clean)       ✓
+Labels              (embedded)           48 (separated)      ✓
+Constant            22                   0                   ✓
+Forward leakage     Yes (fwd_ret_*)      No                  ✓
+Schema              None                 Manifest            ✓
+Duplicates          0                    0                   =
+Null rate           0.05%                0.05%               =
+
+
+BUGS FIXED
+────────────────────────────────────────────────────────────────────────────
+
+1. ✓ Time starts at 1970 (Unix epoch conversion error)
+   → Used correct source (Dukascopy M5, not MT5 M5)
+   → Time now: 2015-2026
+
+2. ✓ Forward features (fwd_ret_*) in trainable set
+   → Reclassified as labels
+   → Schema manifest enforces separation
+
+3. ✓ 22 constant H1/H4 features
+   → Removed from clean dataset
+   → Marked as dead_feature in schema
+
+4. ✓ No feature/label separation
+   → Created schema manifest
+   → Training script uses schema
+
+
+FILES CREATED
+────────────────────────────────────────────────────────────────────────────
+
+data/hydra_xauusd_m5_master_clean.parquet       (656 MB, 783K rows)
+data/hydra_xauusd_m5_master_schema.json          (schema manifest)
+scripts/repair_master_dataset.py                 (repair pipeline)
+scripts/validate_clean_dataset.py                (structural validation)
+scripts/training_validation_clean.py             (ML validation)
+reports/FINAL_REPAIR_VERDICT.md                  (full analysis)
+reports/FINAL_DATASET_VERDICT.md                 (original findings)
+reports/repair_log.txt                           (repair output)
+reports/training_clean_log.txt                   (training output)
+
+
+RECOMMENDATIONS
+────────────────────────────────────────────────────────────────────────────
+
+DATASET NOT READY FOR M5 DIRECTIONAL PREDICTION.
+
+Options:
+
+1. ADD M5 MICROSTRUCTURE FEATURES (HIGH PRIORITY)
+   Required for 30-minute prediction:
+   • Tick volume patterns (5m-30m windows)
+   • Bid-ask spread dynamics (roll model, Corwin-Schultz)
+   • Order flow toxicity (VPIN)
+   • Recent price action (1m-5m momentum)
+   • Intrabar OHLC patterns
+
+2. SWITCH TO H4/DAILY LABELS (ALTERNATIVE)
+   Match feature timescales:
+   • Current features = 60d-252d macro → good for daily/weekly
+   • Label = H4 or D1 forward return
+   • Expected AUC improvement (features aligned with label)
+
+3. USE FOR REGIME CLASSIFICATION ONLY (FALLBACK)
+   • Current features good for slow regime changes
+   • Not for directional M5 prediction
+   • Build regime filter → apply to separate M5 strategy
+
+
+NEXT STEPS
+────────────────────────────────────────────────────────────────────────────
+
+1. DO NOT USE current dataset for M5 training
+   → AUC=0.54 (random), cannot beat baselines
+
+2. CHOOSE APPROACH:
+   A. Add M5 microstructure → rebuild → re-validate
+   B. Switch to H4/Daily labels → re-validate
+   C. Limit to regime classification
+
+3. UPDATE build_master_dataset.py:
+   • Use Dukascopy source (not MT5 M5)
+   • Add time validation (fail if year < 2010)
+   • Add constant feature check (fail if >5)
+   • Add forward-looking feature check
+
+
+FINAL DECISION MATRIX
+────────────────────────────────────────────────────────────────────────────
+
+Criterion                        Pass?   Blocker?
+Data loads correctly             ✓       No
+Time range valid (2015-2026)     ✓       No
+No 1970 bug                      ✓       No
+No duplicates                    ✓       No
+No constant features             ✓       No
+No forward leakage               ✓       No
+Schema manifest exists           ✓       No
+ML beats baselines               ✗       YES (AUC 0.54 vs 0.87)
+Positive Sharpe                  ○       MARGINAL (17.6, unstable)
+
+BLOCKERS: 1 critical (no predictive power)
+VERDICT: MASTER_STILL_NEEDS_REPAIR
+
+
+SUMMARY
+────────────────────────────────────────────────────────────────────────────
+
+STRUCTURAL REPAIR:     COMPLETE ✓
+FEATURE ENGINEERING:   INCOMPLETE ✗
+TRAINING READINESS:    NOT READY ✗
+
+Dataset structurally clean but lacks M5-scale features.
+Use for H4/Daily prediction OR add microstructure features for M5.
+
+================================================================================
+END OF REPORT
+================================================================================

@@ -1,0 +1,9 @@
+{
+  "timestamp": "2026-05-21",
+  "elapsed_seconds": 49.493,
+  "threads": 8,
+  "openmp_enabled": true,
+  "n_configs": 6,
+  "n_folds": 5,
+  "n_results": 30
+}

@@ -1,0 +1,88 @@
+================================================================================
+TRAINING VALIDATION (SCHEMA-DRIVEN)
+================================================================================
+
+[1] Loading schema...
+Schema version: 1.0_clean
+Features: 1076
+Labels: 48
+Trainable features: 1076
+Available labels: 48
+
+[2] Loading dataset...
+Loaded: 782,825 rows × 1,125 cols
+Target label: label_6b
+
+[3] Converting to pandas...
+After label dropna: 498,705 rows
+Label balance: 50.1% positive
+
+[4] Feature filtering...
+Features after null filter (<50%): 1076
+
+[5] Feature importance ranking...
+Top 5 features:
+  iau_z60d: 0.0240
+  gdx_z60d: 0.0233
+  iau_ret20d: 0.0216
+  gld_z60d: 0.0207
+  macro_DGS5_z252: 0.0158
+✓ No forward-looking features in top 100
+
+Feature sets:
+  Top 100: 100
+  Top 200: 200
+  All: 1076
+
+[6] Walk-forward split...
+Train: 299,223 (60.0%)
+Val:   99,741 (20.0%)
+Test:  99,741 (20.0%)
+
+[7] Computing baselines...
+
+Baseline results (test set):
+
+always_long:
+  AUC: 0.500
+  Balanced Acc: 0.500
+  Sharpe: 274.611
+  Net Return: 50826.00
+
+previous_bar:
+  AUC: 0.872
+  Balanced Acc: 0.872
+  Sharpe: 170.220
+  Net Return: 38032.00
+
+[8] Training ML models...
+
+[top_100] Training RF...
+  AUC: 0.538
+  Sharpe: 17.639
+  Net Return: 4652.00
+
+[top_200] Training RF...
+  AUC: 0.535
+  Sharpe: 2.588
+  Net Return: 684.00
+
+[all] Training RF...
+  AUC: 0.531
+  Sharpe: -13.358
+  Net Return: -3526.00
+
+================================================================================
+FINAL VERDICT
+================================================================================
+
+Best baseline Sharpe: 274.611
+Best model Sharpe: 17.639
+Best baseline AUC: 0.872
+Best model AUC: 0.538
+
+✗ VERDICT: MASTER_STILL_NEEDS_REPAIR
+  Models fail to beat baselines with clean features.
+
+Report saved: reports/training_validation_clean_report.json
+================================================================================
