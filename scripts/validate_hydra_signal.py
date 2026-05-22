@@ -15,10 +15,151 @@ import json
 import math
 import re
 import sys
-from dataclasses import dataclass
+import time
+import threading
+import warnings as _warnings
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+# Suppress sklearn feature-name UserWarning when passing NumPy arrays
+_warnings.filterwarnings("ignore", message=".*does not have valid feature names.*", category=UserWarning)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Progress UI
+# ─────────────────────────────────────────────────────────────────────────────
+
+_RICH_AVAILABLE = False
+try:
+    from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeElapsedColumn, TimeRemainingColumn, MofNCompleteColumn
+    from rich.console import Console
+    from rich.table import Table
+    _RICH_AVAILABLE = True
+except ImportError:
+    pass
+
+
+class PlainProgress:
+    """Fallback progress reporter when Rich is unavailable."""
+
+    def __init__(self, total_folds: int, log_every: float = 30.0):
+        self._total = total_folds
+        self._log_every = log_every
+        self._start = time.time()
+
+    def start(self) -> None:
+        print(f"[progress] Starting {self._total} folds...")
+
+    def begin_fold(self, fold_num: int) -> None:
+        elapsed = time.time() - self._start
+        print(f"[fold {fold_num}/{self._total}] starting (elapsed {elapsed:.1f}s)")
+
+    def update_phase(self, fold_num: int, phase: str) -> None:
+        elapsed = time.time() - self._start
+        print(f"[fold {fold_num}/{self._total}] {phase} (elapsed {elapsed:.1f}s)")
+
+    def end_fold(self, fold_num: int, fold_time: float) -> None:
+        elapsed = time.time() - self._start
+        remaining = (elapsed / fold_num) * (self._total - fold_num) if fold_num > 0 else 0
+        print(f"[fold {fold_num}/{self._total}] done in {fold_time:.1f}s (ETA {remaining:.0f}s)")
+
+    def finish(self) -> None:
+        elapsed = time.time() - self._start
+        print(f"[progress] All folds complete in {elapsed:.1f}s")
+
+
+class RichProgress:
+    """Rich-based progress reporter."""
+
+    def __init__(self, total_folds: int, log_every: float = 30.0):
+        self._total = total_folds
+        self._console = Console()
+        self._progress = Progress(
+            SpinnerColumn(),
+            TextColumn("[bold blue]{task.description}"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            TimeElapsedColumn(),
+            TimeRemainingColumn(),
+            console=self._console,
+        )
+        self._task_id = None
+        self._start = time.time()
+
+    def start(self) -> None:
+        self._progress.start()
+        self._task_id = self._progress.add_task("Walk-forward folds", total=self._total)
+
+    def begin_fold(self, fold_num: int) -> None:
+        self._progress.update(self._task_id, description=f"Fold {fold_num}/{self._total}")
+
+    def update_phase(self, fold_num: int, phase: str) -> None:
+        self._progress.update(self._task_id, description=f"Fold {fold_num}/{self._total}: {phase}")
+
+    def end_fold(self, fold_num: int, fold_time: float) -> None:
+        self._progress.advance(self._task_id)
+        self._progress.update(self._task_id, description=f"Fold {fold_num} done ({fold_time:.1f}s)")
+
+    def finish(self) -> None:
+        elapsed = time.time() - self._start
+        self._progress.update(self._task_id, description=f"Complete ({elapsed:.1f}s)")
+        self._progress.stop()
+
+
+class NoProgress:
+    """Silent progress (--no-progress)."""
+
+    def start(self) -> None: pass
+    def begin_fold(self, fold_num: int) -> None: pass
+    def update_phase(self, fold_num: int, phase: str) -> None: pass
+    def end_fold(self, fold_num: int, fold_time: float) -> None: pass
+    def finish(self) -> None: pass
+
+
+def make_progress(mode: str, total_folds: int, log_every: float) -> Any:
+    """Create progress reporter based on mode."""
+    if mode == "none":
+        return NoProgress()
+    if mode == "rich" or (mode == "auto" and _RICH_AVAILABLE):
+        return RichProgress(total_folds, log_every)
+    return PlainProgress(total_folds, log_every)
+
+
+class FitHeartbeat:
+    """Background heartbeat during slow model fitting."""
+
+    def __init__(self, fold_num: int, interval: float = 30.0):
+        self._fold = fold_num
+        self._interval = interval
+        self._start = time.time()
+        self._stop_event = threading.Event()
+        self._thread: threading.Thread | None = None
+
+    def __enter__(self) -> "FitHeartbeat":
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+        return self
+
+    def __exit__(self, *_: Any) -> None:
+        self._stop_event.set()
+        if self._thread:
+            self._thread.join(timeout=1.0)
+
+    def _run(self) -> None:
+        while not self._stop_event.wait(self._interval):
+            elapsed = time.time() - self._start
+            print(f"  [heartbeat] Fold {self._fold}: model fit running... elapsed {elapsed:.0f}s")
+
+
+@dataclass
+class FoldTiming:
+    """Timing breakdown for a single fold."""
+    preprocess_seconds: float = 0.0
+    fit_seconds: float = 0.0
+    predict_seconds: float = 0.0
+    metric_seconds: float = 0.0
+    fold_seconds: float = 0.0
 
 
 DEFAULT_OUTPUT_DIR = "reports/signal_validation"
@@ -187,6 +328,23 @@ def parse_args() -> argparse.Namespace:
             "Primary model. The default uses LightGBM when installed, otherwise "
             "falls back to a small sklearn classifier."
         ),
+    )
+    parser.add_argument(
+        "--no-progress",
+        action="store_true",
+        help="Suppress all progress output (timings still recorded in outputs).",
+    )
+    parser.add_argument(
+        "--progress-mode",
+        choices=["auto", "rich", "plain"],
+        default="auto",
+        help="Progress display backend. 'auto' uses Rich if installed, else plain.",
+    )
+    parser.add_argument(
+        "--log-every-seconds",
+        type=float,
+        default=30.0,
+        help="Heartbeat interval (seconds) during long model fits.",
     )
     return parser.parse_args()
 
@@ -997,6 +1155,8 @@ def json_safe(value: Any) -> Any:
 def run_validation(args: argparse.Namespace) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     np, _ = require_runtime_dependencies()
 
+    run_start_time = time.time()
+
     dataset_path = Path(args.dataset)
     df = load_dataset(dataset_path, args.max_rows)
 
@@ -1019,14 +1179,40 @@ def run_validation(args: argparse.Namespace) -> tuple[list[dict[str, Any]], dict
     price_col = find_price_column(list(df.columns))
     folds = make_walk_forward_folds(len(df), args.folds, args.embargo_bars)
 
+    # Progress setup
+    progress_mode = "none" if getattr(args, "no_progress", False) else getattr(args, "progress_mode", "auto")
+    log_every = getattr(args, "log_every_seconds", 30.0)
+    progress = make_progress(progress_mode, len(folds), log_every)
+
+    # Run start banner
+    print("=" * 70)
+    print("HYDRA SIGNAL VALIDATION — Walk-Forward Harness")
+    print("=" * 70)
+    print(f"  Dataset:    {dataset_path}")
+    print(f"  Rows:       {len(df):,}")
+    print(f"  Features:   {len(feature_cols):,} candidates")
+    print(f"  Label:      {args.label_column}")
+    print(f"  Folds:      {args.folds}")
+    print(f"  Embargo:    {args.embargo_bars} bars")
+    print(f"  Model:      {args.model}")
+    print(f"  Started:    {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}")
+    print("=" * 70)
+
+    progress.start()
+
     rows: list[dict[str, Any]] = []
     for fold in folds:
+        fold_start_time = time.time()
+        timing = FoldTiming()
+        progress.begin_fold(fold.number)
+
         train_slice = slice(fold.train_start, fold.train_end)
         test_slice = slice(fold.test_start, fold.test_end)
 
         y_train = y.iloc[train_slice].to_numpy()
         y_test = y.iloc[test_slice].to_numpy()
         if len(np.unique(y_train)) < 2 or len(np.unique(y_test)) < 2:
+            timing.fold_seconds = time.time() - fold_start_time
             row = {
                 "fold": fold.number,
                 "fold_status": "SKIPPED_ONE_CLASS",
@@ -1050,11 +1236,20 @@ def run_validation(args: argparse.Namespace) -> tuple[list[dict[str, Any]], dict
                 "best_baseline_name": None,
                 "best_baseline_return_after_cost": None,
                 "excess_over_best_baseline": None,
+                "preprocess_seconds": timing.preprocess_seconds,
+                "fit_seconds": timing.fit_seconds,
+                "predict_seconds": timing.predict_seconds,
+                "metric_seconds": timing.metric_seconds,
+                "fold_seconds": timing.fold_seconds,
             }
             add_baseline_columns(row, null_baseline_returns())
             rows.append(row)
+            progress.end_fold(fold.number, timing.fold_seconds)
             continue
 
+        # Preprocess phase
+        progress.update_phase(fold.number, "preprocess")
+        t0 = time.time()
         X_train = df.iloc[train_slice][feature_cols]
         X_test = df.iloc[test_slice][feature_cols]
         X_train_selected, X_test_selected, selected_features = fit_train_only_transform(
@@ -1062,14 +1257,27 @@ def run_validation(args: argparse.Namespace) -> tuple[list[dict[str, Any]], dict
             X_test,
             feature_cols,
         )
+        timing.preprocess_seconds = time.time() - t0
 
+        # Fit phase
+        progress.update_phase(fold.number, "fit")
+        t0 = time.time()
         model_spec = make_model(args.model, seed=42)
-        model_spec.model.fit(X_train_selected, y_train)
+        with FitHeartbeat(fold.number, interval=log_every):
+            model_spec.model.fit(X_train_selected, y_train)
+        timing.fit_seconds = time.time() - t0
 
+        # Predict phase
+        progress.update_phase(fold.number, "predict")
+        t0 = time.time()
         y_proba = probability_positive(model_spec.model, X_test_selected)
         y_pred = (y_proba >= 0.5).astype(int)
         positions = np.where(y_pred == 1, 1.0, -1.0)
+        timing.predict_seconds = time.time() - t0
 
+        # Metrics phase
+        progress.update_phase(fold.number, "metrics")
+        t0 = time.time()
         cls = classification_metrics(y_test, y_pred, y_proba)
         if return_stream.pnl_enabled:
             model_returns = strategy_return_after_cost(
@@ -1089,6 +1297,9 @@ def run_validation(args: argparse.Namespace) -> tuple[list[dict[str, Any]], dict
         else:
             model_returns = null_return_metrics()
             baselines = null_baseline_returns()
+        timing.metric_seconds = time.time() - t0
+
+        timing.fold_seconds = time.time() - fold_start_time
 
         best_name, best_value = best_baseline(baselines)
         model_net = model_returns["return_after_cost"]
@@ -1132,11 +1343,30 @@ def run_validation(args: argparse.Namespace) -> tuple[list[dict[str, Any]], dict
             "best_baseline_name": best_name,
             "best_baseline_return_after_cost": best_value,
             "excess_over_best_baseline": excess,
+            "preprocess_seconds": timing.preprocess_seconds,
+            "fit_seconds": timing.fit_seconds,
+            "predict_seconds": timing.predict_seconds,
+            "metric_seconds": timing.metric_seconds,
+            "fold_seconds": timing.fold_seconds,
         }
 
         add_baseline_columns(row, baselines)
 
         rows.append(row)
+
+        # Live fold summary
+        progress.end_fold(fold.number, timing.fold_seconds)
+        auc_str = f"{cls['auc']:.4f}" if cls.get("auc") is not None else "N/A"
+        print(
+            f"  Fold {fold.number}: AUC={auc_str} | "
+            f"preprocess={timing.preprocess_seconds:.1f}s fit={timing.fit_seconds:.1f}s "
+            f"predict={timing.predict_seconds:.1f}s metrics={timing.metric_seconds:.1f}s "
+            f"total={timing.fold_seconds:.1f}s"
+        )
+
+    progress.finish()
+    total_runtime = time.time() - run_start_time
+    print(f"\nTotal runtime: {total_runtime:.1f}s")
 
     valid_rows = [row for row in rows if row.get("fold_status") == "VALID"]
     aucs = [row.get("auc") for row in valid_rows]
@@ -1172,6 +1402,7 @@ def run_validation(args: argparse.Namespace) -> tuple[list[dict[str, Any]], dict
     summary: dict[str, Any] = {
         "run_id": make_run_id(dataset_path, args.label_column),
         "created_utc": datetime.now(timezone.utc).isoformat(),
+        "total_runtime_seconds": round(total_runtime, 2),
         "warnings": build_warnings(args.label_column),
         "config": {
             "dataset": str(dataset_path),
