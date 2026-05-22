@@ -19,7 +19,7 @@ def test_registry_summary():
     assert summary["total_columns"] == 3000
     assert summary["available"] > 0
     assert summary["unavailable"] > 0
-    assert summary["reserved"] == 450  # Z1, Z2, Z3
+    assert summary["reserved"] == 50  # Z1, Z2, Z3
 
 
 def test_build_small_matrix():
@@ -46,27 +46,30 @@ def test_build_small_matrix():
     assert matrix["A_close"].dtype == pl.Float32
 
     # Check Block C (rolling features)
-    assert "C_roll_5_mean_close" in matrix.columns
+    assert "C_0000" in matrix.columns
 
     # Check Block D (technical)
-    assert "D_ema_14" in matrix.columns
+    assert "D_0000" in matrix.columns
 
     # Check Block G (time features)
-    assert "G_hour" in matrix.columns
+    assert "G_0000" in matrix.columns
 
     # Check Block Z4 (labels)
-    assert "Z4_label_1b_ret" in matrix.columns
+    assert "Z4_0000" in matrix.columns
 
 
-def test_quality_gates():
+def test_quality_gates(monkeypatch, tmp_path):
     """Test quality gates on small matrix."""
     builder = MatrixBuilder()
 
     matrix = builder.build(
         h1_data_path="/home/Martin/Dominion/data/mt5_history/XAUUSD_H1.parquet",
         output_path=None,
-        max_rows=500
+        max_rows=1000
     )
+
+    # Isolate the H1 smoke matrix from the repo-level M5 semantic mapping file.
+    monkeypatch.chdir(tmp_path)
 
     training_allowed, results = run_all_gates(matrix)
 

@@ -1,5 +1,13 @@
 # Dominion Platform Progress
 
+## HYDRA Dataset Audit - 2026-05-22
+
+Status: STRUCTURE GREEN, SIGNAL NOT RE-TESTED.
+
+Fresh audit resolved the stale HYDRA blocker story. `data/hydra_m5_dataset.parquet` now rebuilds as 100,000 rows x 3,001 columns with 148 trainable non-label features and a valid 90-feature semantic mapping, so quality gates report TRAINING ALLOWED. The missing clean-master schema was regenerated; `data/hydra_xauusd_m5_master_clean.parquet` validates at 782,825 rows x 1,125 columns with 1,076 trainable features, 48 labels, 22 excluded dead features, and 17/17 structural checks passing.
+
+Overnight status files overstate the large matrices: the Dukascopy source has 782,825 rows, but `hydra_xauusd_m5_3k.parquet` is 100,000 x 1,580 and `hydra_xauusd_m5_advanced.parquet` is 100,000 x 4,865, not a validated 850K-row / 5,500-feature matrix. RAGD MCP was unavailable during the audit (`127.0.0.1:7474` connection refused). See `reports/2026-05-22_hydra_dataset_audit.md`.
+
 Last update: 2026-05-18 23:xx UTC
 
 ---

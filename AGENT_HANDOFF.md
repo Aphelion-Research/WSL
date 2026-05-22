@@ -1,5 +1,26 @@
 # Dominion Agent Handoff
 
+## Current State - 2026-05-22 HYDRA Dataset Audit
+
+Status: HYDRA STRUCTURE GREEN | RAGD MCP OFFLINE DURING AUDIT.
+
+Fresh evidence:
+- `data/hydra_m5_dataset.parquet`: rebuilt successfully, 100,000 rows x 3,001 cols, 148 trainable non-label features, 90 semantic Block B mappings, HYDRA gates TRAINING ALLOWED.
+- `data/hydra_xauusd_m5_master_clean.parquet`: regenerated/validated with schema, 782,825 rows x 1,125 cols, 1,076 trainable features, 48 labels, 22 excluded dead H1/H4/D1 features, structural validation 17/17 PASS.
+- Overnight claims need qualification: Dukascopy long-history data exists, but `hydra_xauusd_m5_3k.parquet` is 100,000 x 1,580 and `hydra_xauusd_m5_advanced.parquet` is 100,000 x 4,865, not validated 850K-row / 5,500-feature deliverables.
+- RAGD MCP calls `ragd_handoff_read` and `ragd_query` both failed with `127.0.0.1:7474` connection refused; do not claim RAGD context was available.
+
+Commands just validated:
+```bash
+python3 scripts/build_full_dataset.py --timeframe M5 --output data/hydra_m5_dataset.parquet --max-rows 100000 --run-gates
+python3 scripts/repair_master_dataset.py
+python3 scripts/validate_clean_dataset.py
+python3 -m pytest -q tests/dataset/test_matrix_builder.py
+python3 domdata/check_no_trading.py
+```
+
+Current report: `reports/2026-05-22_hydra_dataset_audit.md`.
+
 ## Current State — 2026-05-19
 
 Status: **SOURCE_GREEN | LIVE_WARN** — Core systems operational. RAGD REST API running, vault clean, data pipeline deployed, 5 microstructure subsystems complete. Chunker service unreachable, embed config incomplete (see doctor output).

@@ -1,5 +1,15 @@
 # M5 Dataset Unblock Report
 
+## 2026-05-22 Addendum
+
+The 70-feature blocker below is stale. A fresh rebuild with:
+
+```bash
+python3 scripts/build_full_dataset.py --timeframe M5 --output data/hydra_m5_dataset.parquet --max-rows 100000 --run-gates
+```
+
+produced 100,000 rows x 3,001 columns, 148 trainable non-label features, a restored 90-feature semantic mapping at `data/registry/semantic_column_mapping.json`, and HYDRA quality gates returned TRAINING ALLOWED. See `reports/2026-05-22_hydra_dataset_audit.md` for the current audit.
+
 **Date:** 2026-05-21  
 **Status:** M5 DATA ACQUIRED, TRAINING STILL BLOCKED (70/100 features)
 

@@ -256,6 +256,10 @@ print(f"  Size: {OUTPUT.stat().st_size / 1024**2:.1f} MB")
 print("\n[9] Saving schema manifest...")
 
 SCHEMA_FILE = Path("data/hydra_xauusd_m5_master_schema.json")
+clean_column_names = set(df_clean.columns)
+clean_schema = [s for s in schema if s['name'] in clean_column_names]
+dropped_schema = [s for s in schema if s['name'] not in clean_column_names]
+
 schema_manifest = {
     'version': '1.0_clean',
     'created': datetime.now().isoformat(),
@@ -268,7 +272,8 @@ schema_manifest = {
         'min': str(df_clean['time'].min()),
         'max': str(df_clean['time'].max())
     },
-    'columns': schema,
+    'columns': clean_schema,
+    'excluded_columns': dropped_schema,
     'validation': {
         'time_min_year': int(df_clean['time'].min().year),
         'time_max_year': int(df_clean['time'].max().year),
@@ -313,11 +318,11 @@ print(f"  4. H1 pipeline dead (22 constant features)")
 
 print(f"\nSCHEMA:")
 print(f"  Manifest: {SCHEMA_FILE}")
-print(f"  Columns classified: {len(schema)}")
-print(f"  - features: {sum(1 for s in schema if s['role']=='feature')}")
-print(f"  - labels: {sum(1 for s in schema if s['role']=='label')}")
-print(f"  - metadata: {sum(1 for s in schema if s['role']=='metadata')}")
-print(f"  - dead: {sum(1 for s in schema if s['role']=='dead_feature')}")
+print(f"  Columns classified: {len(clean_schema)} present, {len(dropped_schema)} excluded")
+print(f"  - features: {sum(1 for s in clean_schema if s['role']=='feature')}")
+print(f"  - labels: {sum(1 for s in clean_schema if s['role']=='label')}")
+print(f"  - metadata: {sum(1 for s in clean_schema if s['role']=='metadata')}")
+print(f"  - excluded/dead: {sum(1 for s in dropped_schema if s['role']=='dead_feature')}")
 
 print("=" * 80)
 print("Next: Run validation script on clean dataset")

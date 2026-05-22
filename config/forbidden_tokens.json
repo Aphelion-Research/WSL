@@ -30,6 +30,7 @@
   "allowlist_paths": [
     "config/forbidden_tokens.json",
     "AGENTS.md",
+    "CLAUDE.md",
     "docs/",
     "prompts/",
     "notes/",
@@ -46,4 +47,3 @@
     "vendor"
   ]
 }
-
