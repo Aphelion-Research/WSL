@@ -55,7 +55,10 @@ class FeatureStore:
         all_features.append(macro.compute_all_macro_features(gold_df, macro_df))
 
         # Regime features (~40)
-        all_features.append(regime.compute_all_regime_features(gold_df))
+        # NOTE: HMM regime features REMOVED from default path (leaky).
+        # Only compute safe calendar/session regimes.
+        # For HMM regimes, use fit_transform_split(train, oos) from regime_safe.py
+        all_features.append(regime.detect_micro_regime(gold_df.index))
 
         # Calendar features (~30)
         all_features.append(calendar.compute_all_calendar_features(gold_df.index))

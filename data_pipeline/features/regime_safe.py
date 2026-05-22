@@ -1,8 +1,8 @@
 """Regime detection via HMM and calendar-based regimes.
 
 POINT-IN-TIME SAFE API:
-- fit_regime_hmm_model(train_df) -> fitted model
-- transform_regime_hmm(model, df) -> regime features
+- fit_regime_hmm_model(train_df) -> FittedRegimeHMM
+- transform_regime_hmm(fitted, df) -> regime features
 - fit_transform_split(train_df, oos_df) -> both DataFrames with regimes
 
 OLD API (detect_tactical_regime_hmm) is DEPRECATED and LEAKS.
@@ -22,7 +22,24 @@ EXAMPLE USAGE:
 """
 import numpy as np
 import pandas as pd
-from typing import Optional, Tuple
+from dataclasses import dataclass
+from typing import Any, Optional, Tuple
+
+
+@dataclass
+class FittedRegimeHMM:
+    """Fitted HMM regime model with frozen state mapping.
+
+    Attributes:
+        model: Fitted GaussianHMM
+        n_states: Number of hidden states
+        state_map: Mapping from state_id to regime_name (learned on train)
+        state_probs_map: Mapping from regime_name to state_id (for probabilities)
+    """
+    model: Any  # hmmlearn.hmm.GaussianHMM
+    n_states: int
+    state_map: dict[int, str]
+    state_probs_map: dict[str, int]
 
 
 def _prepare_hmm_features(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
@@ -44,7 +61,7 @@ def _prepare_hmm_features(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     return X, valid_mask
 
 
-def fit_regime_hmm_model(train_df: pd.DataFrame, n_states: int = 4):
+def fit_regime_hmm_model(train_df: pd.DataFrame, n_states: int = 4) -> FittedRegimeHMM:
     """Fit HMM regime model on training data only.
 
     Args:
@@ -52,7 +69,7 @@ def fit_regime_hmm_model(train_df: pd.DataFrame, n_states: int = 4):
         n_states: Number of hidden states
 
     Returns:
-        Fitted HMM model (hmmlearn.hmm.GaussianHMM)
+        FittedRegimeHMM with frozen state mapping
 
     Raises:
         ImportError: If hmmlearn not available
@@ -78,20 +95,57 @@ def fit_regime_hmm_model(train_df: pd.DataFrame, n_states: int = 4):
     )
     model.fit(X_valid)
 
-    return model
+    # Predict train states to learn state-to-regime mapping
+    train_states = np.full(len(X), -1)
+    train_states[valid_mask] = model.predict(X_valid)
+
+    # Map states to regime names based on mean train returns
+    train_returns = train_df["close"].pct_change()
+    state_means = []
+    for i in range(n_states):
+        state_returns = train_returns.values[train_states == i]
+        if len(state_returns) > 0:
+            state_means.append((i, np.mean(state_returns)))
+        else:
+            state_means.append((i, 0))
+
+    state_means.sort(key=lambda x: x[1], reverse=True)
+
+    # Map: highest mean = trending_up, lowest = trending_down, middle = ranging/crisis
+    regime_names = ["trending_up", "trending_down", "ranging", "crisis"]
+    state_map = {}
+    state_probs_map = {}
+
+    for idx, (state, _) in enumerate(state_means):
+        if idx < len(regime_names):
+            regime_name = regime_names[idx]
+        else:
+            regime_name = "unknown"
+        state_map[state] = regime_name
+
+    # Build reverse map for probabilities
+    state_probs_map["trending_up"] = state_means[0][0] if len(state_means) > 0 else 0
+    state_probs_map["trending_down"] = state_means[-1][0] if len(state_means) > 0 else 0
+    state_probs_map["ranging"] = state_means[1][0] if len(state_means) > 1 else 0
+    state_probs_map["crisis"] = state_means[2][0] if len(state_means) > 2 else 0
+
+    return FittedRegimeHMM(
+        model=model,
+        n_states=n_states,
+        state_map=state_map,
+        state_probs_map=state_probs_map,
+    )
 
 
 def transform_regime_hmm(
-    model,
+    fitted: FittedRegimeHMM,
     df: pd.DataFrame,
-    train_returns: Optional[pd.Series] = None,
 ) -> pd.DataFrame:
-    """Transform data using fitted HMM model (point-in-time safe).
+    """Transform data using fitted HMM model (point-in-time safe, prefix-stable).
 
     Args:
-        model: Fitted HMM model from fit_regime_hmm_model()
+        fitted: FittedRegimeHMM from fit_regime_hmm_model()
         df: DataFrame to transform with ['close', 'volume']
-        train_returns: Training returns for state-to-regime mapping (optional)
 
     Returns:
         DataFrame with regime features:
@@ -101,9 +155,8 @@ def transform_regime_hmm(
     features = pd.DataFrame(index=df.index)
 
     X, valid_mask = _prepare_hmm_features(df)
-    X_valid = X[valid_mask]
 
-    if len(X_valid) == 0:
+    if valid_mask.sum() == 0:
         # No valid data, return unknown
         features["regime_tactical"] = "unknown"
         features["regime_prob_trend_up"] = 0.25
@@ -112,45 +165,28 @@ def transform_regime_hmm(
         features["regime_prob_crisis"] = 0.25
         return features
 
-    # Predict states (transform only, no fitting)
-    states = np.full(len(X), -1)
-    states[valid_mask] = model.predict(X_valid)
+    # POINTWISE prediction (prefix-stable, no full-sequence Viterbi)
+    # For each valid row, predict independently
+    states = np.full(len(X), -1, dtype=int)
+    probs = np.full((len(X), fitted.n_states), 1.0 / fitted.n_states, dtype=float)
 
-    # Predict probabilities
-    n_states = model.n_components
-    probs = np.full((len(X), n_states), 1.0 / n_states)
-    probs[valid_mask] = model.predict_proba(X_valid)
+    valid_indices = np.where(valid_mask)[0]
+    for i in valid_indices:
+        row = X[i:i+1]  # shape (1, n_features)
+        # Pointwise prediction (no dependency on future rows)
+        row_probs = fitted.model.predict_proba(row)[0]
+        probs[i] = row_probs
+        states[i] = np.argmax(row_probs)
 
-    # Map states to regime names based on mean returns
-    returns = df["close"].pct_change() if train_returns is None else train_returns
-    state_means = []
-    for i in range(n_states):
-        state_returns = returns.values[states == i]
-        if len(state_returns) > 0:
-            state_means.append((i, np.mean(state_returns)))
-        else:
-            state_means.append((i, 0))
-
-    state_means.sort(key=lambda x: x[1], reverse=True)
-
-    # Map: highest mean = trending_up, lowest = trending_down, middle = ranging/crisis
-    state_map = {}
-    regime_names = ["trending_up", "trending_down", "ranging", "crisis"]
-    for idx, (state, _) in enumerate(state_means):
-        if idx < len(regime_names):
-            state_map[state] = regime_names[idx]
-        else:
-            state_map[state] = "unknown"
-
-    # Apply mapping
-    regime_labels = [state_map.get(s, "unknown") for s in states]
+    # Apply frozen state_map (learned on train)
+    regime_labels = [fitted.state_map.get(s, "unknown") for s in states]
     features["regime_tactical"] = regime_labels
 
-    # Probability columns
-    features["regime_prob_trend_up"] = probs[:, state_means[0][0]] if len(state_means) > 0 else 0.25
-    features["regime_prob_trend_down"] = probs[:, state_means[-1][0]] if len(state_means) > 0 else 0.25
-    features["regime_prob_ranging"] = probs[:, state_means[1][0] if len(state_means) > 1 else 0] if len(state_means) > 1 else 0.25
-    features["regime_prob_crisis"] = probs[:, state_means[2][0] if len(state_means) > 2 else 0] if len(state_means) > 2 else 0.25
+    # Probability columns (use frozen state_probs_map)
+    features["regime_prob_trend_up"] = probs[:, fitted.state_probs_map["trending_up"]]
+    features["regime_prob_trend_down"] = probs[:, fitted.state_probs_map["trending_down"]]
+    features["regime_prob_ranging"] = probs[:, fitted.state_probs_map["ranging"]]
+    features["regime_prob_crisis"] = probs[:, fitted.state_probs_map["crisis"]]
 
     return features
 
@@ -185,15 +221,12 @@ def fit_transform_split(
 
         return _fallback(train_df), _fallback(oos_df)
 
-    # Fit on training data
-    model = fit_regime_hmm_model(train_df, n_states=n_states)
+    # Fit on training data (returns FittedRegimeHMM)
+    fitted = fit_regime_hmm_model(train_df, n_states=n_states)
 
-    # Get training returns for state mapping
-    train_returns = train_df["close"].pct_change()
-
-    # Transform both
-    train_features = transform_regime_hmm(model, train_df, train_returns=train_returns)
-    oos_features = transform_regime_hmm(model, oos_df, train_returns=train_returns)
+    # Transform both (no train_returns needed, state_map frozen)
+    train_features = transform_regime_hmm(fitted, train_df)
+    oos_features = transform_regime_hmm(fitted, oos_df)
 
     return train_features, oos_features
 
@@ -228,9 +261,9 @@ def detect_tactical_regime_hmm(df: pd.DataFrame, n_states: int = 4) -> pd.DataFr
         features["regime_prob_crisis"] = 0.25
         return features
 
-    # Fit on full data (LEAKY)
-    model = fit_regime_hmm_model(df, n_states=n_states)
-    return transform_regime_hmm(model, df)
+    # Fit on full data (LEAKY) - returns FittedRegimeHMM
+    fitted = fit_regime_hmm_model(df, n_states=n_states)
+    return transform_regime_hmm(fitted, df)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

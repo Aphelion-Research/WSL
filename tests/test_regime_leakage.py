@@ -39,17 +39,17 @@ def test_fit_on_train_only_stable(sample_data):
     oos = sample_data.iloc[300:]
 
     # Fit on train only
-    model1 = fit_regime_hmm_model(train)
+    fitted1 = fit_regime_hmm_model(train)
 
     # Fit on train + OOS (should NOT be done in practice, but testing stability)
-    model2 = fit_regime_hmm_model(pd.concat([train, oos]))
+    fitted2 = fit_regime_hmm_model(pd.concat([train, oos]))
 
     # Transform train data with both models
-    train_features1 = transform_regime_hmm(model1, train)
-    train_features2 = transform_regime_hmm(model2, train)
+    train_features1 = transform_regime_hmm(fitted1, train)
+    train_features2 = transform_regime_hmm(fitted2, train)
 
     # Train regime labels should be IDENTICAL (no future leakage)
-    # NOTE: This will fail if model2 is different due to seeing future OOS data
+    # NOTE: This will fail if fitted2 is different due to seeing future OOS data
     # We cannot guarantee exact state IDs match, but regime distributions should be similar
     regime1_counts = train_features1["regime_tactical"].value_counts(normalize=True)
     regime2_counts = train_features2["regime_tactical"].value_counts(normalize=True)
@@ -73,14 +73,13 @@ def test_oos_prefix_stable_when_future_appended(sample_data):
     oos_long = sample_data.iloc[300:450]
 
     # Fit on train once
-    model = fit_regime_hmm_model(train)
-    train_returns = train["close"].pct_change()
+    fitted = fit_regime_hmm_model(train)
 
     # Transform OOS (short)
-    oos_features_short = transform_regime_hmm(model, oos_short, train_returns=train_returns)
+    oos_features_short = transform_regime_hmm(fitted, oos_short)
 
     # Transform OOS (long)
-    oos_features_long = transform_regime_hmm(model, oos_long, train_returns=train_returns)
+    oos_features_long = transform_regime_hmm(fitted, oos_long)
 
     # The first 100 rows of OOS should be IDENTICAL (no future leakage)
     prefix_short = oos_features_short.iloc[:100]
@@ -156,15 +155,15 @@ def test_insufficient_train_data_raises():
 def test_hmmlearn_not_installed_fallback(sample_data, monkeypatch):
     """If hmmlearn not installed, fit_transform_split() should return 'unknown' regimes."""
     # Mock ImportError
-    import sys
-    original_import = __builtins__.__import__
+    import builtins
+    original_import = builtins.__import__
 
     def mock_import(name, *args, **kwargs):
         if name == "hmmlearn":
             raise ImportError("hmmlearn not installed")
         return original_import(name, *args, **kwargs)
 
-    monkeypatch.setattr(__builtins__, "__import__", mock_import)
+    monkeypatch.setattr(builtins, "__import__", mock_import)
 
     train = sample_data.iloc[:300]
     oos = sample_data.iloc[300:]
@@ -194,13 +193,13 @@ def test_leaky_full_data_fit_fails():
     oos = df.iloc[300:]
 
     # LEAKY: Fit on train only
-    model_train_only = fit_regime_hmm_model(train)
-    train_regimes_train_only = transform_regime_hmm(model_train_only, train)
+    fitted_train_only = fit_regime_hmm_model(train)
+    train_regimes_train_only = transform_regime_hmm(fitted_train_only, train)
 
     # LEAKY: Fit on train+OOS together (what OLD code does)
     full_df = pd.concat([train, oos])
-    model_full = fit_regime_hmm_model(full_df)
-    train_regimes_full = transform_regime_hmm(model_full, train)
+    fitted_full = fit_regime_hmm_model(full_df)
+    train_regimes_full = transform_regime_hmm(fitted_full, train)
 
     # Regimes should be DIFFERENT (proving leakage)
     regime_dist_train_only = train_regimes_train_only["regime_tactical"].value_counts(normalize=True)
@@ -220,3 +219,44 @@ def test_leaky_full_data_fit_fails():
     # After fix, all code should use fit_transform_split() instead
     assert max_diff >= 0.05, \
         "Full-data HMM fit did not change train regimes (leakage not demonstrated)"
+
+
+def test_compute_all_regime_features_fail_closed(sample_data):
+    """compute_all_regime_features() should raise by default (fail-closed)."""
+    from data_pipeline.features.regime import compute_all_regime_features
+
+    # Should raise without allow_leaky_hmm=True
+    with pytest.raises(RuntimeError, match="LEAKS future information"):
+        compute_all_regime_features(sample_data)
+
+
+def test_compute_all_regime_features_explicit_leaky(sample_data):
+    """compute_all_regime_features(allow_leaky_hmm=True) should work but warn."""
+    from data_pipeline.features.regime import compute_all_regime_features
+
+    # Should work with explicit flag but warn
+    with pytest.warns(DeprecationWarning, match="leaky HMM"):
+        features = compute_all_regime_features(sample_data, allow_leaky_hmm=True)
+
+    assert "regime_tactical" in features.columns
+    assert "regime_micro" in features.columns
+
+
+def test_feature_store_no_leaky_hmm(sample_data):
+    """FeatureStore should not call leaky HMM by default."""
+    from data_pipeline.features.store import FeatureStore
+
+    store = FeatureStore()
+
+    # Mock macro/cot data
+    macro_df = pd.DataFrame({"timestamp": sample_data.index[:10], "dummy": 1})
+    cot_df = pd.DataFrame({"report_date": sample_data.index[:10], "dummy": 1})
+
+    # Should NOT raise (no HMM features by default)
+    features = store.compute_all_features(sample_data, macro_df, cot_df)
+
+    # Should have micro regime (safe, calendar-based)
+    assert "regime_micro" in features.columns
+
+    # Should NOT have HMM tactical regime (leaky)
+    assert "regime_tactical" not in features.columns

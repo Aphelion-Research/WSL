@@ -111,18 +111,39 @@ def compute_historical_return_by_regime(df: pd.DataFrame, regime_series: pd.Seri
     return features
 
 
-def compute_all_regime_features(df: pd.DataFrame) -> pd.DataFrame:
+def compute_all_regime_features(df: pd.DataFrame, *, allow_leaky_hmm: bool = False) -> pd.DataFrame:
     """Compute all regime features (~40 features).
 
-    DEPRECATED: This function calls detect_tactical_regime_hmm() which LEAKS.
-    For point-in-time safe regime features, use:
+    FAIL-CLOSED BY DEFAULT: This function REFUSES to run leaky HMM unless explicitly allowed.
+
+    Args:
+        df: Full dataset DataFrame
+        allow_leaky_hmm: If False (default), raises RuntimeError.
+                        If True, allows leaky full-data HMM fit (DEPRECATED).
+
+    Returns:
+        DataFrame with regime features
+
+    Raises:
+        RuntimeError: If allow_leaky_hmm=False (default)
+
+    RECOMMENDED SAFE USAGE:
         from data_pipeline.features.regime_safe import fit_transform_split
         train_regimes, oos_regimes = fit_transform_split(train_df, oos_df)
-
-    This function is kept for backward compatibility but prints a warning.
     """
+    if not allow_leaky_hmm:
+        raise RuntimeError(
+            "compute_all_regime_features() fits HMM on FULL DATA (train+OOS together), "
+            "which LEAKS future information into past regime labels. This is UNSAFE for backtest/research.\n\n"
+            "For point-in-time safe regime features, use:\n"
+            "    from data_pipeline.features.regime_safe import fit_transform_split\n"
+            "    train_regimes, oos_regimes = fit_transform_split(train_df, oos_df)\n\n"
+            "If you truly need legacy behavior (e.g., offline feature engineering with no backtest), "
+            "pass allow_leaky_hmm=True."
+        )
+
     warnings.warn(
-        "compute_all_regime_features() uses leaky HMM (fits on full data). "
+        "compute_all_regime_features(allow_leaky_hmm=True) uses leaky HMM (fits on full data). "
         "For backtest/research, use fit_transform_split(train, oos) from regime_safe.py instead.",
         DeprecationWarning,
         stacklevel=2,
