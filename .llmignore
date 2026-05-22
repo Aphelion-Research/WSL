@@ -1,0 +1,74 @@
+# LLM Context Exclusion List — Dominion V2
+# Excludes 99.7% of repo (data/models/build artifacts)
+# Only SOURCE + CONFIG files are kept (20.76 MB / 850 files)
+
+# DATA (52.1% / 4.0 GB)
+data/
+artifacts/hydra/
+backups/
+*.csv
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.db
+*.sqlite
+*.pkl
+*.pickle
+*.npy
+*.npz
+
+# BUILD (27.4% / 2.1 GB)
+__pycache__/
+.cache/
+*.egg-info/
+build/
+dist/
+cpp/build/
+aws/dist/
+*.o
+*.so
+*.a
+*.lib
+*.dylib
+*.dll
+
+# MODELS (15.5% / 1.2 GB)
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.bin
+*.ckpt
+*.pb
+models/
+checkpoints/
+
+# MISC (3.8% / 293 MB)
+catboost_info/
+mlruns/
+.venv/
+venv/
+node_modules/
+*.log
+*.tmp
+.pytest_cache/
+
+# JSON EXCLUSION (keep only schemas/feature lists)
+*.json
+!data/registry/semantic_column_mapping.json
+!artifacts/hydra/features_fold0.json
+!skills-lock.json
+
+# ARCHIVES (0.9% / 66 MB)
+*.zip
+*.tar
+*.gz
+*.bz2
+*.xz
+*.7z
+
+# Keep exceptions (required for context)
+!requirements.txt
+!pyproject.toml
+!pytest.ini
