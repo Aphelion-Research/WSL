@@ -28,37 +28,46 @@ from typing import Any, Optional, Tuple
 
 @dataclass
 class FittedRegimeHMM:
-    """Fitted HMM regime model with frozen state mapping.
+    """Fitted HMM regime model with frozen state mapping and normalization.
 
     Attributes:
         model: Fitted GaussianHMM
         n_states: Number of hidden states
         state_map: Mapping from state_id to regime_name (learned on train)
         state_probs_map: Mapping from regime_name to state_id (for probabilities)
+        feature_means: Train-computed feature means (for normalization)
+        feature_stds: Train-computed feature stds (for normalization)
     """
     model: Any  # hmmlearn.hmm.GaussianHMM
     n_states: int
     state_map: dict[int, str]
     state_probs_map: dict[str, int]
+    feature_means: np.ndarray
+    feature_stds: np.ndarray
 
 
 def _prepare_hmm_features(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
-    """Prepare HMM input features: returns, volatility, volume."""
+    """Prepare HMM input features: returns, volatility, volume (raw, unnormalized)."""
     returns = df["close"].pct_change()
     volatility = returns.rolling(20).std()
     volume = df["volume"]
 
-    # Normalize
+    # Stack raw features (do NOT normalize here)
     X = np.column_stack([
-        (returns - returns.mean()) / (returns.std() + 1e-10),
-        (volatility - volatility.mean()) / (volatility.std() + 1e-10),
-        (volume - volume.mean()) / (volume.std() + 1e-10),
+        returns.values,
+        volatility.values,
+        volume.values,
     ])
 
     # Valid mask (no NaNs)
     valid_mask = ~np.isnan(X).any(axis=1)
 
     return X, valid_mask
+
+
+def _normalize_features(X: np.ndarray, means: np.ndarray, stds: np.ndarray) -> np.ndarray:
+    """Normalize features using provided means and stds."""
+    return (X - means) / (stds + 1e-10)
 
 
 def fit_regime_hmm_model(train_df: pd.DataFrame, n_states: int = 4) -> FittedRegimeHMM:
@@ -86,18 +95,25 @@ def fit_regime_hmm_model(train_df: pd.DataFrame, n_states: int = 4) -> FittedReg
     if len(X_valid) < 100:
         raise ValueError(f"Insufficient training data: {len(X_valid)} valid rows (need ≥100)")
 
-    # Fit HMM on training data only
+    # Compute train normalization stats
+    feature_means = X_valid.mean(axis=0)
+    feature_stds = X_valid.std(axis=0)
+
+    # Normalize train features
+    X_valid_norm = _normalize_features(X_valid, feature_means, feature_stds)
+
+    # Fit HMM on normalized training data only
     model = hmmlearn_hmm.GaussianHMM(
         n_components=n_states,
         covariance_type="full",
         n_iter=100,
         random_state=42,
     )
-    model.fit(X_valid)
+    model.fit(X_valid_norm)
 
     # Predict train states to learn state-to-regime mapping
     train_states = np.full(len(X), -1)
-    train_states[valid_mask] = model.predict(X_valid)
+    train_states[valid_mask] = model.predict(X_valid_norm)
 
     # Map states to regime names based on mean train returns
     train_returns = train_df["close"].pct_change()
@@ -134,6 +150,8 @@ def fit_regime_hmm_model(train_df: pd.DataFrame, n_states: int = 4) -> FittedReg
         n_states=n_states,
         state_map=state_map,
         state_probs_map=state_probs_map,
+        feature_means=feature_means,
+        feature_stds=feature_stds,
     )
 
 
@@ -165,6 +183,9 @@ def transform_regime_hmm(
         features["regime_prob_crisis"] = 0.25
         return features
 
+    # Normalize using TRAIN stats only (prefix-stable)
+    X_norm = _normalize_features(X, fitted.feature_means, fitted.feature_stds)
+
     # POINTWISE prediction (prefix-stable, no full-sequence Viterbi)
     # For each valid row, predict independently
     states = np.full(len(X), -1, dtype=int)
@@ -172,7 +193,7 @@ def transform_regime_hmm(
 
     valid_indices = np.where(valid_mask)[0]
     for i in valid_indices:
-        row = X[i:i+1]  # shape (1, n_features)
+        row = X_norm[i:i+1]  # shape (1, n_features), normalized
         # Pointwise prediction (no dependency on future rows)
         row_probs = fitted.model.predict_proba(row)[0]
         probs[i] = row_probs
@@ -274,12 +295,26 @@ def detect_micro_regime(timestamps: pd.DatetimeIndex) -> pd.DataFrame:
     """Detect micro (time-of-day) regime.
 
     Regimes: london, ny, asian, overlap, dead_zone
+
+    Args:
+        timestamps: DatetimeIndex or compatible index
+
+    Returns:
+        DataFrame with regime_micro column
     """
     features = pd.DataFrame(index=timestamps)
 
     regimes = []
     for ts in timestamps:
-        hour = ts.hour
+        # Handle non-datetime indexes defensively
+        if isinstance(ts, pd.Timestamp):
+            hour = ts.hour
+        elif hasattr(ts, "hour"):
+            hour = ts.hour
+        else:
+            # Cannot determine time-of-day, default to unknown
+            regimes.append("unknown")
+            continue
 
         if 8 <= hour < 13:
             regimes.append("london")

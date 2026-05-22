@@ -137,12 +137,27 @@ def add_microstructure_proxies(X):
 def add_market_regime_hmm(X):
     """Add HMM-based regime features.
 
-    WARNING: This function fits HMM on FULL data (train+OOS together).
-    For backtest/research, use fit_transform_split() from regime_safe.py instead.
+    DEPRECATED: This function fits HMM on FULL data (train+OOS together).
+    This is UNSAFE for backtest/research (leaks future into past).
 
-    This function is for OFFLINE feature engineering only (not point-in-time safe).
+    For point-in-time safe HMM features, use:
+        from data_pipeline.features.regime_safe import fit_transform_split
+        train_regimes, oos_regimes = fit_transform_split(train, oos)
+
+    This function is DISABLED by default.
+    To enable legacy behavior (offline feature engineering only), set:
+        ALLOW_LEAKY_HMM=1 in environment
     """
-    print("Adding HMM regime features...")
+    import os
+    allow_leaky = os.environ.get("ALLOW_LEAKY_HMM", "0") == "1"
+
+    if not allow_leaky:
+        print("HMM regime features DISABLED (leaky full-data fit).")
+        print("  For point-in-time safe HMM, use fit_transform_split(train, oos) from regime_safe.py")
+        print("  To force legacy behavior (offline only), set ALLOW_LEAKY_HMM=1")
+        return pd.DataFrame(index=X.index)
+
+    print("Adding HMM regime features (LEAKY, offline only)...")
     print("  WARNING: Fitting HMM on full data (NOT point-in-time safe)")
 
     try:

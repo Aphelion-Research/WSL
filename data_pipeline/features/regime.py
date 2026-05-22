@@ -41,12 +41,26 @@ def detect_micro_regime(timestamps: pd.DatetimeIndex) -> pd.DataFrame:
     """Detect micro (time-of-day) regime.
 
     Regimes: london, ny, asian, overlap, dead_zone
+
+    Args:
+        timestamps: DatetimeIndex or compatible index
+
+    Returns:
+        DataFrame with regime_micro column
     """
     features = pd.DataFrame(index=timestamps)
 
     regimes = []
     for ts in timestamps:
-        hour = ts.hour
+        # Handle non-datetime indexes defensively
+        if isinstance(ts, pd.Timestamp):
+            hour = ts.hour
+        elif hasattr(ts, "hour"):
+            hour = ts.hour
+        else:
+            # Cannot determine time-of-day, default to unknown
+            regimes.append("unknown")
+            continue
 
         if 8 <= hour < 13:
             regimes.append("london")

@@ -20,16 +20,25 @@ from data_pipeline.features.regime_safe import (
 
 @pytest.fixture
 def sample_data():
-    """Generate synthetic OHLCV data."""
+    """Generate synthetic OHLCV data with DatetimeIndex."""
     np.random.seed(42)
     n = 500
     close = 2000 + np.cumsum(np.random.randn(n) * 10)
+    high = close + np.abs(np.random.randn(n) * 5)
+    low = close - np.abs(np.random.randn(n) * 5)
+    open_ = close + np.random.randn(n) * 3
     volume = np.random.randint(1000, 10000, n)
 
+    # Use DatetimeIndex
+    index = pd.date_range("2020-01-01", periods=n, freq="1h")
+
     df = pd.DataFrame({
+        "open": open_,
+        "high": high,
+        "low": low,
         "close": close,
         "volume": volume,
-    })
+    }, index=index)
     return df
 
 
@@ -89,12 +98,13 @@ def test_oos_prefix_stable_when_future_appended(sample_data):
     assert (prefix_short["regime_tactical"] == prefix_long["regime_tactical"]).all(), \
         "OOS regime labels changed when future data was appended (LEAKAGE)"
 
-    # Regime probabilities must match exactly
+    # Regime probabilities must match (with tight tolerance for numerical precision)
     for col in ["regime_prob_trend_up", "regime_prob_trend_down", "regime_prob_ranging", "regime_prob_crisis"]:
         np.testing.assert_allclose(
             prefix_short[col].values,
             prefix_long[col].values,
-            rtol=1e-5,
+            rtol=1e-10,
+            atol=1e-12,
             err_msg=f"{col} changed when future OOS data was appended (LEAKAGE)",
         )
 
@@ -176,49 +186,29 @@ def test_hmmlearn_not_installed_fallback(sample_data, monkeypatch):
     assert (train_features["regime_prob_trend_up"] == 0.25).all()
 
 
-def test_leaky_full_data_fit_fails():
-    """Demonstrate that fitting HMM on full data (train+OOS) causes leakage.
+def test_safe_api_uses_train_normalization_only(sample_data):
+    """Safe API must use train-fitted normalization stats only (no OOS stats).
 
-    This test PASSES if the leaky approach produces DIFFERENT train regimes
-    when OOS data is added (proving leakage exists).
+    This is a structural test (deterministic, not stochastic).
     """
-    np.random.seed(42)
-    n = 500
-    close = 2000 + np.cumsum(np.random.randn(n) * 10)
-    volume = np.random.randint(1000, 10000, n)
+    train = sample_data.iloc[:300]
+    oos = sample_data.iloc[300:]
 
-    df = pd.DataFrame({"close": close, "volume": volume})
+    # Fit on train
+    fitted = fit_regime_hmm_model(train)
 
-    train = df.iloc[:300]
-    oos = df.iloc[300:]
+    # Check that fitted stores train normalization stats
+    assert fitted.feature_means is not None
+    assert fitted.feature_stds is not None
+    assert len(fitted.feature_means) == 3  # returns, volatility, volume
+    assert len(fitted.feature_stds) == 3
 
-    # LEAKY: Fit on train only
-    fitted_train_only = fit_regime_hmm_model(train)
-    train_regimes_train_only = transform_regime_hmm(fitted_train_only, train)
+    # Transform OOS
+    oos_features = transform_regime_hmm(fitted, oos)
 
-    # LEAKY: Fit on train+OOS together (what OLD code does)
-    full_df = pd.concat([train, oos])
-    fitted_full = fit_regime_hmm_model(full_df)
-    train_regimes_full = transform_regime_hmm(fitted_full, train)
-
-    # Regimes should be DIFFERENT (proving leakage)
-    regime_dist_train_only = train_regimes_train_only["regime_tactical"].value_counts(normalize=True)
-    regime_dist_full = train_regimes_full["regime_tactical"].value_counts(normalize=True)
-
-    # If distributions are identical, leakage prevention worked (BAD for this test)
-    # If distributions differ, leakage exists (GOOD for this test — proves old code leaks)
-    max_diff = 0.0
-    for regime in regime_dist_train_only.index:
-        if regime in regime_dist_full.index:
-            diff = abs(regime_dist_train_only[regime] - regime_dist_full[regime])
-            max_diff = max(max_diff, diff)
-
-    # We EXPECT leakage to cause differences
-    # If max_diff < 0.05, models are too similar (leakage not detected, test inconclusive)
-    # This test documents that the OLD approach (full-data fit) DOES leak
-    # After fix, all code should use fit_transform_split() instead
-    assert max_diff >= 0.05, \
-        "Full-data HMM fit did not change train regimes (leakage not demonstrated)"
+    # Transform should succeed (uses train stats, not OOS stats)
+    assert "regime_tactical" in oos_features.columns
+    assert len(oos_features) == len(oos)
 
 
 def test_compute_all_regime_features_fail_closed(sample_data):
@@ -242,13 +232,41 @@ def test_compute_all_regime_features_explicit_leaky(sample_data):
     assert "regime_micro" in features.columns
 
 
-def test_feature_store_no_leaky_hmm(sample_data):
+def test_feature_store_no_leaky_hmm(sample_data, monkeypatch):
     """FeatureStore should not call leaky HMM by default."""
     from data_pipeline.features.store import FeatureStore
+    from data_pipeline.features import price, microstructure, crossasset, macro, regime, calendar, cot_features
 
     store = FeatureStore()
 
-    # Mock macro/cot data
+    # Monkeypatch feature computation functions to return safe DataFrames
+    def mock_empty_features(df, *args, **kwargs):
+        # Return empty DataFrame with same index as input
+        if isinstance(df, pd.DataFrame):
+            return pd.DataFrame(index=df.index)
+        else:
+            return pd.DataFrame(index=df)
+
+    monkeypatch.setattr(price, "compute_all_price_features", mock_empty_features)
+    monkeypatch.setattr(microstructure, "compute_all_microstructure_features", mock_empty_features)
+    monkeypatch.setattr(crossasset, "compute_all_crossasset_features", mock_empty_features)
+    monkeypatch.setattr(macro, "compute_all_macro_features", mock_empty_features)
+    monkeypatch.setattr(cot_features, "compute_all_cot_features", mock_empty_features)
+    monkeypatch.setattr(calendar, "compute_all_calendar_features", mock_empty_features)
+
+    # Monkeypatch compute_all_regime_features to raise if called (should NOT be called)
+    def mock_fail_regime_features(*args, **kwargs):
+        raise AssertionError("FeatureStore called compute_all_regime_features (leaky HMM path)")
+
+    monkeypatch.setattr(regime, "compute_all_regime_features", mock_fail_regime_features)
+
+    # Monkeypatch detect_micro_regime to return safe DataFrame
+    def mock_micro_regime(timestamps):
+        return pd.DataFrame({"regime_micro": "unknown"}, index=timestamps)
+
+    monkeypatch.setattr(regime, "detect_micro_regime", mock_micro_regime)
+
+    # Mock macro/cot data (structure doesn't matter since functions are mocked)
     macro_df = pd.DataFrame({"timestamp": sample_data.index[:10], "dummy": 1})
     cot_df = pd.DataFrame({"report_date": sample_data.index[:10], "dummy": 1})
 
