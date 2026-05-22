@@ -66,3 +66,9 @@ data/mt5_history/*.json
 data/mt5_history/_fetch_temp.py
 *.parquet
 catboost_info/
+
+# Generated HYDRA validation outputs
+reports/lunch_battery_*/
+reports/lunch_battery_console_*.log
+reports/signal_validation_master_*/
+reports/signal_validation_master_72b_smoke/
