@@ -1,0 +1,36 @@
+{
+  "candidate": "triple_barrier_aligned_72b",
+  "available": false,
+  "unavailable_reason": "missing high/low/close columns",
+  "dataset_path": null,
+  "metadata_path": "reports/hydra_label_lab/hydra_label_lab_20260522T210742Z/candidates/triple_barrier_aligned_72b.json",
+  "label_column": "label_72b",
+  "return_column": "tb_ret_72b",
+  "horizon_bars": 72,
+  "cost_bps": null,
+  "recommended_gauntlet_command": null,
+  "dry_run_gauntlet_command": null,
+  "row_count": null,
+  "positive_rate": null,
+  "nan_rate": null,
+  "return_mean": null,
+  "return_std": null,
+  "return_min": null,
+  "return_max": null,
+  "label_return_sign_mismatch": null,
+  "source_dataset": "data/hydra_xauusd_m5_master_clean.parquet",
+  "source_rows_loaded": 100000,
+  "max_rows": 100000,
+  "kind": "triple_barrier_aligned",
+  "created_utc": "2026-05-22T21:07:52.449582+00:00",
+  "details": {
+    "available": false,
+    "unavailable_reason": "missing high/low/close columns",
+    "atr": {
+      "reason": "missing high/low/close columns",
+      "high_column": null,
+      "low_column": null,
+      "close_column": null
+    }
+  }
+}

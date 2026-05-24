@@ -12,10 +12,14 @@ import argparse
 import csv
 import json
 import math
+import os
 import shlex
+import signal
 import subprocess
 import sys
-from dataclasses import dataclass
+import threading
+import time
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -91,6 +95,7 @@ FINAL_VERDICTS = {
     "NEEDS_NEW_LABELS",
     "NEEDS_NEW_FEATURES",
     "SCRIPT_ERROR",
+    "INTERRUPTED_PARTIAL",
 }
 
 
@@ -99,6 +104,30 @@ class HelpFormatter(
     argparse.RawDescriptionHelpFormatter,
 ):
     """Readable examples plus defaults."""
+
+
+class HeartbeatThread:
+    """Prints periodic heartbeat while a subprocess is running."""
+
+    def __init__(self, label: str, log_path: Path, interval: float = 30.0):
+        self._label = label
+        self._log_path = log_path
+        self._interval = interval
+        self._start = time.monotonic()
+        self._stop_event = threading.Event()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+
+    def start(self) -> None:
+        self._thread.start()
+
+    def stop(self) -> None:
+        self._stop_event.set()
+        self._thread.join(timeout=2.0)
+
+    def _run(self) -> None:
+        while not self._stop_event.wait(self._interval):
+            elapsed = int(time.monotonic() - self._start)
+            print(f"  [heartbeat] still running: {self._label}, elapsed {elapsed}s, log={self._log_path}", flush=True)
 
 
 @dataclass(frozen=True)
@@ -128,6 +157,8 @@ class RunContext:
     git_sha: str
     validation_count: int = 0
     max_configs_reached: bool = False
+    interrupted: bool = False
+    active_process: subprocess.Popen | None = field(default=None, repr=False)
 
 
 def parse_args() -> argparse.Namespace:
@@ -164,6 +195,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--costs", default=None, help="Comma-separated cost-bps override.")
     parser.add_argument("--seed", type=int, default=42,
                         help="Recorded orchestration seed for reproducibility metadata.")
+    parser.add_argument("--resume-run-dir", default=None,
+                        help="Path to a previous run directory to resume from. Skips configs that already have summary.json.")
     return parser.parse_args()
 
 
@@ -374,18 +407,29 @@ def append_command(path: Path, command: list[str]) -> None:
         handle.write(shell_join(command) + "\n")
 
 
-def run_logged(command: list[str], log_path: Path) -> int:
+def run_logged(command: list[str], log_path: Path, ctx: RunContext | None = None, heartbeat_label: str = "") -> int:
     log_path.parent.mkdir(parents=True, exist_ok=True)
+    hb = HeartbeatThread(heartbeat_label or "subprocess", log_path) if heartbeat_label else None
     with log_path.open("w") as log:
         log.write(f"$ {shell_join(command)}\n\n")
         log.flush()
-        proc = subprocess.run(
+        proc = subprocess.Popen(
             command,
-            check=False,
             text=True,
             stdout=log,
             stderr=subprocess.STDOUT,
         )
+        if ctx is not None:
+            ctx.active_process = proc
+        if hb:
+            hb.start()
+        try:
+            proc.wait()
+        finally:
+            if hb:
+                hb.stop()
+            if ctx is not None:
+                ctx.active_process = None
         log.write(f"\n[exit_code] {proc.returncode}\n")
     return int(proc.returncode)
 
@@ -648,6 +692,39 @@ def annotate_stage_row(row: dict[str, Any]) -> None:
             row["gate_status"] = "FAILED_GATE"
 
 
+def print_pre_run(config: Config, stage_dir: Path, log_path: Path) -> None:
+    max_rows_str = "full" if config.max_rows is None else str(config.max_rows)
+    print(
+        f"\n{'='*60}\n"
+        f"  RUNNING: stage={config.stage} model={config.model}\n"
+        f"  threshold={config.threshold} cost_bps={config.cost_bps}\n"
+        f"  max_rows={max_rows_str} folds={config.folds}\n"
+        f"  output_dir={stage_dir}\n"
+        f"  log={log_path}\n"
+        f"{'='*60}",
+        flush=True,
+    )
+
+
+def print_post_run(exit_code: int, summary_path: Path | None) -> None:
+    parts = [f"  exit_code={exit_code}"]
+    if summary_path is not None:
+        summary = read_json(summary_path)
+        if summary:
+            parts.append(f"  verdict={summary.get('verdict')}")
+            net = metric(summary, "total_return_net")
+            excess = summary.get("excess_over_best_baseline")
+            dd = metric(summary, "max_drawdown")
+            tc = metric(summary, "trade_count")
+            parts.append(f"  total_return_net={net}  excess={excess}")
+            parts.append(f"  max_drawdown={dd}  trade_count={tc}")
+        else:
+            parts.append("  summary.json exists but unreadable")
+    else:
+        parts.append("  no summary.json found")
+    print("\n".join(parts), flush=True)
+
+
 def execute_config(ctx: RunContext, config: Config) -> dict[str, Any] | None:
     if ctx.max_configs_reached:
         return None
@@ -655,10 +732,17 @@ def execute_config(ctx: RunContext, config: Config) -> dict[str, Any] | None:
     log_path = ctx.logs_dir / log_name(config)
     command = validation_command(config, stage_dir)
 
+    print_pre_run(config, stage_dir, log_path)
+
     before = set(stage_dir.rglob("summary.json")) if stage_dir.exists() else set()
     append_command(ctx.commands_path, command)
-    exit_code = run_logged(command, log_path)
+
+    heartbeat_label = f"{config.stage}/{config.model}/thr={config.threshold}"
+    exit_code = run_logged(command, log_path, ctx=ctx, heartbeat_label=heartbeat_label)
     summary_path = latest_summary(stage_dir, before)
+
+    print_post_run(exit_code, summary_path)
+
     row = row_from_summary(config, command, log_path, exit_code, summary_path)
     annotate_stage_row(row)
 
@@ -740,6 +824,24 @@ def write_planned_commands(args: argparse.Namespace, ctx: RunContext) -> None:
         print(shell_join(command))
 
 
+def write_incremental_artifacts(args: argparse.Namespace, ctx: RunContext, rows: list[dict[str, Any]], preflight_results: list[dict[str, Any]]) -> None:
+    """Rewrite leaderboard/summary after each completed config so partial progress persists."""
+    if not rows:
+        return
+    write_leaderboard(ctx.run_dir / "leaderboard.csv", rows)
+    finalize_full_rows(rows, mode_thresholds(args))
+    final_verdict, next_recommendation, decision_reason = final_decision(args, rows, None)
+    finished_utc = utc_now()
+    write_summary_json(
+        ctx.run_dir / "summary.json", args, ctx, rows, preflight_results,
+        final_verdict, next_recommendation, decision_reason, finished_utc,
+    )
+    write_summary_md(
+        ctx.run_dir / "summary.md", args, ctx, rows,
+        final_verdict, next_recommendation, decision_reason, finished_utc,
+    )
+
+
 def run_gauntlet(args: argparse.Namespace, ctx: RunContext) -> tuple[list[dict[str, Any]], list[dict[str, Any]], str | None]:
     rows: list[dict[str, Any]] = []
     preflight_results: list[dict[str, Any]] = []
@@ -749,49 +851,67 @@ def run_gauntlet(args: argparse.Namespace, ctx: RunContext) -> tuple[list[dict[s
         if not ok:
             return rows, preflight_results, "PREFLIGHT_FAILED"
 
-    smoke_rows: list[dict[str, Any]] = []
-    for config in planned_smoke_configs(args):
-        if not can_run_more(ctx, args.max_configs):
-            break
-        row = execute_config(ctx, config)
-        if row is not None:
-            rows.append(row)
-            smoke_rows.append(row)
-
-    if args.mode == "fast":
-        return rows, preflight_results, None
-
-    medium_rows: list[dict[str, Any]] = []
-    for source_row in [row for row in smoke_rows if row.get("promoted")]:
-        if not can_run_more(ctx, args.max_configs):
-            break
-        row = execute_config(ctx, medium_config_from(source_row))
-        if row is not None:
-            rows.append(row)
-            medium_rows.append(row)
-
-    full_rows: list[dict[str, Any]] = []
-    for source_row in [row for row in medium_rows if row.get("promoted")]:
-        if not can_run_more(ctx, args.max_configs):
-            break
-        row = execute_config(ctx, full_config_from(source_row))
-        if row is not None:
-            rows.append(row)
-            full_rows.append(row)
-
-    _, stress_costs = mode_costs(args)
-    full_survivors = [row for row in full_rows if row.get("gate_status") == "GOOD_RESEARCH_OUTPUT"]
-    perfect_found = False
-    for source_row in full_survivors:
-        for cost in stress_costs:
+    try:
+        smoke_rows: list[dict[str, Any]] = []
+        for config in planned_smoke_configs(args):
             if not can_run_more(ctx, args.max_configs):
                 break
-            row = execute_config(ctx, stress_config_from(source_row, cost, args.mode))
+            row = execute_config(ctx, config)
             if row is not None:
                 rows.append(row)
-        perfect_found, _ = is_perfect(source_row, rows, mode_thresholds(args))
-        if perfect_found:
-            break
+                smoke_rows.append(row)
+                write_incremental_artifacts(args, ctx, rows, preflight_results)
+
+        if args.mode == "fast":
+            return rows, preflight_results, None
+
+        medium_rows: list[dict[str, Any]] = []
+        for source_row in [row for row in smoke_rows if row.get("promoted")]:
+            if not can_run_more(ctx, args.max_configs):
+                break
+            row = execute_config(ctx, medium_config_from(source_row))
+            if row is not None:
+                rows.append(row)
+                medium_rows.append(row)
+                write_incremental_artifacts(args, ctx, rows, preflight_results)
+
+        full_rows_list: list[dict[str, Any]] = []
+        for source_row in [row for row in medium_rows if row.get("promoted")]:
+            if not can_run_more(ctx, args.max_configs):
+                break
+            row = execute_config(ctx, full_config_from(source_row))
+            if row is not None:
+                rows.append(row)
+                full_rows_list.append(row)
+                write_incremental_artifacts(args, ctx, rows, preflight_results)
+
+        _, stress_costs = mode_costs(args)
+        full_survivors = [row for row in full_rows_list if row.get("gate_status") == "GOOD_RESEARCH_OUTPUT"]
+        perfect_found = False
+        for source_row in full_survivors:
+            for cost in stress_costs:
+                if not can_run_more(ctx, args.max_configs):
+                    break
+                row = execute_config(ctx, stress_config_from(source_row, cost, args.mode))
+                if row is not None:
+                    rows.append(row)
+                    write_incremental_artifacts(args, ctx, rows, preflight_results)
+            perfect_found, _ = is_perfect(source_row, rows, mode_thresholds(args))
+            if perfect_found:
+                break
+
+    except KeyboardInterrupt:
+        print("\n\n*** INTERRUPTED by Ctrl+C ***", flush=True)
+        ctx.interrupted = True
+        if ctx.active_process is not None:
+            try:
+                ctx.active_process.terminate()
+                ctx.active_process.wait(timeout=5)
+            except Exception:
+                pass
+            ctx.active_process = None
+        write_incremental_artifacts(args, ctx, rows, preflight_results)
+        return rows, preflight_results, "INTERRUPTED_PARTIAL"
 
     return rows, preflight_results, None
 
@@ -896,6 +1016,9 @@ def final_decision(
     rows: list[dict[str, Any]],
     forced_verdict: str | None,
 ) -> tuple[str, str, str]:
+    if forced_verdict == "INTERRUPTED_PARTIAL":
+        return "INTERRUPTED_PARTIAL", "RESUME_RUN", "Run interrupted by user. Use --resume-run-dir to continue."
+
     if forced_verdict == "PREFLIGHT_FAILED":
         return "PREFLIGHT_FAILED", "REJECT_CURRENT_TARGET", "Preflight failed; validation did not run."
 
@@ -1200,6 +1323,70 @@ def write_summary_md(
     path.write_text("\n".join(lines))
 
 
+def stage_output_dir_for_config_in_dir(run_dir: Path, config: Config) -> Path:
+    """Compute stage_output_dir without requiring a RunContext."""
+    max_rows = "full" if config.max_rows is None else str(config.max_rows)
+    dirname = (
+        f"{config.stage.lower()}_{safe_name(config.model)}_"
+        f"thr_{safe_name(config.threshold)}_cost_{safe_name(config.cost_bps)}_"
+        f"rows_{max_rows}"
+    )
+    return run_dir / "stage_outputs" / dirname
+
+
+def load_existing_rows(run_dir: Path) -> list[dict[str, Any]]:
+    """Load leaderboard rows from existing stage_output summary.json files."""
+    rows: list[dict[str, Any]] = []
+    stage_outputs = run_dir / "stage_outputs"
+    if not stage_outputs.exists():
+        return rows
+    for summary_path in stage_outputs.rglob("summary.json"):
+        summary = read_json(summary_path)
+        if summary is None:
+            continue
+        row = {
+            "stage": summary.get("stage", "UNKNOWN"),
+            "dataset": summary.get("dataset", ""),
+            "label_column": summary.get("label_column", ""),
+            "return_column": summary.get("return_column", ""),
+            "horizon_bars": summary.get("horizon_bars", 0),
+            "threshold": summary.get("threshold"),
+            "model": summary.get("model"),
+            "cost_bps": summary.get("cost_bps"),
+            "max_rows": summary.get("max_rows"),
+            "folds": summary.get("folds"),
+            "process_exit_code": 0,
+            "verdict": summary.get("verdict"),
+            "trade_count": metric(summary, "trade_count"),
+            "win_rate": metric(summary, "win_rate"),
+            "avg_trade_return": metric(summary, "avg_trade_return"),
+            "total_return_gross": metric(summary, "total_return_gross"),
+            "total_return_net": metric(summary, "total_return_net"),
+            "max_drawdown": metric(summary, "max_drawdown"),
+            "long_count": metric(summary, "long_count"),
+            "short_count": metric(summary, "short_count"),
+            "best_baseline_name": summary.get("best_baseline_name"),
+            "best_baseline_return_net": summary.get("best_baseline_return_net"),
+            "excess_over_best_baseline": summary.get("excess_over_best_baseline"),
+            "promoted": False,
+            "promotion_reason": "",
+            "gate_status": "PLANNED",
+            "summary_json_path": str(summary_path),
+            "summary_md_path": summary_md_for(summary_path),
+            "log_path": None,
+            "command": None,
+        }
+        annotate_stage_row(row)
+        rows.append(row)
+    return rows
+
+
+def config_already_done(run_dir: Path, config: Config) -> bool:
+    """Check if a config's stage_output_dir already has summary.json."""
+    stage_dir = stage_output_dir_for_config_in_dir(run_dir, config)
+    return any(stage_dir.rglob("summary.json"))
+
+
 def initialize_context(args: argparse.Namespace) -> RunContext:
     run_id = run_id_for(args)
     run_dir = Path(args.output_dir) / run_id
@@ -1218,9 +1405,124 @@ def initialize_context(args: argparse.Namespace) -> RunContext:
     )
 
 
+def initialize_resume_context(args: argparse.Namespace) -> RunContext:
+    """Create a RunContext that reuses an existing run directory."""
+    run_dir = Path(args.resume_run_dir)
+    if not run_dir.exists():
+        raise SystemExit(f"Resume dir does not exist: {run_dir}")
+    logs_dir = run_dir / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    commands_path = run_dir / "commands_run.sh"
+    run_id = run_dir.name
+    return RunContext(
+        run_id=run_id,
+        run_dir=run_dir,
+        logs_dir=logs_dir,
+        commands_path=commands_path,
+        started_utc=utc_now(),
+        git_sha=git_sha(),
+    )
+
+
+def run_gauntlet_with_resume(args: argparse.Namespace, ctx: RunContext) -> tuple[list[dict[str, Any]], list[dict[str, Any]], str | None]:
+    """Run gauntlet, skipping configs whose stage_output already has summary.json."""
+    rows: list[dict[str, Any]] = []
+    preflight_results: list[dict[str, Any]] = []
+
+    existing_rows = load_existing_rows(ctx.run_dir)
+    rows.extend(existing_rows)
+    ctx.validation_count = len(existing_rows)
+    print(f"  [resume] loaded {len(existing_rows)} existing results from {ctx.run_dir / 'stage_outputs'}", flush=True)
+
+    if not args.no_preflight:
+        ok, preflight_results = preflight(ctx)
+        if not ok:
+            return rows, preflight_results, "PREFLIGHT_FAILED"
+
+    try:
+        smoke_rows: list[dict[str, Any]] = [r for r in rows if r.get("stage") == "SMOKE_STAGE"]
+        for config in planned_smoke_configs(args):
+            if not can_run_more(ctx, args.max_configs):
+                break
+            if config_already_done(ctx.run_dir, config):
+                continue
+            row = execute_config(ctx, config)
+            if row is not None:
+                rows.append(row)
+                smoke_rows.append(row)
+                write_incremental_artifacts(args, ctx, rows, preflight_results)
+
+        if args.mode == "fast":
+            return rows, preflight_results, None
+
+        medium_rows: list[dict[str, Any]] = [r for r in rows if r.get("stage") == "MEDIUM_STAGE"]
+        for source_row in [row for row in smoke_rows if row.get("promoted")]:
+            if not can_run_more(ctx, args.max_configs):
+                break
+            cfg = medium_config_from(source_row)
+            if config_already_done(ctx.run_dir, cfg):
+                continue
+            row = execute_config(ctx, cfg)
+            if row is not None:
+                rows.append(row)
+                medium_rows.append(row)
+                write_incremental_artifacts(args, ctx, rows, preflight_results)
+
+        full_rows_list: list[dict[str, Any]] = [r for r in rows if r.get("stage") == "FULL_STAGE"]
+        for source_row in [row for row in medium_rows if row.get("promoted")]:
+            if not can_run_more(ctx, args.max_configs):
+                break
+            cfg = full_config_from(source_row)
+            if config_already_done(ctx.run_dir, cfg):
+                continue
+            row = execute_config(ctx, cfg)
+            if row is not None:
+                rows.append(row)
+                full_rows_list.append(row)
+                write_incremental_artifacts(args, ctx, rows, preflight_results)
+
+        _, stress_costs = mode_costs(args)
+        full_survivors = [row for row in full_rows_list if row.get("gate_status") == "GOOD_RESEARCH_OUTPUT"]
+        perfect_found = False
+        for source_row in full_survivors:
+            for cost in stress_costs:
+                if not can_run_more(ctx, args.max_configs):
+                    break
+                cfg = stress_config_from(source_row, cost, args.mode)
+                if config_already_done(ctx.run_dir, cfg):
+                    continue
+                row = execute_config(ctx, cfg)
+                if row is not None:
+                    rows.append(row)
+                    write_incremental_artifacts(args, ctx, rows, preflight_results)
+            perfect_found, _ = is_perfect(source_row, rows, mode_thresholds(args))
+            if perfect_found:
+                break
+
+    except KeyboardInterrupt:
+        print("\n\n*** INTERRUPTED by Ctrl+C ***", flush=True)
+        ctx.interrupted = True
+        if ctx.active_process is not None:
+            try:
+                ctx.active_process.terminate()
+                ctx.active_process.wait(timeout=5)
+            except Exception:
+                pass
+            ctx.active_process = None
+        write_incremental_artifacts(args, ctx, rows, preflight_results)
+        return rows, preflight_results, "INTERRUPTED_PARTIAL"
+
+    return rows, preflight_results, None
+
+
 def main() -> int:
     args = parse_args()
-    ctx = initialize_context(args)
+
+    if args.resume_run_dir:
+        ctx = initialize_resume_context(args)
+        print(f"RESUMING: {ctx.run_dir}", flush=True)
+    else:
+        ctx = initialize_context(args)
 
     if args.max_configs is not None and args.max_configs <= 0:
         raise SystemExit("--max-configs must be positive when provided")
@@ -1228,7 +1530,11 @@ def main() -> int:
         write_planned_commands(args, ctx)
         return 0
 
-    rows, preflight_results, forced_verdict = run_gauntlet(args, ctx)
+    if args.resume_run_dir:
+        rows, preflight_results, forced_verdict = run_gauntlet_with_resume(args, ctx)
+    else:
+        rows, preflight_results, forced_verdict = run_gauntlet(args, ctx)
+
     finalize_full_rows(rows, mode_thresholds(args))
     final_verdict, next_recommendation, decision_reason = final_decision(args, rows, forced_verdict)
     if final_verdict not in FINAL_VERDICTS:
@@ -1260,12 +1566,16 @@ def main() -> int:
         finished_utc,
     )
 
-    print(f"RUN_ID: {ctx.run_id}")
+    print(f"\nRUN_ID: {ctx.run_id}")
     print(f"VERDICT: {final_verdict}")
     print(f"NEXT: {next_recommendation}")
     print(f"LEADERBOARD: {ctx.run_dir / 'leaderboard.csv'}")
     print(f"SUMMARY_JSON: {ctx.run_dir / 'summary.json'}")
     print(f"SUMMARY_MD: {ctx.run_dir / 'summary.md'}")
+
+    if ctx.interrupted:
+        print(f"\nRUN_DIR (for resume): {ctx.run_dir}", flush=True)
+        return 130
     return 0
 
 

@@ -1,0 +1,104 @@
+{
+  "run_id": "hydra_gauntlet_fast_label_72b_20260522T205714Z",
+  "git_sha": "784d27b",
+  "started_utc": "2026-05-22T20:57:14.749782+00:00",
+  "finished_utc": "2026-05-22T20:59:26.710715+00:00",
+  "mode": "fast",
+  "seed": 42,
+  "dataset": "data/hydra_xauusd_m5_master_clean.parquet",
+  "label_column": "label_72b",
+  "return_column": "fwd_ret_72b",
+  "horizon_bars": 72,
+  "total_configs_run": 4,
+  "max_configs_reached": false,
+  "final_verdict": "NO_EDGE",
+  "next_recommendation": "TRY_NEW_LABEL_DESIGN",
+  "decision_reason": "No smoke configs promoted. Positive net alone is insufficient; configs must beat the best baseline.",
+  "production_warning": "Production candidate requires separate broker/event-driven validation.",
+  "preflight": [
+    {
+      "name": "preflight_pycompile_nonoverlap",
+      "command": "python -m py_compile scripts/validate_hydra_nonoverlap.py",
+      "exit_code": 0,
+      "log_path": "reports/hydra_research_gauntlet_fast/hydra_gauntlet_fast_label_72b_20260522T205714Z/logs/preflight_pycompile_nonoverlap.log"
+    },
+    {
+      "name": "preflight_pycompile_signal",
+      "command": "python -m py_compile scripts/validate_hydra_signal.py",
+      "exit_code": 0,
+      "log_path": "reports/hydra_research_gauntlet_fast/hydra_gauntlet_fast_label_72b_20260522T205714Z/logs/preflight_pycompile_signal.log"
+    },
+    {
+      "name": "preflight_clean_dataset",
+      "command": "python3 scripts/validate_clean_dataset.py",
+      "exit_code": 0,
+      "log_path": "reports/hydra_research_gauntlet_fast/hydra_gauntlet_fast_label_72b_20260522T205714Z/logs/preflight_clean_dataset.log"
+    },
+    {
+      "name": "preflight_regime_leakage",
+      "command": "python -m pytest tests/test_regime_leakage.py -q",
+      "exit_code": 0,
+      "log_path": "reports/hydra_research_gauntlet_fast/hydra_gauntlet_fast_label_72b_20260522T205714Z/logs/preflight_regime_leakage.log"
+    },
+    {
+      "name": "preflight_ragd_tests",
+      "command": "python -m pytest -q ragd_embed/tests ragd_chunker/tests",
+      "exit_code": 0,
+      "log_path": "reports/hydra_research_gauntlet_fast/hydra_gauntlet_fast_label_72b_20260522T205714Z/logs/preflight_ragd_tests.log"
+    }
+  ],
+  "best_config": {
+    "stage": "SMOKE_STAGE",
+    "dataset": "data/hydra_xauusd_m5_master_clean.parquet",
+    "label_column": "label_72b",
+    "return_column": "fwd_ret_72b",
+    "horizon_bars": 72,
+    "threshold": 0.55,
+    "model": "hist_gradient_boosting",
+    "cost_bps": 2.0,
+    "max_rows": 50000,
+    "folds": 2,
+    "process_exit_code": 0,
+    "verdict": "NO_EDGE",
+    "trade_count": 455,
+    "win_rate": 0.47912087912087914,
+    "avg_trade_return": -1.0219332839968367e-05,
+    "total_return_gross": 0.08635020355781439,
+    "total_return_net": -0.004649796442185607,
+    "max_drawdown": -0.09286541868880059,
+    "long_count": 160,
+    "short_count": 295,
+    "best_baseline_name": "random_seed_5",
+    "best_baseline_return_net": 0.08095862530331334,
+    "excess_over_best_baseline": -0.08560842174549894,
+    "promoted": false,
+    "promotion_reason": "smoke neither net positive nor near baseline",
+    "gate_status": "FAILED_GATE",
+    "summary_json_path": "reports/hydra_research_gauntlet_fast/hydra_gauntlet_fast_label_72b_20260522T205714Z/stage_outputs/smoke_stage_hist_gradient_boosting_thr_0.55_cost_2.0_rows_50000/nonoverlap_hydra_xauusd_m5_master_clean_label_72b_20260522_205758/summary.json",
+    "summary_md_path": "reports/hydra_research_gauntlet_fast/hydra_gauntlet_fast_label_72b_20260522T205714Z/stage_outputs/smoke_stage_hist_gradient_boosting_thr_0.55_cost_2.0_rows_50000/nonoverlap_hydra_xauusd_m5_master_clean_label_72b_20260522_205758/summary.md",
+    "log_path": "reports/hydra_research_gauntlet_fast/hydra_gauntlet_fast_label_72b_20260522T205714Z/logs/smoke_stage_hist_gradient_boosting_thr_0.55_cost_2.0_rows_50000.log",
+    "command": "python scripts/validate_hydra_nonoverlap.py --dataset data/hydra_xauusd_m5_master_clean.parquet --label-column label_72b --return-column fwd_ret_72b --horizon-bars 72 --folds 2 --embargo-bars 288 --threshold 0.55 --cost-bps 2.0 --model hist_gradient_boosting --output-dir reports/hydra_research_gauntlet_fast/hydra_gauntlet_fast_label_72b_20260522T205714Z/stage_outputs/smoke_stage_hist_gradient_boosting_thr_0.55_cost_2.0_rows_50000 --max-rows 50000"
+  },
+  "failure_analysis": {
+    "net_negative": 4,
+    "baseline_dominated": 4,
+    "too_much_drawdown": 2,
+    "too_few_trades": 0,
+    "cost_stress_failed": 0,
+    "script_error": 0,
+    "missing_summary": 0
+  },
+  "cost_stress_results": [],
+  "stability_analysis": {
+    "best_is_isolated": null,
+    "neighboring_thresholds_checked": [
+      {
+        "threshold": 0.62,
+        "gate_status": "FAILED_GATE",
+        "total_return_net": -0.08653600467462688,
+        "excess_over_best_baseline": -0.16749462997794023
+      }
+    ]
+  },
+  "leaderboard_csv": "reports/hydra_research_gauntlet_fast/hydra_gauntlet_fast_label_72b_20260522T205714Z/leaderboard.csv"
+}

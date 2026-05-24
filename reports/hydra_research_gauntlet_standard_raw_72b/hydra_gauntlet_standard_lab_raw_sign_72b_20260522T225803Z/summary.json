@@ -1,0 +1,97 @@
+{
+  "run_id": "hydra_gauntlet_standard_lab_raw_sign_72b_20260522T225803Z",
+  "git_sha": "40c9242",
+  "started_utc": "2026-05-22T22:58:03.243169+00:00",
+  "finished_utc": "2026-05-22T23:24:49.053060+00:00",
+  "mode": "standard",
+  "seed": 42,
+  "dataset": "reports/hydra_label_lab/hydra_label_lab_20260522T210742Z/datasets/raw_sign_72b.parquet",
+  "label_column": "lab_raw_sign_72b",
+  "return_column": "fwd_ret_72b",
+  "horizon_bars": 72,
+  "total_configs_run": 36,
+  "max_configs_reached": false,
+  "final_verdict": "NEEDS_NEW_LABELS",
+  "next_recommendation": "TRY_NEW_LABEL_DESIGN",
+  "decision_reason": "Medium candidates did not survive full non-overlap gates. Try aligning labels to raw-return PnL target.",
+  "production_warning": "Production candidate requires separate broker/event-driven validation.",
+  "preflight": [
+    {
+      "name": "preflight_pycompile_nonoverlap",
+      "command": "python -m py_compile scripts/validate_hydra_nonoverlap.py",
+      "exit_code": 0,
+      "log_path": "reports/hydra_research_gauntlet_standard_raw_72b/hydra_gauntlet_standard_lab_raw_sign_72b_20260522T225803Z/logs/preflight_pycompile_nonoverlap.log"
+    },
+    {
+      "name": "preflight_pycompile_signal",
+      "command": "python -m py_compile scripts/validate_hydra_signal.py",
+      "exit_code": 0,
+      "log_path": "reports/hydra_research_gauntlet_standard_raw_72b/hydra_gauntlet_standard_lab_raw_sign_72b_20260522T225803Z/logs/preflight_pycompile_signal.log"
+    },
+    {
+      "name": "preflight_clean_dataset",
+      "command": "python3 scripts/validate_clean_dataset.py",
+      "exit_code": 0,
+      "log_path": "reports/hydra_research_gauntlet_standard_raw_72b/hydra_gauntlet_standard_lab_raw_sign_72b_20260522T225803Z/logs/preflight_clean_dataset.log"
+    },
+    {
+      "name": "preflight_regime_leakage",
+      "command": "python -m pytest tests/test_regime_leakage.py -q",
+      "exit_code": 0,
+      "log_path": "reports/hydra_research_gauntlet_standard_raw_72b/hydra_gauntlet_standard_lab_raw_sign_72b_20260522T225803Z/logs/preflight_regime_leakage.log"
+    },
+    {
+      "name": "preflight_ragd_tests",
+      "command": "python -m pytest -q ragd_embed/tests ragd_chunker/tests",
+      "exit_code": 0,
+      "log_path": "reports/hydra_research_gauntlet_standard_raw_72b/hydra_gauntlet_standard_lab_raw_sign_72b_20260522T225803Z/logs/preflight_ragd_tests.log"
+    }
+  ],
+  "best_config": {
+    "stage": "MEDIUM_STAGE",
+    "dataset": "reports/hydra_label_lab/hydra_label_lab_20260522T210742Z/datasets/raw_sign_72b.parquet",
+    "label_column": "lab_raw_sign_72b",
+    "return_column": "fwd_ret_72b",
+    "horizon_bars": 72,
+    "threshold": 0.72,
+    "model": "lightgbm_or_sklearn_fallback",
+    "cost_bps": 2.0,
+    "max_rows": 100000,
+    "folds": 3,
+    "process_exit_code": 0,
+    "verdict": "WEAK_EDGE_NONOVERLAP",
+    "trade_count": 838,
+    "win_rate": 0.5035799522673031,
+    "avg_trade_return": 0.00015399064143848732,
+    "total_return_gross": 0.29664415752545237,
+    "total_return_net": 0.12904415752545237,
+    "max_drawdown": -0.11646620562181818,
+    "long_count": 374,
+    "short_count": 464,
+    "best_baseline_name": "random_seed_8",
+    "best_baseline_return_net": 0.035344222873104396,
+    "excess_over_best_baseline": 0.09369993465234797,
+    "promoted": true,
+    "promotion_reason": "medium promotion gate passed",
+    "gate_status": "PROMOTED_TO_FULL",
+    "summary_json_path": "reports/hydra_research_gauntlet_standard_raw_72b/hydra_gauntlet_standard_lab_raw_sign_72b_20260522T225803Z/stage_outputs/medium_stage_lightgbm_or_sklearn_fallback_thr_0.72_cost_2.0_rows_100000/nonoverlap_raw_sign_72b_lab_raw_sign_72b_20260522_231718/summary.json",
+    "summary_md_path": "reports/hydra_research_gauntlet_standard_raw_72b/hydra_gauntlet_standard_lab_raw_sign_72b_20260522T225803Z/stage_outputs/medium_stage_lightgbm_or_sklearn_fallback_thr_0.72_cost_2.0_rows_100000/nonoverlap_raw_sign_72b_lab_raw_sign_72b_20260522_231718/summary.md",
+    "log_path": "reports/hydra_research_gauntlet_standard_raw_72b/hydra_gauntlet_standard_lab_raw_sign_72b_20260522T225803Z/logs/medium_stage_lightgbm_or_sklearn_fallback_thr_0.72_cost_2.0_rows_100000.log",
+    "command": "python scripts/validate_hydra_nonoverlap.py --dataset reports/hydra_label_lab/hydra_label_lab_20260522T210742Z/datasets/raw_sign_72b.parquet --label-column lab_raw_sign_72b --return-column fwd_ret_72b --horizon-bars 72 --folds 3 --embargo-bars 288 --threshold 0.72 --cost-bps 2.0 --model lightgbm_or_sklearn_fallback --output-dir reports/hydra_research_gauntlet_standard_raw_72b/hydra_gauntlet_standard_lab_raw_sign_72b_20260522T225803Z/stage_outputs/medium_stage_lightgbm_or_sklearn_fallback_thr_0.72_cost_2.0_rows_100000 --max-rows 100000"
+  },
+  "failure_analysis": {
+    "net_negative": 10,
+    "baseline_dominated": 13,
+    "too_much_drawdown": 23,
+    "too_few_trades": 0,
+    "cost_stress_failed": 0,
+    "script_error": 0,
+    "missing_summary": 0
+  },
+  "cost_stress_results": [],
+  "stability_analysis": {
+    "best_is_isolated": null,
+    "neighboring_thresholds_checked": []
+  },
+  "leaderboard_csv": "reports/hydra_research_gauntlet_standard_raw_72b/hydra_gauntlet_standard_lab_raw_sign_72b_20260522T225803Z/leaderboard.csv"
+}

@@ -1,0 +1,29 @@
+{
+  "candidate": "raw_sign_72b",
+  "available": true,
+  "unavailable_reason": null,
+  "dataset_path": "reports/hydra_label_lab/hydra_label_lab_20260523T000144Z/datasets/raw_sign_72b.parquet",
+  "metadata_path": "reports/hydra_label_lab/hydra_label_lab_20260523T000144Z/candidates/raw_sign_72b.json",
+  "label_column": "lab_raw_sign_72b",
+  "return_column": "fwd_ret_72b",
+  "horizon_bars": 72,
+  "cost_bps": null,
+  "recommended_gauntlet_command": "python scripts/hydra_research_gauntlet.py --mode fast --dataset reports/hydra_label_lab/hydra_label_lab_20260523T000144Z/datasets/raw_sign_72b.parquet --label-column lab_raw_sign_72b --return-column fwd_ret_72b --horizon-bars 72 --output-dir reports/hydra_research_gauntlet_raw_sign_72b",
+  "dry_run_gauntlet_command": "python scripts/hydra_research_gauntlet.py --mode fast --dataset reports/hydra_label_lab/hydra_label_lab_20260523T000144Z/datasets/raw_sign_72b.parquet --label-column lab_raw_sign_72b --return-column fwd_ret_72b --horizon-bars 72 --output-dir reports/hydra_research_gauntlet_raw_sign_72b --dry-run",
+  "row_count": 782685,
+  "positive_rate": 0.5174119375339316,
+  "nan_rate": 0.0,
+  "return_mean": 0.000175324268558539,
+  "return_std": 0.005705849774685183,
+  "return_min": -0.12858836730441328,
+  "return_max": 0.07387521819177455,
+  "label_return_sign_mismatch": 0.0,
+  "source_dataset": "data/hydra_xauusd_m5_master_clean.parquet",
+  "source_rows_loaded": 782825,
+  "max_rows": null,
+  "kind": "raw_sign",
+  "created_utc": "2026-05-23T00:02:01.416460+00:00",
+  "details": {
+    "available": true
+  }
+}

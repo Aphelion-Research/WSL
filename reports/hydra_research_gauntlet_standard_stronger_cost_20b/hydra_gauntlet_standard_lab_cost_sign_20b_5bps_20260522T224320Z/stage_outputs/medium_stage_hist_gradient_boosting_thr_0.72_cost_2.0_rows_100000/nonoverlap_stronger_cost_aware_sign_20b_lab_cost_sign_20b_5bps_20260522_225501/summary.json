@@ -1,0 +1,171 @@
+{
+  "disclaimer": "WARNING: This is bar-return validation, NOT live execution. Does NOT model spread, slippage, partial fills, requotes, OHLC path risk, margin calls, swap costs, or broker execution mechanics. Results are an UPPER BOUND on real-world performance.",
+  "run_id": "nonoverlap_stronger_cost_aware_sign_20b_lab_cost_sign_20b_5bps_20260522_225501",
+  "created_utc": "2026-05-22T22:55:01.199653+00:00",
+  "total_runtime_seconds": 48.55,
+  "config": {
+    "dataset": "reports/hydra_label_lab/hydra_label_lab_20260522T210742Z/datasets/stronger_cost_aware_sign_20b.parquet",
+    "label_column": "lab_cost_sign_20b_5bps",
+    "return_column": "fwd_ret_20b",
+    "horizon_bars": 20,
+    "threshold": 0.72,
+    "folds": 3,
+    "embargo_bars": 288,
+    "cost_bps": 2.0,
+    "random_seeds": 10,
+    "max_rows": 100000,
+    "model": "hist_gradient_boosting"
+  },
+  "dataset_info": {
+    "rows": 74435,
+    "feature_candidates": 1115,
+    "label_positive_rate": 0.5033116141600054
+  },
+  "model_results": {
+    "trade_count": 1739,
+    "win_rate": 0.5526164462334675,
+    "avg_trade_return": -0.00010615518553645416,
+    "total_return_gross": 0.16319613235210623,
+    "total_return_net": -0.1846038676478938,
+    "max_drawdown": -0.2356567091074574,
+    "long_count": 970,
+    "short_count": 769
+  },
+  "baselines": {
+    "always_long": {
+      "trade_count": 2779,
+      "win_rate": 0.4987405541561713,
+      "avg_trade_return": -0.00019124134193301788,
+      "total_return_gross": 0.02434031076814331,
+      "total_return_net": -0.5314596892318567,
+      "max_drawdown": -0.5941249821858422,
+      "long_count": 2779,
+      "short_count": 0
+    },
+    "always_short": {
+      "trade_count": 2779,
+      "win_rate": 0.5012594458438288,
+      "avg_trade_return": -0.00020875865806698211,
+      "total_return_gross": -0.02434031076814331,
+      "total_return_net": -0.5801403107681433,
+      "max_drawdown": -0.5926450851444589,
+      "long_count": 0,
+      "short_count": 2779
+    },
+    "momentum": {
+      "trade_count": 0,
+      "win_rate": null,
+      "avg_trade_return": null,
+      "total_return_gross": null,
+      "total_return_net": null,
+      "max_drawdown": null,
+      "long_count": 0,
+      "short_count": 0,
+      "flat_rate": null
+    },
+    "random_seed_0": {
+      "trade_count": 2779,
+      "win_rate": 0.5026988125224902,
+      "avg_trade_return": -0.0001917424428616245,
+      "total_return_gross": 0.022947751287545514,
+      "total_return_net": -0.5328522487124545,
+      "max_drawdown": -0.5803293623023764,
+      "long_count": 1344,
+      "short_count": 1435
+    },
+    "random_seed_1": {
+      "trade_count": 2779,
+      "win_rate": 0.49298308744152575,
+      "avg_trade_return": -0.00024482269739542776,
+      "total_return_gross": -0.12456227606189375,
+      "total_return_net": -0.6803622760618938,
+      "max_drawdown": -0.6875983192399892,
+      "long_count": 1423,
+      "short_count": 1356
+    },
+    "random_seed_2": {
+      "trade_count": 2779,
+      "win_rate": 0.49154372076286434,
+      "avg_trade_return": -0.000262755943389485,
+      "total_return_gross": -0.1743987666793787,
+      "total_return_net": -0.7301987666793788,
+      "max_drawdown": -0.7403109524939719,
+      "long_count": 1293,
+      "short_count": 1486
+    },
+    "random_seed_3": {
+      "trade_count": 2779,
+      "win_rate": 0.5214105793450882,
+      "avg_trade_return": -0.0001222446355006423,
+      "total_return_gross": 0.21608215794371513,
+      "total_return_net": -0.3397178420562849,
+      "max_drawdown": -0.35025522615521143,
+      "long_count": 1424,
+      "short_count": 1355
+    },
+    "random_seed_4": {
+      "trade_count": 2779,
+      "win_rate": 0.4980208708168406,
+      "avg_trade_return": -0.0002656167661521228,
+      "total_return_gross": -0.1823489931367491,
+      "total_return_net": -0.7381489931367492,
+      "max_drawdown": -0.7545278465367445,
+      "long_count": 1451,
+      "short_count": 1328
+    },
+    "random_seed_5": {
+      "trade_count": 2779,
+      "win_rate": 0.5030586541921555,
+      "avg_trade_return": -0.00014658401585788277,
+      "total_return_gross": 0.1484430199309438,
+      "total_return_net": -0.40735698006905624,
+      "max_drawdown": -0.4754430776460706,
+      "long_count": 1375,
+      "short_count": 1404
+    },
+    "random_seed_6": {
+      "trade_count": 2779,
+      "win_rate": 0.49982007916516735,
+      "avg_trade_return": -0.00018681887915872767,
+      "total_return_gross": 0.036630334817895835,
+      "total_return_net": -0.5191696651821042,
+      "max_drawdown": -0.5691627391922279,
+      "long_count": 1396,
+      "short_count": 1383
+    },
+    "random_seed_7": {
+      "trade_count": 2779,
+      "win_rate": 0.4958618207988485,
+      "avg_trade_return": -0.00024096050168190427,
+      "total_return_gross": -0.11382923417401195,
+      "total_return_net": -0.669629234174012,
+      "max_drawdown": -0.7231637312982286,
+      "long_count": 1355,
+      "short_count": 1424
+    },
+    "random_seed_8": {
+      "trade_count": 2779,
+      "win_rate": 0.5026988125224902,
+      "avg_trade_return": -0.00018321310446107471,
+      "total_return_gross": 0.04665078270267339,
+      "total_return_net": -0.5091492172973267,
+      "max_drawdown": -0.5292298033134746,
+      "long_count": 1422,
+      "short_count": 1357
+    },
+    "random_seed_9": {
+      "trade_count": 2779,
+      "win_rate": 0.5156531126304426,
+      "avg_trade_return": -0.00022998795566659959,
+      "total_return_gross": -0.0833365287974802,
+      "total_return_net": -0.6391365287974803,
+      "max_drawdown": -0.7019015820971751,
+      "long_count": 1394,
+      "short_count": 1385
+    }
+  },
+  "best_baseline_name": "random_seed_3",
+  "best_baseline_return_net": -0.3397178420562849,
+  "excess_over_best_baseline": 0.15511397440839111,
+  "verdict": "WEAK_EDGE_NONOVERLAP"
+}
