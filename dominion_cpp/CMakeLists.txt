@@ -8,9 +8,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(DOMINION_BUILD_TESTS "Build tests" ON)
 option(DOMINION_ENABLE_ONNX "Enable ONNX Runtime inference" OFF)
+option(DOMINION_ENABLE_GPU "Enable DirectML GPU acceleration" ON)
+option(DOMINION_USE_MKL "Use Intel MKL" ON)
 
 # Compiler flags
-add_compile_options(-O3 -march=native -Wall -Wextra -Wpedantic)
+add_compile_options(-O3 -march=native -ffast-math -Wall -Wextra -Wpedantic)
 
 # OpenMP
 find_package(OpenMP)
@@ -38,10 +40,96 @@ FetchContent_Declare(eigen
     GIT_SHALLOW TRUE
 )
 
-FetchContent_MakeAvailable(json httplib eigen)
+FetchContent_Declare(pybind11
+    GIT_REPOSITORY https://github.com/pybind/pybind11.git
+    GIT_TAG v2.11.1
+)
+
+FetchContent_MakeAvailable(json httplib eigen pybind11)
 
 # System dependencies
 find_package(OpenSSL REQUIRED)
+
+# QuantLib
+find_package(QuantLib QUIET)
+if(NOT QuantLib_FOUND)
+    find_library(QUANTLIB_LIB QuantLib)
+    find_path(QUANTLIB_INCLUDE ql/quantlib.hpp)
+    if(QUANTLIB_LIB AND QUANTLIB_INCLUDE)
+        add_library(QuantLib::QuantLib INTERFACE IMPORTED)
+        target_link_libraries(QuantLib::QuantLib INTERFACE ${QUANTLIB_LIB})
+        target_include_directories(QuantLib::QuantLib INTERFACE ${QUANTLIB_INCLUDE})
+        set(QUANTLIB_AVAILABLE ON)
+    endif()
+else()
+    set(QUANTLIB_AVAILABLE ON)
+endif()
+
+# FFTW3
+find_package(FFTW3 QUIET)
+if(NOT FFTW3_FOUND)
+    find_library(FFTW3_LIB fftw3)
+    find_path(FFTW3_INCLUDE fftw3.h)
+    if(FFTW3_LIB AND FFTW3_INCLUDE)
+        add_library(FFTW3::fftw3 INTERFACE IMPORTED)
+        target_link_libraries(FFTW3::fftw3 INTERFACE ${FFTW3_LIB})
+        target_include_directories(FFTW3::fftw3 INTERFACE ${FFTW3_INCLUDE})
+        set(FFTW3_AVAILABLE ON)
+    endif()
+endif()
+
+# Intel MKL (optional, fallback to OpenBLAS)
+if(DOMINION_USE_MKL)
+    find_package(MKL QUIET)
+    if(MKL_FOUND)
+        set(BLA_VENDOR Intel10_64lp)
+        set(MKL_AVAILABLE ON)
+    else()
+        find_package(BLAS QUIET)
+        find_package(LAPACK QUIET)
+    endif()
+else()
+    find_package(BLAS QUIET)
+    find_package(LAPACK QUIET)
+endif()
+
+# GUDHI (Topological Data Analysis)
+find_path(GUDHI_INCLUDE gudhi/Simplex_tree.h PATHS /usr/include /usr/local/include)
+if(GUDHI_INCLUDE)
+    add_library(GUDHI::GUDHI INTERFACE IMPORTED)
+    target_include_directories(GUDHI::GUDHI INTERFACE ${GUDHI_INCLUDE})
+    set(GUDHI_AVAILABLE ON)
+endif()
+
+# igraph (network analysis)
+find_library(IGRAPH_LIB igraph)
+find_path(IGRAPH_INCLUDE igraph/igraph.h)
+if(IGRAPH_LIB AND IGRAPH_INCLUDE)
+    add_library(igraph::igraph INTERFACE IMPORTED)
+    target_link_libraries(igraph::igraph INTERFACE ${IGRAPH_LIB})
+    target_include_directories(igraph::igraph INTERFACE ${IGRAPH_INCLUDE})
+    set(IGRAPH_AVAILABLE ON)
+endif()
+
+# ITensor (tensor networks)
+find_library(ITENSOR_LIB itensor)
+find_path(ITENSOR_INCLUDE itensor/all.h)
+if(ITENSOR_LIB AND ITENSOR_INCLUDE)
+    add_library(ITensor::ITensor INTERFACE IMPORTED)
+    target_link_libraries(ITensor::ITensor INTERFACE ${ITENSOR_LIB})
+    target_include_directories(ITensor::ITensor INTERFACE ${ITENSOR_INCLUDE})
+    set(ITENSOR_AVAILABLE ON)
+endif()
+
+# DirectML (GPU acceleration via WSL)
+if(DOMINION_ENABLE_GPU)
+    find_library(DIRECTML_LIB DirectML PATHS /usr/lib/wsl/lib)
+    if(DIRECTML_LIB)
+        add_library(DirectML::DirectML INTERFACE IMPORTED)
+        target_link_libraries(DirectML::DirectML INTERFACE ${DIRECTML_LIB})
+        set(DIRECTML_AVAILABLE ON)
+    endif()
+endif()
 
 # SQLite3 (link directly against .so.0 if dev package not installed)
 set(SQLITE3_LIB "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0")
@@ -120,6 +208,43 @@ if(OpenMP_CXX_FOUND)
     target_link_libraries(dominion_core PUBLIC OpenMP::OpenMP_CXX)
 endif()
 
+if(QUANTLIB_AVAILABLE)
+    target_compile_definitions(dominion_core PUBLIC DOMINION_HAS_QUANTLIB=1)
+    target_link_libraries(dominion_core PUBLIC QuantLib::QuantLib)
+endif()
+
+if(FFTW3_AVAILABLE)
+    target_compile_definitions(dominion_core PUBLIC DOMINION_HAS_FFTW3=1)
+    target_link_libraries(dominion_core PUBLIC FFTW3::fftw3)
+endif()
+
+if(MKL_AVAILABLE)
+    target_compile_definitions(dominion_core PUBLIC DOMINION_HAS_MKL=1)
+    target_link_libraries(dominion_core PUBLIC MKL::MKL)
+elseif(BLAS_FOUND AND LAPACK_FOUND)
+    target_link_libraries(dominion_core PUBLIC ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+endif()
+
+if(GUDHI_AVAILABLE)
+    target_compile_definitions(dominion_core PUBLIC DOMINION_HAS_GUDHI=1)
+    target_link_libraries(dominion_core PUBLIC GUDHI::GUDHI)
+endif()
+
+if(IGRAPH_AVAILABLE)
+    target_compile_definitions(dominion_core PUBLIC DOMINION_HAS_IGRAPH=1)
+    target_link_libraries(dominion_core PUBLIC igraph::igraph)
+endif()
+
+if(ITENSOR_AVAILABLE)
+    target_compile_definitions(dominion_core PUBLIC DOMINION_HAS_ITENSOR=1)
+    target_link_libraries(dominion_core PUBLIC ITensor::ITensor)
+endif()
+
+if(DIRECTML_AVAILABLE)
+    target_compile_definitions(dominion_core PUBLIC DOMINION_HAS_DIRECTML=1)
+    target_link_libraries(dominion_core PUBLIC DirectML::DirectML)
+endif()
+
 if(DOMINION_ENABLE_ONNX AND ONNXRUNTIME_AVAILABLE)
     target_compile_definitions(dominion_core PUBLIC DOMINION_HAS_ONNX=1)
     target_link_libraries(dominion_core PUBLIC onnxruntime::onnxruntime)
@@ -133,8 +258,13 @@ target_link_libraries(dominion_daemon PRIVATE dominion_core)
 add_executable(dominion_cli src/cli.cpp)
 target_link_libraries(dominion_cli PRIVATE dominion_core)
 
+# Python bindings
+pybind11_add_module(dominion_features bindings/python.cpp)
+target_link_libraries(dominion_features PRIVATE dominion_core)
+
 # Install
 install(TARGETS dominion_daemon dominion_cli RUNTIME DESTINATION bin)
+install(TARGETS dominion_features LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/python3/dist-packages)
 
 # Tests
 if(DOMINION_BUILD_TESTS AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt)
