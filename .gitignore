@@ -17,9 +17,10 @@ secrets/
 *.env
 .mt5/
 apps/wine-python/
+apps/wine-python/**
 apps/mt5/
 apps/mt5-official/
-apps/mt5-official/*.exe
+apps/mt5-official/**
 *.log
 *.tmp
 .DS_Store
@@ -57,6 +58,7 @@ artifacts/hydra/
 *.zip
 # HYDRA runtime (runs, fetched data, parquet datasets)
 runs/
+runs/**
 data/fetched/
 data/raw/provider=dukascopy/
 data/raw/provider=yahoo/
@@ -64,8 +66,15 @@ data/canonical/provider=dukascopy/
 data/mt5_history/*.parquet
 data/mt5_history/*.json
 data/mt5_history/_fetch_temp.py
+data/agent_prime/
 *.parquet
 catboost_info/
+*.csv
+# Large model artifacts
+models/**/*.pt
+models/**/*.onnx
+models/**/*.pkl
+models/**/*.joblib
 
 # Generated HYDRA validation outputs
 reports/lunch_battery_*/

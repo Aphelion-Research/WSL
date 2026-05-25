@@ -533,15 +533,14 @@ def build_cpp_advanced_features(df: pl.DataFrame) -> pl.DataFrame:
             except Exception:
                 pass
 
-    # Sample entropy (expensive - limit windows for small arrays)
-    se_windows = [50, 100] if len(close_arr) < 10000 else [50, 100, 200]
-    for m in [2, 3]:
-        for window in se_windows:
-            try:
-                se = cpp.information.compute_sample_entropy(close_arr, m, 0.2, window)
-                features[f"sample_entropy_m{m}_w{window}"] = se
-            except Exception:
-                pass
+    # Sample entropy (DISABLED - too expensive, use permutation entropy instead)
+    # for m in [2]:
+    #     for window in [50, 100]:
+    #         try:
+    #             se = cpp.information.compute_sample_entropy(close_arr, m, 0.2, window)
+    #             features[f"sample_entropy_m{m}_w{window}"] = se
+    #         except Exception:
+    #             pass
 
     # Lempel-Ziv complexity
     for window in [50, 100, 200, 500]:
