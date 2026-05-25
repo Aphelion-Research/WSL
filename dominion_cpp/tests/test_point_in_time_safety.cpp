@@ -95,8 +95,16 @@ TEST(PointInTimeSafety, RollingWindowShift) {
         prices[i] = static_cast<double>(i);
     }
 
-    // Compute rolling mean (should use window [i-window, i-1], not [i-window+1, i])
-    auto rolling_mean = dominion::rolling_mean(prices, window);
+    // Compute rolling mean manually (should use window [i-window, i-1], not [i-window+1, i])
+    PriceVec rolling_mean(N, std::nan(""));
+
+    for (int i = window; i < N; ++i) {
+        double sum = 0.0;
+        for (int j = i - window; j < i; ++j) {
+            sum += prices[j];
+        }
+        rolling_mean[i] = sum / window;
+    }
 
     for (int i = window; i < N; ++i) {
         double expected_mean = 0.0;

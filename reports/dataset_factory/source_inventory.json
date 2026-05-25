@@ -1,0 +1,76 @@
+{
+  "mt5_m5_master": {
+    "path": "/home/Martin/Dominion/data/mt5_history/XAUUSD_M5_MASTER.parquet",
+    "rows": 789257,
+    "columns": 9,
+    "status": "FOUND_AND_USED",
+    "role": "spine"
+  },
+  "master_clean": {
+    "path": "/home/Martin/Dominion/data/hydra_xauusd_m5_master_clean.parquet",
+    "rows": 782825,
+    "columns": 1125,
+    "status": "FOUND_AND_USED",
+    "role": "existing_features"
+  },
+  "mt5_h1": {
+    "path": "/home/Martin/Dominion/data/mt5_history/XAUUSD_H1.parquet",
+    "rows": 50000,
+    "columns": 9,
+    "status": "FOUND_AND_USED",
+    "role": "cross_timeframe"
+  },
+  "mt5_h4": {
+    "path": "/home/Martin/Dominion/data/mt5_history/XAUUSD_H4.parquet",
+    "rows": 23763,
+    "columns": 9,
+    "status": "FOUND_AND_USED",
+    "role": "cross_timeframe"
+  },
+  "mt5_d1": {
+    "path": "/home/Martin/Dominion/data/mt5_history/XAUUSD_D1.parquet",
+    "rows": 4598,
+    "columns": 9,
+    "status": "FOUND_AND_USED",
+    "role": "cross_timeframe"
+  },
+  "macro_fred": {
+    "path": "/home/Martin/Dominion/data/macro",
+    "series_count": 120,
+    "status": "FOUND_AND_USED",
+    "role": "macro_features"
+  },
+  "cross_asset_daily": {
+    "path": "/home/Martin/Dominion/data/cross_asset/cross_asset_daily.parquet",
+    "rows": 4158,
+    "columns": 27,
+    "status": "FOUND_AND_USED",
+    "role": "cross_asset"
+  },
+  "gpr": {
+    "path": "/home/Martin/Dominion/data/alternative/gpr_daily.parquet",
+    "rows": 15113,
+    "columns": 11,
+    "status": "FOUND_AND_USED",
+    "role": "alternative"
+  },
+  "cot": {
+    "path": "/home/Martin/Dominion/data/cot/cot_gold_weekly.parquet",
+    "rows": 593,
+    "columns": 4,
+    "status": "FOUND_AND_USED",
+    "role": "alternative"
+  },
+  "etf_flows": {
+    "path": "/home/Martin/Dominion/data/etf/etf_flows_daily.parquet",
+    "rows": 2862,
+    "columns": 7,
+    "status": "FOUND_AND_USED",
+    "role": "alternative"
+  },
+  "cpp_features": {
+    "status": "FOUND_AND_USED",
+    "functions": 17,
+    "role": "advanced_features"
+  }
+}

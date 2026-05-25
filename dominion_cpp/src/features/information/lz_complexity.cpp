@@ -1,6 +1,9 @@
 #include "dominion/information.hpp"
 #include <set>
+#include <map>
 #include <string>
+#include <cmath>
+#include <algorithm>
 
 namespace dominion::information {
 

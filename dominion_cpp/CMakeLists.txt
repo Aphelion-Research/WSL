@@ -12,7 +12,7 @@ option(DOMINION_ENABLE_GPU "Enable DirectML GPU acceleration" ON)
 option(DOMINION_USE_MKL "Use Intel MKL" ON)
 
 # Compiler flags
-add_compile_options(-O3 -march=native -ffast-math -Wall -Wextra -Wpedantic)
+add_compile_options(-O3 -march=native -ffast-math -fPIC -Wall -Wextra -Wpedantic)
 
 # OpenMP
 find_package(OpenMP)
@@ -181,6 +181,18 @@ add_library(dominion_core STATIC
     src/features/orderbook_features.cpp
     src/features/crossasset_advanced.cpp
     src/features/causal_features.cpp
+    src/features/noise/ssa.cpp
+    src/features/noise/emd.cpp
+    src/features/noise/vmd.cpp
+    src/features/noise/wavelet.cpp
+    src/features/noise/features.cpp
+    src/features/information/permutation_entropy.cpp
+    src/features/information/sample_entropy.cpp
+    src/features/information/transfer_entropy.cpp
+    src/features/information/lz_complexity.cpp
+    src/features/multifractal/mfdfa.cpp
+    src/features/multifractal/dfa.cpp
+    src/features/microstructure/noise_models.cpp
     src/health/monitor.cpp
     src/health/anomaly.cpp
     src/health/report.cpp
@@ -257,6 +269,10 @@ target_link_libraries(dominion_daemon PRIVATE dominion_core)
 # CLI tool
 add_executable(dominion_cli src/cli.cpp)
 target_link_libraries(dominion_cli PRIVATE dominion_core)
+
+# Dataset builder
+add_executable(dataset_builder src/dataset_builder.cpp)
+target_link_libraries(dataset_builder PRIVATE dominion_core)
 
 # Python bindings
 pybind11_add_module(dominion_features bindings/python.cpp)

@@ -1,0 +1,140 @@
+{
+  "timestamp": "2026-05-25T10:41:00Z",
+  "status": "RUNNING",
+  "current_command": "./dominion_cpp/build/dataset_builder data/hydra_subsampled.csv data/hydra_cpp_features.csv 1",
+  "pid": "check ps aux | grep dataset_builder",
+  "task_id": "b4073tr42",
+  "output_file": "/tmp/claude-1000/-home-Martin-Dominion/57fad6db-eeb7-432e-b51f-a092a40086ff/tasks/b4073tr42.output",
+
+  "input": {
+    "path": "data/hydra_subsampled.csv",
+    "rows": 156565,
+    "format": "CSV",
+    "subsample": "every 5th bar from original 782k"
+  },
+
+  "output": {
+    "path": "data/hydra_cpp_features.csv",
+    "status": "IN_PROGRESS",
+    "format": "CSV"
+  },
+
+  "artifact_type": "PROTOTYPE",
+  "is_fallback": false,
+  "is_final": false,
+
+  "features_added": {
+    "count": 10,
+    "list": [
+      "hurst_60",
+      "hurst_252",
+      "fractal_dim_252",
+      "dfa_252",
+      "perm_entropy_100",
+      "sample_entropy_100",
+      "lz_complexity_100",
+      "hansen_lunde_rv_60",
+      "tsrv_60",
+      "efficient_price_60"
+    ],
+    "families": [
+      "multifractal",
+      "information_theory",
+      "microstructure_noise",
+      "noise_decomposition"
+    ]
+  },
+
+  "limitations": {
+    "format": "CSV not Parquet (slow I/O)",
+    "rows": "156k subsampled (not full 782k)",
+    "features": "10 only (target: 2000+)",
+    "quantlib": "Not integrated yet",
+    "calendar": "No calendar/session features yet",
+    "manifest": "Not generated yet",
+    "leakage_proof": "Not validated yet",
+    "determinism": "Not tested yet"
+  },
+
+  "completed_code_changes": {
+    "modified": [
+      "dominion_cpp/CMakeLists.txt (added -fPIC, dataset_builder target)",
+      "dominion_cpp/src/features/information/lz_complexity.cpp (fixed includes)"
+    ],
+    "created": [
+      "dominion_cpp/src/dataset_builder.cpp (C++ feature builder)",
+      "dominion_cpp/src/features/noise/ssa.cpp",
+      "dominion_cpp/src/features/noise/emd.cpp",
+      "dominion_cpp/src/features/noise/vmd.cpp",
+      "dominion_cpp/src/features/noise/wavelet.cpp",
+      "dominion_cpp/src/features/information/permutation_entropy.cpp",
+      "dominion_cpp/src/features/information/sample_entropy.cpp",
+      "dominion_cpp/src/features/information/transfer_entropy.cpp",
+      "dominion_cpp/src/features/multifractal/mfdfa.cpp",
+      "dominion_cpp/src/features/multifractal/dfa.cpp",
+      "dominion_cpp/src/features/microstructure/noise_models.cpp",
+      "dominion_cpp/bindings/python.cpp (pybind11 bindings)",
+      "scripts/build_advanced_dataset.py (Python fallback - failed)",
+      "scripts/train_cpp_features.py (training script - NOT RUN)",
+      "scripts/train_existing_features.py (baseline training - NOT RUN)"
+    ],
+    "built": [
+      "dominion_cpp/build/dominion_features.cpython-313-x86_64-linux-gnu.so",
+      "dominion_cpp/build/dataset_builder (executable)"
+    ]
+  },
+
+  "pending_tasks": {
+    "immediate": [
+      "Wait for dataset_builder completion",
+      "Report validation stats ONLY (no training)",
+      "Check output CSV row/col counts",
+      "Check NaN percentages",
+      "Check timestamp ordering",
+      "Check runtime/memory"
+    ],
+    "after_validation": [
+      "Add manifest generation (feature metadata JSON)",
+      "Add CLI args: --limit-rows, --manifest-out, --validate-only",
+      "Add leakage checks (no target/fwd_ret/label as inputs)",
+      "Add deterministic test (same input → same hash)",
+      "Add schema tests (time preserved, order preserved, no dupes)",
+      "Convert to Parquet I/O",
+      "Add QuantLib calendar/session features",
+      "Expand to full 2000+ feature set",
+      "Run on full 782k dataset"
+    ],
+    "never": [
+      "DO NOT RUN TRAINING",
+      "DO NOT CALL THIS FINAL",
+      "DO NOT CLAIM PERFORMANCE IMPROVEMENT"
+    ]
+  },
+
+  "baseline_results": {
+    "model": "RandomForest (50 trees, depth 8)",
+    "dataset": "hydra_xauusd_m5_master_clean.parquet (subsampled)",
+    "train_r2": 0.0294,
+    "test_r2": -0.0186,
+    "test_directional_accuracy": 0.5118,
+    "test_sharpe": 1.7905,
+    "test_total_return_pct": 195.45,
+    "test_max_drawdown_pct": 52.66,
+    "top_features": [
+      "macro_DFII10_z252",
+      "macro_DEXJPUS_z252",
+      "price_accel",
+      "obv_slope_5b",
+      "atr_55b"
+    ],
+    "note": "Model barely predictive. Sharpe driven by volatility timing (ATR), not direction."
+  },
+
+  "hard_rules": {
+    "no_training": true,
+    "no_final_claim": true,
+    "no_performance_claim": true,
+    "validation_only": true,
+    "manual_commands_only": true
+  }
+}
