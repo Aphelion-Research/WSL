@@ -67,25 +67,25 @@ public:
 
         while (true) {
             auto now = std::chrono::steady_clock::now();
-            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start_time).count();
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
 
-            if (max_runtime_sec_ > 0 && elapsed >= max_runtime_sec_) {
+            if (max_runtime_sec_ > 0 && elapsed >= max_runtime_sec_ * 1000) {
                 std::cout << "Max runtime reached, stopping...\n";
                 break;
             }
 
             // Collect ticks
-            if (elapsed % (tick_interval_ms_ / 1000.0) < 0.1) {
+            if (elapsed % tick_interval_ms_ == 0) {
                 collect_tick();
             }
 
             // Collect bars
-            if (elapsed % bar_interval_sec_ == 0) {
+            if (elapsed % (bar_interval_sec_ * 1000) == 0) {
                 collect_bar();
             }
 
             // Heartbeat
-            if (elapsed % heartbeat_sec_ == 0) {
+            if (elapsed % (heartbeat_sec_ * 1000) == 0) {
                 write_heartbeat();
             }
 

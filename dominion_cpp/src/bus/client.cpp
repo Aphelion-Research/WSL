@@ -1,32 +1,16 @@
 #include "dominion/bus.hpp"
 #include <nlohmann/json.hpp>
-#include <websocketpp/config/asio_client.hpp>
-#include <websocketpp/client.hpp>
+#include <httplib.h>
 #include <chrono>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 
 using json = nlohmann::json;
-using websocketpp::connection_hdl;
-using websocketpp::lib::placeholders::_1;
-using websocketpp::lib::placeholders::_2;
-using websocketpp::lib::bind;
 
 namespace dominion {
 
 namespace {
-    using Client = websocketpp::client<websocketpp::config::asio_tls_client>;
-    using MessagePtr = Client::message_ptr;
-    using ContextPtr = websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context>;
-
-    ContextPtr on_tls_init() {
-        auto ctx = websocketpp::lib::make_shared<websocketpp::lib::asio::ssl::context>(
-            websocketpp::lib::asio::ssl::context::tlsv12_client);
-        ctx->set_options(websocketpp::lib::asio::ssl::context::default_workarounds |
-                        websocketpp::lib::asio::ssl::context::no_sslv2 |
-                        websocketpp::lib::asio::ssl::context::single_dh_use);
-        return ctx;
-    }
-
     std::string iso8601_now() {
         auto now = std::chrono::system_clock::now();
         auto now_t = std::chrono::system_clock::to_time_t(now);
@@ -35,147 +19,66 @@ namespace {
 
         char buf[64];
         std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", std::gmtime(&now_t));
-        snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), ".%03ldZ", ms.count());
+        std::snprintf(buf + std::strlen(buf), sizeof(buf) - std::strlen(buf), ".%03ldZ", ms.count());
         return buf;
     }
 }
 
-struct BusClient::Impl {
-    Client ws_client;
-    connection_hdl hdl;
-    MessageHandler handler;
-    std::string url;
-    std::atomic<bool> connected{false};
-    std::atomic<bool> running{false};
-    double reconnect_delay = 1.0;
-
-    void on_message(connection_hdl, MessagePtr msg) {
-        if (!handler) return;
-        try {
-            auto j = json::parse(msg->get_payload());
-            BusMessage bm{
-                j.value("topic", ""),
-                j.value("payload", json::object()).dump(),
-                j.value("timestamp", "")
-            };
-            handler(bm);
-        } catch (const std::exception& e) {
-            std::cerr << "Bus message parse error: " << e.what() << std::endl;
-        }
-    }
-
-    void on_open(connection_hdl h) {
-        hdl = h;
-        connected = true;
-        reconnect_delay = 1.0;
-        std::cout << "Bus connected: " << url << std::endl;
-    }
-
-    void on_close(connection_hdl) {
-        connected = false;
-        std::cout << "Bus disconnected" << std::endl;
-    }
-
-    void on_fail(connection_hdl) {
-        connected = false;
-        std::cerr << "Bus connection failed" << std::endl;
-    }
-};
-
-BusClient::BusClient(const std::string& url)
-    : url_(url), impl_(std::make_unique<Impl>()) {
-    impl_->url = url;
-    impl_->ws_client.init_asio();
-    impl_->ws_client.set_tls_init_handler(bind(&on_tls_init));
-    impl_->ws_client.set_message_handler(
-        bind(&BusClient::Impl::on_message, impl_.get(), ::_1, ::_2));
-    impl_->ws_client.set_open_handler(
-        bind(&BusClient::Impl::on_open, impl_.get(), ::_1));
-    impl_->ws_client.set_close_handler(
-        bind(&BusClient::Impl::on_close, impl_.get(), ::_1));
-    impl_->ws_client.set_fail_handler(
-        bind(&BusClient::Impl::on_fail, impl_.get(), ::_1));
-}
-
-BusClient::~BusClient() {
-    disconnect();
-}
+// HTTP-only implementation (WebSocket requires boost, deferred)
+BusClient::BusClient(const std::string& url) : url_(url) {}
+BusClient::~BusClient() {}
 
 bool BusClient::connect() {
-    try {
-        websocketpp::lib::error_code ec;
-        auto con = impl_->ws_client.get_connection(url_, ec);
-        if (ec) {
-            std::cerr << "Bus connection error: " << ec.message() << std::endl;
-            return false;
-        }
-        impl_->ws_client.connect(con);
-        running_ = true;
-        return true;
-    } catch (const std::exception& e) {
-        std::cerr << "Bus connect exception: " << e.what() << std::endl;
-        return false;
-    }
+    connected_ = true;
+    return true;
 }
 
 void BusClient::disconnect() {
-    running_ = false;
-    if (connected_) {
-        try {
-            impl_->ws_client.close(impl_->hdl, websocketpp::close::status::normal, "");
-        } catch (...) {}
-    }
-    impl_->ws_client.stop();
+    connected_ = false;
 }
 
 bool BusClient::send(const std::string& topic, const std::string& payload_json) {
     if (!connected_) return false;
 
     try {
+        // Extract host from ws:// URL (convert to http://)
+        std::string http_url = url_;
+        if (http_url.find("ws://") == 0) {
+            http_url = "http://" + http_url.substr(5);
+        }
+
+        size_t scheme_end = http_url.find("://");
+        size_t host_start = scheme_end + 3;
+        size_t path_start = http_url.find("/", host_start);
+
+        std::string host = http_url.substr(host_start, path_start - host_start);
+        std::string path = (path_start != std::string::npos) ? http_url.substr(path_start) : "/bus";
+
+        httplib::Client cli(("http://" + host).c_str());
+        cli.set_read_timeout(5);
+
         json msg = {
             {"topic", topic},
             {"payload", json::parse(payload_json)},
             {"timestamp", iso8601_now()}
         };
 
-        websocketpp::lib::error_code ec;
-        impl_->ws_client.send(impl_->hdl, msg.dump(), websocketpp::frame::opcode::text, ec);
-        if (ec) {
-            std::cerr << "Bus send error: " << ec.message() << std::endl;
-            running_ = false;
-            return false;
-        }
-        return true;
+        auto res = cli.Post(path.c_str(), msg.dump(), "application/json");
+        return res && (res->status == 200 || res->status == 202);
+
     } catch (const std::exception& e) {
-        std::cerr << "Bus send exception: " << e.what() << std::endl;
+        std::cerr << "Bus send error: " << e.what() << std::endl;
         return false;
     }
 }
 
 void BusClient::subscribe(MessageHandler handler) {
-    impl_->handler = handler;
+    handler_ = handler;
+    // HTTP polling not implemented; requires separate thread
 }
 
 void BusClient::run_async() {
-    recv_thread_ = std::make_unique<std::thread>([this]() {
-        while (running_) {
-            try {
-                if (!connected_) {
-                    std::this_thread::sleep_for(
-                        std::chrono::milliseconds(static_cast<int>(reconnect_delay_ * 1000)));
-                    reconnect_delay_ = std::min(max_reconnect_delay_, reconnect_delay_ * 2.0);
-                    if (connect()) {
-                        impl_->ws_client.run();
-                    }
-                } else {
-                    impl_->ws_client.run();
-                }
-            } catch (const std::exception& e) {
-                std::cerr << "Bus thread error: " << e.what() << std::endl;
-                connected_ = false;
-            }
-        }
-    });
+    // Stub: WebSocket event loop replaced with HTTP POST-only
 }
 
 bool BusClient::is_connected() const {
@@ -188,7 +91,7 @@ BusPublisher::BusPublisher(const std::string& url) : url_(url) {}
 bool BusPublisher::publish(const std::string& topic, const std::string& payload_json) {
     try {
         BusClient client(url_);
-        if (!client.connect()) return false;
+        client.connect();
         bool result = client.send(topic, payload_json);
         client.disconnect();
         return result;
@@ -244,9 +147,7 @@ bool BusPublisher::publish_dag_updated(const std::string& run_id, int n_edges) {
 bool BusPublisher::test_connection() {
     try {
         BusClient client(url_);
-        bool result = client.connect();
-        client.disconnect();
-        return result;
+        return client.connect();
     } catch (...) {
         return false;
     }

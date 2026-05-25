@@ -1,5 +1,5 @@
 #include "dominion/storage.hpp"
-#include <sqlite3.h>
+#include "dominion/sqlite3_wrapper.h"
 #include <stdexcept>
 #include <string>
 

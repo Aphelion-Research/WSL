@@ -1,3 +1,4 @@
+#include <cmath>
 #include "dominion/features.hpp"
 #include <cmath>
 #include <algorithm>

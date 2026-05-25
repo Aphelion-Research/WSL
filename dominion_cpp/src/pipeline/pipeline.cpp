@@ -8,17 +8,28 @@
 
 #include <chrono>
 #include <iostream>
-#include <uuid/uuid.h>
+#include <random>
+#include <sstream>
+#include <iomanip>
 
 namespace dominion {
 
 namespace {
     std::string generate_uuid() {
-        uuid_t uuid;
-        uuid_generate(uuid);
-        char uuid_str[37];
-        uuid_unparse(uuid, uuid_str);
-        return uuid_str;
+        // Simple UUID v4 generation without libuuid
+        std::random_device rd;
+        std::mt19937_64 gen(rd());
+        std::uniform_int_distribution<uint64_t> dis;
+
+        std::ostringstream oss;
+        oss << std::hex << std::setfill('0');
+        oss << std::setw(8) << (dis(gen) & 0xFFFFFFFF) << "-";
+        oss << std::setw(4) << (dis(gen) & 0xFFFF) << "-";
+        oss << std::setw(4) << ((dis(gen) & 0x0FFF) | 0x4000) << "-";  // Version 4
+        oss << std::setw(4) << ((dis(gen) & 0x3FFF) | 0x8000) << "-";  // Variant
+        oss << std::setw(12) << (dis(gen) & 0xFFFFFFFFFFFF);
+
+        return oss.str();
     }
 
     std::string phase_name(PipelinePhase phase) {

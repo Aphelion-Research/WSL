@@ -1,3 +1,5 @@
+#include <cmath>
+#include <cmath>
 #include "dominion/features.hpp"
 
 namespace dominion::features {

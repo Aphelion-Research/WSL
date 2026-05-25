@@ -23,7 +23,8 @@ include(FetchContent)
 
 FetchContent_Declare(json
     URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
-    URL_HASH SHA256=d6c65aca6b1ed68e7a182f4757f0f1c0e0c4f89d8e842e16f1b03c2215d91e28
+    URL_HASH SHA256=d6c65aca6b1ed68e7a182f4757257b107ae403032760ed6ef121c9d55e81757d
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 
 FetchContent_Declare(httplib
@@ -31,27 +32,23 @@ FetchContent_Declare(httplib
     GIT_TAG v0.18.6
 )
 
-FetchContent_Declare(websocketpp
-    GIT_REPOSITORY https://github.com/zaphoyd/websocketpp.git
-    GIT_TAG 0.8.2
+FetchContent_Declare(eigen
+    GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+    GIT_TAG 3.4.0
+    GIT_SHALLOW TRUE
 )
 
-FetchContent_MakeAvailable(json httplib)
-FetchContent_GetProperties(websocketpp)
-if(NOT websocketpp_POPULATED)
-    FetchContent_Populate(websocketpp)
-endif()
+FetchContent_MakeAvailable(json httplib eigen)
 
 # System dependencies
 find_package(OpenSSL REQUIRED)
-find_package(SQLite3)
-if(NOT SQLite3_FOUND)
-    find_library(SQLITE3_LIB sqlite3)
-    find_path(SQLITE3_INCLUDE sqlite3.h)
-    add_library(SQLite::SQLite3 INTERFACE IMPORTED)
-    target_link_libraries(SQLite::SQLite3 INTERFACE ${SQLITE3_LIB})
-    target_include_directories(SQLite::SQLite3 INTERFACE ${SQLITE3_INCLUDE})
-endif()
+
+# SQLite3 (link directly against .so.0 if dev package not installed)
+set(SQLITE3_LIB "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0")
+set(SQLITE3_INCLUDE "/usr/include")
+add_library(SQLite::SQLite3 INTERFACE IMPORTED)
+target_link_libraries(SQLite::SQLite3 INTERFACE ${SQLITE3_LIB})
+target_include_directories(SQLite::SQLite3 INTERFACE ${SQLITE3_INCLUDE})
 
 # ONNX Runtime (optional)
 if(DOMINION_ENABLE_ONNX)
@@ -83,6 +80,7 @@ add_library(dominion_core STATIC
     src/fusion/kalman.cpp
     src/fusion/bridge.cpp
     src/fusion/conflict.cpp
+    src/features/primitives.cpp
     src/features/store.cpp
     src/features/price.cpp
     src/features/microstructure.cpp
@@ -90,6 +88,11 @@ add_library(dominion_core STATIC
     src/features/macro.cpp
     src/features/regime.cpp
     src/features/calendar.cpp
+    src/features/ml_features.cpp
+    src/features/signal_processing.cpp
+    src/features/orderbook_features.cpp
+    src/features/crossasset_advanced.cpp
+    src/features/causal_features.cpp
     src/health/monitor.cpp
     src/health/anomaly.cpp
     src/health/report.cpp
@@ -101,7 +104,6 @@ add_library(dominion_core STATIC
 
 target_include_directories(dominion_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${websocketpp_SOURCE_DIR}
 )
 
 target_link_libraries(dominion_core PUBLIC
@@ -110,6 +112,7 @@ target_link_libraries(dominion_core PUBLIC
     OpenSSL::SSL
     OpenSSL::Crypto
     SQLite::SQLite3
+    Eigen3::Eigen
     pthread
 )
 
@@ -134,7 +137,7 @@ target_link_libraries(dominion_cli PRIVATE dominion_core)
 install(TARGETS dominion_daemon dominion_cli RUNTIME DESTINATION bin)
 
 # Tests
-if(DOMINION_BUILD_TESTS)
+if(DOMINION_BUILD_TESTS AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt)
     enable_testing()
     add_subdirectory(tests)
 endif()

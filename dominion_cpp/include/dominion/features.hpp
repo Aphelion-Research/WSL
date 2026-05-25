@@ -44,6 +44,67 @@ FeatureMap compute_regime_features(const PriceVec& returns, const PriceVec& vola
 FeatureMap compute_calendar_features(const std::vector<Timestamp>& timestamps,
                                      const std::vector<std::string>& fomc_dates);
 
+// ML-based features (~15)
+FeatureMap compute_autoencoder_anomalies(const FeatureMap& input_features,
+                                         const std::vector<std::string>& feature_names,
+                                         int n_components = 10);
+
+FeatureMap compute_feature_stability(const FeatureMap& features,
+                                     const PriceVec& returns,
+                                     int window = 60);
+
+FeatureMap compute_data_quality_score(const std::vector<Bar>& bars);
+
+// Signal processing features (~20)
+FeatureMap compute_emd_features(const PriceVec& prices);
+FeatureMap compute_hilbert_features(const PriceVec& prices);
+FeatureMap compute_ssa_features(const PriceVec& prices, int window_length = 60, int n_components = 3);
+FeatureMap compute_fractional_diff_features(const PriceVec& prices, double d = 0.5);
+
+// Order book / microstructure advanced (~15)
+FeatureMap compute_kyles_lambda(const PriceVec& close, const PriceVec& volume, int window = 60);
+FeatureMap compute_roll_spread(const PriceVec& close, int window = 60);
+FeatureMap compute_corwin_schultz_spread(const PriceVec& high, const PriceVec& low);
+FeatureMap compute_orderbook_imbalance_proxy(const PriceVec& open, const PriceVec& close,
+                                             const PriceVec& high, const PriceVec& low,
+                                             const PriceVec& volume);
+FeatureMap compute_price_impact_asymmetry(const PriceVec& close, const PriceVec& volume, int window = 60);
+
+// Cross-asset advanced (~20)
+FeatureMap compute_dcc_correlations(const PriceVec& gold_returns,
+                                    const std::unordered_map<std::string, PriceVec>& macro_returns,
+                                    double lambda = 0.94);
+FeatureMap compute_copula_tail_dependence(const PriceVec& gold_returns,
+                                          const std::unordered_map<std::string, PriceVec>& macro_returns,
+                                          double tail_quantile = 0.05,
+                                          int window = 252);
+FeatureMap compute_pca_regime_features(const std::unordered_map<std::string, PriceVec>& macro_returns,
+                                       int window = 252);
+FeatureMap compute_network_centrality(const PriceVec& gold_returns,
+                                      const std::unordered_map<std::string, PriceVec>& macro_returns,
+                                      double corr_threshold = 0.5,
+                                      int window = 252);
+
+// Causal inference features (~15)
+FeatureMap compute_transfer_entropy(const PriceVec& source_series,
+                                    const PriceVec& target_series,
+                                    int n_bins = 10,
+                                    int lag = 1,
+                                    int window = 252);
+FeatureMap compute_ccm_causality(const PriceVec& x_series,
+                                 const PriceVec& y_series,
+                                 int embed_dim = 3,
+                                 int tau = 1,
+                                 int window = 252);
+FeatureMap compute_causal_dag_strengths(const PriceVec& gold_returns,
+                                        const std::unordered_map<std::string, PriceVec>& macro_returns,
+                                        int lag = 1,
+                                        int window = 252);
+FeatureMap compute_granger_causality_rolling(const PriceVec& x_series,
+                                            const PriceVec& y_series,
+                                            int max_lag = 5,
+                                            int window = 252);
+
 } // namespace features
 
 // Feature validation
