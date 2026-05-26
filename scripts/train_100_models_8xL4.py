@@ -341,27 +341,35 @@ def train_model(config, data, model_idx, total_models, gpu_monitor):
     train_losses = []
     test_losses = []
 
-    with tqdm(total=n_est, desc=f"  GPU{gpu_id} {config['name'][:25]}", unit="tree", ncols=100, leave=False) as pbar:
-        def callback(env):
-            train_losses.append(env.evaluation_result_list[0][1])
-            test_losses.append(env.evaluation_result_list[1][1])
-            pbar.update(1)
-            if (env.iteration + 1) % 50 == 0:
-                pbar.set_postfix({
-                    "loss": f"{test_losses[-1]:.4f}",
-                    "iter": env.iteration + 1,
-                    f"gpu{gpu_id}": f"{gpu_id}"
-                })
+    # XGBoost 3.2.0+ callback
+    class ProgressCallback(xgb.callback.TrainingCallback):
+        def __init__(self, pbar):
+            self.pbar = pbar
 
-        model = xgb.train(
-            params,
-            dtrain,
-            num_boost_round=n_est,
-            evals=[(dtrain, "train"), (dtest, "test")],
-            early_stopping_rounds=50,
-            verbose_eval=False,
-            callbacks=[callback]
-        )
+        def after_iteration(self, model, epoch, evals_log):
+            train_losses.append(evals_log['train']['mlogloss'][-1])
+            test_losses.append(evals_log['test']['mlogloss'][-1])
+            self.pbar.update(1)
+            if (epoch + 1) % 50 == 0:
+                self.pbar.set_postfix({
+                    "loss": f"{test_losses[-1]:.4f}",
+                    "iter": epoch + 1,
+                })
+            return False
+
+    pbar = tqdm(total=n_est, desc=f"  GPU{gpu_id} {config['name'][:25]}", unit="tree", ncols=100, leave=False)
+
+    model = xgb.train(
+        params,
+        dtrain,
+        num_boost_round=n_est,
+        evals=[(dtrain, "train"), (dtest, "test")],
+        early_stopping_rounds=50,
+        verbose_eval=False,
+        callbacks=[ProgressCallback(pbar)]
+    )
+
+    pbar.close()
 
     gpu_monitor.stop()
     train_time = time.time() - start_time
