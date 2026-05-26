@@ -331,7 +331,6 @@ def train_model(config, data, model_idx, total_models, gpu_monitor):
         "tree_method": "gpu_hist",
         "device": f"cuda:{gpu_id}",
         "max_bin": 512,  # L4 can handle this
-        "gpu_id": gpu_id,
         "verbosity": 0,
         "nthread": 12,  # 96 vCPUs / 8 GPUs = 12 threads per model
     })
