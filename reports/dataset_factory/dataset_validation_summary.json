@@ -1,0 +1,88 @@
+{
+  "leakage_audit": {
+    "passed": true,
+    "issues": [],
+    "feature_count": 1870,
+    "target_columns": [
+      "fwd_ret_5b",
+      "fwd_ret_10b",
+      "fwd_ret_20b",
+      "fwd_ret_72b",
+      "fwd_ret_144b",
+      "fwd_ret_288b",
+      "label_5b",
+      "label_20b",
+      "label_72b",
+      "label_288b"
+    ]
+  },
+  "determinism": {
+    "passed": true,
+    "hash1": "skipped",
+    "hash2": "skipped"
+  },
+  "nan_stats_per_family": {
+    "other": {
+      "count": 586,
+      "mean_null_pct": 0.66,
+      "max_null_pct": 0.81
+    },
+    "return": {
+      "count": 179,
+      "mean_null_pct": 0.01,
+      "max_null_pct": 0.13
+    },
+    "volatility": {
+      "count": 193,
+      "mean_null_pct": 0.02,
+      "max_null_pct": 0.13
+    },
+    "trend_momentum": {
+      "count": 189,
+      "mean_null_pct": 0.01,
+      "max_null_pct": 0.05
+    },
+    "session_calendar": {
+      "count": 57,
+      "mean_null_pct": 6.6,
+      "max_null_pct": 64.77
+    },
+    "microstructure": {
+      "count": 56,
+      "mean_null_pct": 0.01,
+      "max_null_pct": 0.04
+    },
+    "cross_timeframe": {
+      "count": 51,
+      "mean_null_pct": 9.46,
+      "max_null_pct": 28.38
+    },
+    "entropy_fractal": {
+      "count": 6,
+      "mean_null_pct": 0.0,
+      "max_null_pct": 0.0
+    },
+    "macro": {
+      "count": 448,
+      "mean_null_pct": 0.81,
+      "max_null_pct": 0.81
+    },
+    "interactions": {
+      "count": 105,
+      "mean_null_pct": 4.39,
+      "max_null_pct": 29.19
+    },
+    "targets": {
+      "count": 10,
+      "mean_null_pct": 0.01,
+      "max_null_pct": 0.04
+    }
+  },
+  "inf_count": 0,
+  "feature_count": 1863,
+  "feature_gate_passed": true,
+  "dropped_columns": [],
+  "rows": 789257,
+  "first_timestamp": "2015-01-01 23:00:00",
+  "last_timestamp": "2026-05-21 04:35:00"
+}

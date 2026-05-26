@@ -155,6 +155,19 @@ if(DOMINION_ENABLE_ONNX)
     endif()
 endif()
 
+# Arrow/Parquet (from pyarrow)
+set(PYARROW_DIR "${CMAKE_SOURCE_DIR}/../.venv/lib/python3.13/site-packages/pyarrow")
+add_library(Arrow::arrow_shared SHARED IMPORTED)
+set_target_properties(Arrow::arrow_shared PROPERTIES
+    IMPORTED_LOCATION "${PYARROW_DIR}/libarrow.so.2400"
+    INTERFACE_INCLUDE_DIRECTORIES "${PYARROW_DIR}/include"
+)
+add_library(Parquet::parquet_shared SHARED IMPORTED)
+set_target_properties(Parquet::parquet_shared PROPERTIES
+    IMPORTED_LOCATION "${PYARROW_DIR}/libparquet.so.2400"
+    INTERFACE_INCLUDE_DIRECTORIES "${PYARROW_DIR}/include"
+)
+
 # Core library
 add_library(dominion_core STATIC
     src/pipeline/pipeline.cpp
@@ -200,6 +213,7 @@ add_library(dominion_core STATIC
     src/bus/publisher.cpp
     src/mt5/collector.cpp
     src/mt5/safety.cpp
+    src/dataset_builder_v2.cpp
 )
 
 target_include_directories(dominion_core PUBLIC
@@ -213,6 +227,8 @@ target_link_libraries(dominion_core PUBLIC
     OpenSSL::Crypto
     SQLite::SQLite3
     Eigen3::Eigen
+    Arrow::arrow_shared
+    Parquet::parquet_shared
     pthread
 )
 

@@ -15,6 +15,7 @@
 #include "dominion/recurrence.hpp"
 #include "dominion/quantum.hpp"
 #include "dominion/features.hpp"
+#include "dominion/dataset_builder_v2.hpp"
 
 namespace py = pybind11;
 
@@ -152,6 +153,31 @@ PYBIND11_MODULE(dominion_features, m) {
         return features;
     }, py::arg("prices"), py::arg("n_threads") = 20,
     "Compute all 2000+ features in one call (batch mode)");
+
+    // ========== DATASET BUILDER V2 ==========
+    py::class_<dominion::ProgressState>(m, "ProgressState")
+        .def_readonly("building", &dominion::ProgressState::building)
+        .def_readonly("completed_families", &dominion::ProgressState::completed_families)
+        .def_readonly("completed_features", &dominion::ProgressState::completed_features)
+        .def_readonly("total_families", &dominion::ProgressState::total_families)
+        .def_readonly("total_features", &dominion::ProgressState::total_features)
+        .def_readonly("progress_pct", &dominion::ProgressState::progress_pct)
+        .def("format_progress", &dominion::ProgressState::format_progress);
+
+    py::class_<dominion::DatasetConfig>(m, "DatasetConfig")
+        .def(py::init<>())
+        .def_readwrite("input_path", &dominion::DatasetConfig::input_path)
+        .def_readwrite("output_path", &dominion::DatasetConfig::output_path)
+        .def_readwrite("manifest_path", &dominion::DatasetConfig::manifest_path)
+        .def_readwrite("max_rows", &dominion::DatasetConfig::max_rows)
+        .def_readwrite("num_threads", &dominion::DatasetConfig::num_threads)
+        .def_readwrite("skip_validation", &dominion::DatasetConfig::skip_validation)
+        .def_readwrite("verbose", &dominion::DatasetConfig::verbose);
+
+    py::class_<dominion::DatasetBuilderV2>(m, "DatasetBuilderV2")
+        .def(py::init<const dominion::DatasetConfig&>())
+        .def("build", &dominion::DatasetBuilderV2::build)
+        .def("get_progress", &dominion::DatasetBuilderV2::get_progress, py::return_value_policy::reference_internal);
 
     m.def("version", []() {
         return "2.0.0-alpha";

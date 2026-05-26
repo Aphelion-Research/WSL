@@ -1,0 +1,15 @@
+{
+  "other": 202,
+  "return": 136,
+  "volatility": 163,
+  "trend_momentum": 189,
+  "session_calendar": 57,
+  "microstructure": 59,
+  "cross_timeframe": 51,
+  "entropy_fractal": 6,
+  "macro": 448,
+  "cross_asset": 430,
+  "alternative": 19,
+  "composite": 5,
+  "interactions": 105
+}
