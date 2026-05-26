@@ -328,7 +328,7 @@ def train_model(config, data, model_idx, total_models, gpu_monitor):
         "objective": "multi:softmax",
         "num_class": 3,
         "eval_metric": "mlogloss",
-        "tree_method": "gpu_hist",
+        "tree_method": "hist",  # XGBoost 3.2+ unified method
         "device": f"cuda:{gpu_id}",
         "max_bin": 512,  # L4 can handle this
         "verbosity": 0,
