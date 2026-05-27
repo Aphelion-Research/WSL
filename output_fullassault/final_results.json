@@ -1,0 +1,6 @@
+{
+  "timestamp": "2026-05-27 10:08:17.689976",
+  "approach": "expanding_window_ensemble_detrend5d",
+  "total_predictions": 2176,
+  "years_tested": [
+    

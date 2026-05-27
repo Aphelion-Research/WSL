@@ -1,0 +1,358 @@
+{
+  "timestamp": "2026-05-27T10:00:07.077252",
+  "dataset": "data/institutional_xauusd.parquet",
+  "n_samples": 716546,
+  "n_features": 48,
+  "feature_names": [
+    "vwap_dev_4h",
+    "vwap_dev_session",
+    "obi_1h",
+    "obi_4h",
+    "obi_day",
+    "atr_1h_pct",
+    "atr_day_pct",
+    "vol_regime",
+    "vol_regime_weekly",
+    "var_5pct_daily",
+    "sma200_h1_pos",
+    "sma50_day_pos",
+    "spread_zscore",
+    "volume_zscore",
+    "big_volume_ratio",
+    "cos_hour",
+    "sin_hour",
+    "cos_dow",
+    "ret_1h",
+    "ret_4h",
+    "ret_1d",
+    "ret_1w",
+    "dxy_ret_1d",
+    "dxy_ret_5d",
+    "dxy_sma50_pos",
+    "gold_silver_ratio",
+    "gold_silver_zscore",
+    "vix_level",
+    "vix_change_5d",
+    "gvz_level",
+    "spx_ret_5d",
+    "tlt_ret_5d",
+    "copper_gold_ratio",
+    "copper_gold_zscore",
+    "wti_ret_5d",
+    "btc_ret_5d",
+    "yield_spread_10y2y",
+    "yield_spread_10y2y_change_5d",
+    "real_yield_10y",
+    "real_yield_10y_change_5d",
+    "breakeven_10y",
+    "breakeven_10y_change_5d",
+    "fed_funds_rate",
+    "cot_mm_net",
+    "cot_mm_net_percentile",
+    "cot_mm_net_change",
+    "cot_oi",
+    "cot_oi_change"
+  ],
+  "horizons": {
+    "label_4h": {
+      "label": "label_4h",
+      "train_samples": 429927,
+      "val_samples": 143309,
+      "oos_samples": 143310,
+      "train_date_range": "2016-01-04 00:00:00 to 2022-04-01 13:10:00",
+      "val_date_range": "2022-04-01 13:15:00 to 2024-04-29 12:30:00",
+      "oos_date_range": "2024-04-29 12:35:00 to 2026-05-20 23:55:00",
+      "best_iteration": 32,
+      "val_auc": 0.49298119682000524,
+      "oos_auc": 0.5051029563538671,
+      "oos_accuracy": 0.5182401786337311,
+      "oos_logloss": 0.6927846502987255,
+      "top_features": [
+        [
+          "vwap_dev_session",
+          10829.6513671875
+        ],
+        [
+          "dxy_ret_1d",
+          10306.5537109375
+        ],
+        [
+          "gold_silver_ratio",
+          9358.8193359375
+        ],
+        [
+          "breakeven_10y",
+          7151.3740234375
+        ],
+        [
+          "real_yield_10y",
+          6775.9736328125
+        ],
+        [
+          "sma50_day_pos",
+          6591.64208984375
+        ],
+        [
+          "sma200_h1_pos",
+          6198.087890625
+        ],
+        [
+          "btc_ret_5d",
+          5848.54736328125
+        ],
+        [
+          "tlt_ret_5d",
+          5613.73828125
+        ],
+        [
+          "copper_gold_zscore",
+          5463.98095703125
+        ],
+        [
+          "copper_gold_ratio",
+          5425.53271484375
+        ],
+        [
+          "cot_oi",
+          4929.35888671875
+        ],
+        [
+          "wti_ret_5d",
+          4786.24462890625
+        ],
+        [
+          "vix_level",
+          4495.97509765625
+        ],
+        [
+          "ret_1w",
+          4255.65966796875
+        ]
+      ],
+      "confidence_gating": {
+        "0.5": {
+          "n_trades": 143310,
+          "trade_rate": 1.0,
+          "accuracy": 0.5182401786337311,
+          "auc_roc": 0.5051029563538671
+        },
+        "0.52": {
+          "n_trades": 39351,
+          "trade_rate": 0.27458656060288883,
+          "accuracy": 0.5172168432822546,
+          "auc_roc": 0.49879009792778095
+        },
+        "0.55": {
+          "n_trades": 890,
+          "trade_rate": 0.006210313306817389,
+          "accuracy": 0.34606741573033706,
+          "auc_roc": 0.4973988690735103
+        }
+      }
+    },
+    "label_1d": {
+      "label": "label_1d",
+      "train_samples": 429927,
+      "val_samples": 143309,
+      "oos_samples": 143310,
+      "train_date_range": "2016-01-04 00:00:00 to 2022-04-01 13:10:00",
+      "val_date_range": "2022-04-01 13:15:00 to 2024-04-29 12:30:00",
+      "oos_date_range": "2024-04-29 12:35:00 to 2026-05-20 23:55:00",
+      "best_iteration": 6,
+      "val_auc": 0.4673237014188553,
+      "oos_auc": 0.5040583023438406,
+      "oos_accuracy": 0.5652780685227827,
+      "oos_logloss": 0.6879242450915026,
+      "top_features": [
+        [
+          "copper_gold_ratio",
+          37206.46875
+        ],
+        [
+          "gold_silver_ratio",
+          29136.6328125
+        ],
+        [
+          "breakeven_10y",
+          27038.478515625
+        ],
+        [
+          "gold_silver_zscore",
+          20221.271484375
+        ],
+        [
+          "btc_ret_5d",
+          16255.0244140625
+        ],
+        [
+          "dxy_ret_5d",
+          15420.2001953125
+        ],
+        [
+          "cot_oi",
+          15288.8935546875
+        ],
+        [
+          "cot_mm_net",
+          15224.9873046875
+        ],
+        [
+          "cot_oi_change",
+          15171.7490234375
+        ],
+        [
+          "sma50_day_pos",
+          13579.1865234375
+        ],
+        [
+          "cot_mm_net_change",
+          13080.4482421875
+        ],
+        [
+          "tlt_ret_5d",
+          12410.5986328125
+        ],
+        [
+          "copper_gold_zscore",
+          12277.060546875
+        ],
+        [
+          "vix_level",
+          10240.7626953125
+        ],
+        [
+          "dxy_ret_1d",
+          9640.029296875
+        ]
+      ],
+      "confidence_gating": {
+        "0.5": {
+          "n_trades": 143310,
+          "trade_rate": 1.0,
+          "accuracy": 0.5652780685227827,
+          "auc_roc": 0.5040583023438406
+        },
+        "0.52": {
+          "n_trades": 93968,
+          "trade_rate": 0.6556974391179959,
+          "accuracy": 0.5465264770985867,
+          "auc_roc": 0.5586687808662308
+        },
+        "0.55": {
+          "n_trades": 1170,
+          "trade_rate": 0.00816411974042286,
+          "accuracy": 0.770940170940171,
+          "auc_roc": 0.7605879968229805
+        }
+      }
+    },
+    "label_3d": {
+      "label": "label_3d",
+      "train_samples": 429927,
+      "val_samples": 143309,
+      "oos_samples": 143310,
+      "train_date_range": "2016-01-04 00:00:00 to 2022-04-01 13:10:00",
+      "val_date_range": "2022-04-01 13:15:00 to 2024-04-29 12:30:00",
+      "oos_date_range": "2024-04-29 12:35:00 to 2026-05-20 23:55:00",
+      "best_iteration": 12,
+      "val_auc": 0.4980630461773645,
+      "oos_auc": 0.5026932136602803,
+      "oos_accuracy": 0.5847044867769172,
+      "oos_logloss": 0.6808744460031433,
+      "top_features": [
+        [
+          "gold_silver_ratio",
+          133302.671875
+        ],
+        [
+          "cot_mm_net",
+          102642.296875
+        ],
+        [
+          "copper_gold_ratio",
+          90323.5546875
+        ],
+        [
+          "copper_gold_zscore",
+          88839.5078125
+        ],
+        [
+          "cot_oi",
+          78404.7734375
+        ],
+        [
+          "real_yield_10y",
+          58712.3203125
+        ],
+        [
+          "breakeven_10y",
+          53838.4921875
+        ],
+        [
+          "sma200_h1_pos",
+          52379.16796875
+        ],
+        [
+          "sma50_day_pos",
+          47073.23046875
+        ],
+        [
+          "spx_ret_5d",
+          42161.51953125
+        ],
+        [
+          "cot_oi_change",
+          39769.86328125
+        ],
+        [
+          "dxy_sma50_pos",
+          39100.21484375
+        ],
+        [
+          "vix_level",
+          35987.91796875
+        ],
+        [
+          "cot_mm_net_change",
+          29028.912109375
+        ],
+        [
+          "btc_ret_5d",
+          25082.3203125
+        ]
+      ],
+      "confidence_gating": {
+        "0.5": {
+          "n_trades": 143310,
+          "trade_rate": 1.0,
+          "accuracy": 0.5847044867769172,
+          "auc_roc": 0.5026932136602803
+        },
+        "0.52": {
+          "n_trades": 114649,
+          "trade_rate": 0.80000697788012,
+          "accuracy": 0.5950422594178755,
+          "auc_roc": 0.5046762368340114
+        },
+        "0.55": {
+          "n_trades": 58907,
+          "trade_rate": 0.41104598422999095,
+          "accuracy": 0.6030183170081654,
+          "auc_roc": 0.5454174014394462
+        },
+        "0.58": {
+          "n_trades": 12313,
+          "trade_rate": 0.08591863791780058,
+          "accuracy": 0.6166653130837326,
+          "auc_roc": 0.5763033999870532
+        },
+        "0.6": {
+          "n_trades": 1091,
+          "trade_rate": 0.007612867210941316,
+          "accuracy": 0.7103574702108157,
+          "auc_roc": 0.8100979991833401
+        }
+      }
+    }
+  }
+}

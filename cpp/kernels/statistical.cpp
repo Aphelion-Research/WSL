@@ -102,9 +102,11 @@ std::vector<float> rolling_quantile(const std::vector<float>& data,
     std::vector<float> result(data.size(), NAN_F);
     if (q < 0.0f || q > 1.0f) return result;
 
+    std::vector<float> vals;
+    vals.reserve(window);
+
     for (size_t i = window - 1; i < data.size(); ++i) {
-        std::vector<float> vals;
-        vals.reserve(window);
+        vals.clear();
 
         for (int j = 0; j < window; ++j) {
             float val = data[i - j];
@@ -114,16 +116,22 @@ std::vector<float> rolling_quantile(const std::vector<float>& data,
         }
 
         if (!vals.empty()) {
-            std::sort(vals.begin(), vals.end());
             float pos = q * (vals.size() - 1);
             size_t idx = static_cast<size_t>(pos);
+            float frac = pos - idx;
 
             if (idx >= vals.size() - 1) {
-                result[i] = vals.back();
+                result[i] = *std::max_element(vals.begin(), vals.end());
+            } else if (frac < 1e-9f) {
+                std::nth_element(vals.begin(), vals.begin() + idx, vals.end());
+                result[i] = vals[idx];
             } else {
-                // Linear interpolation
-                float frac = pos - idx;
-                result[i] = vals[idx] + frac * (vals[idx + 1] - vals[idx]);
+                // Need both vals[idx] and vals[idx+1] for interpolation
+                std::nth_element(vals.begin(), vals.begin() + idx, vals.end());
+                float v_lower = vals[idx];
+                // vals[idx+1..end) are all >= vals[idx]; find min of right partition
+                float v_upper = *std::min_element(vals.begin() + idx + 1, vals.end());
+                result[i] = v_lower + frac * (v_upper - v_lower);
             }
         }
     }

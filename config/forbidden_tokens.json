@@ -34,7 +34,11 @@
     "docs/",
     "prompts/",
     "notes/",
-    "vault/"
+    "vault/",
+    "graphify-out/",
+    "dominion_cpp/MIGRATION_STATUS.md",
+    "dominion_cpp/README.md",
+    "dominion_cpp/src/mt5/safety.cpp"
   ],
   "skip_parts": [
     "__pycache__",

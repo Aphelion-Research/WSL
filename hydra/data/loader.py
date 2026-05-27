@@ -74,19 +74,27 @@ def merge_all(con: duckdb.DuckDBPyConnection, tf: str = "h1") -> pd.DataFrame:
     cot = load_cot(con)
     regimes = load_regimes(con)
 
+    # Convert timestamps once
     bars["ts"] = pd.to_datetime(bars["ts"])
     feats["ts"] = pd.to_datetime(feats["ts"])
     macro["ts"] = pd.to_datetime(macro["ts"])
     cot["ts"] = pd.to_datetime(cot["ts"])
     regimes["ts"] = pd.to_datetime(regimes["ts"])
 
-    df = bars.copy()
-    df = pd.merge_asof(df.sort_values("ts"), feats.sort_values("ts"),
-                       on="ts", direction="backward")
-    df = pd.merge_asof(df.sort_values("ts"), macro.sort_values("ts"),
-                       on="ts", direction="backward")
-    df = pd.merge_asof(df.sort_values("ts"), cot.sort_values("ts"),
-                       on="ts", direction="backward")
-    df = pd.merge_asof(df.sort_values("ts"), regimes.sort_values("ts"),
-                       on="ts", direction="backward")
+    # Sort each once (bars already sorted from SQL ORDER BY, but ensure)
+    bars.sort_values("ts", inplace=True)
+    feats.sort_values("ts", inplace=True)
+    macro.sort_values("ts", inplace=True)
+    cot.sort_values("ts", inplace=True)
+    regimes.sort_values("ts", inplace=True)
+
+    # Merge without re-sorting (already sorted)
+    df = pd.merge_asof(bars, feats, on="ts", direction="backward")
+    del feats
+    df = pd.merge_asof(df, macro, on="ts", direction="backward")
+    del macro
+    df = pd.merge_asof(df, cot, on="ts", direction="backward")
+    del cot
+    df = pd.merge_asof(df, regimes, on="ts", direction="backward")
+    del regimes
     return df.reset_index(drop=True)

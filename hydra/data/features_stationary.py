@@ -31,17 +31,15 @@ def compute_log_returns(close: np.ndarray, periods: list[int]) -> dict[str, np.n
 def compute_rolling_zscore(close: np.ndarray, windows: list[int]) -> dict[str, np.ndarray]:
     """Rolling z-score using ONLY the last N bars (not training quantiles). Clipped to [-5, 5]."""
     features = {}
+    s = pd.Series(close, dtype=np.float64)
     for w in windows:
-        zscore = np.full(len(close), np.nan, dtype=np.float32)
-        for i in range(w, len(close)):
-            window = close[i-w:i]
-            mean = window.mean()
-            std = window.std()
-            if std > 1e-10:
-                z = (close[i] - mean) / std
-                # Clip to prevent outliers during regime transitions
-                zscore[i] = np.clip(z, -5.0, 5.0)
-        features[f"rolling_zscore_{w}"] = zscore
+        # Original: mean/std over close[i-w:i] (excludes current bar), applied at index i
+        # pandas rolling(w) on shifted series gives same window
+        rolled = s.shift(1).rolling(w, min_periods=w)
+        mean = rolled.mean().values
+        std = rolled.std(ddof=0).values
+        z = np.where(std > 1e-10, (close - mean) / std, np.nan)
+        features[f"rolling_zscore_{w}"] = np.clip(z, -5.0, 5.0).astype(np.float32)
     return features
 
 
@@ -68,13 +66,11 @@ def compute_atr_pct(high: np.ndarray, low: np.ndarray, close: np.ndarray, period
 def compute_drawdown_pct(close: np.ndarray, windows: list[int]) -> dict[str, np.ndarray]:
     """Drawdown normalized by current price (NOT absolute drawdown)."""
     features = {}
+    s = pd.Series(close, dtype=np.float64)
     for w in windows:
-        dd_pct = np.full(len(close), np.nan, dtype=np.float32)
-        for i in range(w, len(close)):
-            window = close[i-w:i+1]
-            peak = window.max()
-            if peak > 1e-10:
-                dd_pct[i] = (close[i] - peak) / peak  # negative value
+        # Original: peak over close[i-w:i+1] (w+1 bars including current)
+        peak = s.rolling(w + 1, min_periods=w + 1).max().values
+        dd_pct = np.where(peak > 1e-10, (close - peak) / peak, np.nan).astype(np.float32)
         features[f"drawdown_pct_{w}"] = dd_pct
     return features
 
@@ -82,14 +78,13 @@ def compute_drawdown_pct(close: np.ndarray, windows: list[int]) -> dict[str, np.
 def compute_realized_vol(close: np.ndarray, windows: list[int]) -> dict[str, np.ndarray]:
     """Rolling realized volatility (annualized)."""
     features = {}
-    log_ret = np.full(len(close), np.nan, dtype=np.float32)
-    log_ret[1:] = np.log(close[1:] / close[:-1]).astype(np.float32)
+    log_ret = np.full(len(close), np.nan, dtype=np.float64)
+    log_ret[1:] = np.log(close[1:] / close[:-1])
 
+    s = pd.Series(log_ret)
     for w in windows:
-        rvol = np.full(len(close), np.nan, dtype=np.float32)
-        for i in range(w, len(close)):
-            window = log_ret[i-w+1:i+1]
-            rvol[i] = window.std() * np.sqrt(252)  # annualized
+        # Original: std over log_ret[i-w+1:i+1] (w bars including current), ddof=0
+        rvol = (s.rolling(w, min_periods=w).std(ddof=0) * np.sqrt(252)).values.astype(np.float32)
         features[f"realized_vol_{w}"] = rvol
     return features
 
@@ -117,12 +112,11 @@ def compute_rsi(close: np.ndarray, period: int = 14) -> np.ndarray:
 
 def compute_volume_ratio(volume: np.ndarray, window: int = 20) -> np.ndarray:
     """Volume / rolling_mean_volume. Clipped to [0, 10]."""
-    vol_ma = np.full(len(volume), np.nan, dtype=np.float32)
-    for i in range(window, len(volume)):
-        vol_ma[i] = volume[i-window:i].mean()
+    # Original: mean over volume[i-window:i] (excludes current), applied at index i
+    s = pd.Series(volume, dtype=np.float64)
+    vol_ma = s.shift(1).rolling(window, min_periods=window).mean().values
 
     ratio = np.where(vol_ma > 1e-10, volume / vol_ma, 1.0)
-    # Clip to prevent extreme volume spikes from creating outliers
     ratio = np.clip(ratio, 0.0, 10.0).astype(np.float32)
     return ratio
 
@@ -156,13 +150,11 @@ def compute_macd_pct(close: np.ndarray, fast: int = 12, slow: int = 26, signal: 
 
 def compute_bb_position(close: np.ndarray, window: int = 20, num_std: float = 2.0) -> np.ndarray:
     """Bollinger Band position: (close - bb_mid) / (bb_upper - bb_lower)."""
-    bb_mid = np.full(len(close), np.nan, dtype=np.float32)
-    bb_std = np.full(len(close), np.nan, dtype=np.float32)
-
-    for i in range(window, len(close)):
-        window_data = close[i-window:i]
-        bb_mid[i] = window_data.mean()
-        bb_std[i] = window_data.std()
+    # Original: mean/std over close[i-window:i] (excludes current), applied at index i
+    s = pd.Series(close, dtype=np.float64)
+    rolled = s.shift(1).rolling(window, min_periods=window)
+    bb_mid = rolled.mean().values
+    bb_std = rolled.std(ddof=0).values
 
     bb_upper = bb_mid + num_std * bb_std
     bb_lower = bb_mid - num_std * bb_std
@@ -175,18 +167,17 @@ def compute_bb_position(close: np.ndarray, window: int = 20, num_std: float = 2.
 def compute_autocorr(close: np.ndarray, windows: list[int], lags: list[int]) -> dict[str, np.ndarray]:
     """Rolling autocorrelation of log returns."""
     features = {}
-    log_ret = np.full(len(close), np.nan, dtype=np.float32)
-    log_ret[1:] = np.log(close[1:] / close[:-1]).astype(np.float32)
+    log_ret = np.full(len(close), np.nan, dtype=np.float64)
+    log_ret[1:] = np.log(close[1:] / close[:-1])
 
+    s = pd.Series(log_ret)
     for w in windows:
         for lag in lags:
-            autocorr = np.full(len(close), np.nan, dtype=np.float32)
-            for i in range(w + lag, len(close)):
-                window = log_ret[i-w:i]
-                window_lagged = log_ret[i-w-lag:i-lag]
-                if len(window) == len(window_lagged) and window.std() > 1e-10 and window_lagged.std() > 1e-10:
-                    autocorr[i] = np.corrcoef(window, window_lagged)[0, 1]
-            features[f"autocorr_{w}_lag{lag}"] = autocorr
+            # Original: corrcoef(log_ret[i-w:i], log_ret[i-w-lag:i-lag]) at index i
+            # This is correlation between the window and its lagged copy
+            s_lagged = s.shift(lag)
+            corr = s.rolling(w, min_periods=w).corr(s_lagged).values.astype(np.float32)
+            features[f"autocorr_{w}_lag{lag}"] = corr
     return features
 
 
@@ -197,12 +188,15 @@ def compute_hurst(close: np.ndarray, windows: list[int]) -> dict[str, np.ndarray
 
     for w in windows:
         hurst = np.full(len(close), np.nan, dtype=np.float32)
+        # Original: window = log_ret[i-w:i-1] at index i (w-1 elements from offset i-w)
+        # min length check: len(window) < 20 → skip
+        if w - 1 < 20:
+            features[f"hurst_{w}"] = hurst
+            continue
+
         for i in range(w, len(close)):
             window = log_ret[i-w:i-1]
-            if len(window) < 20:
-                continue
 
-            # Compute R/S statistic
             mean_ret = window.mean()
             cumsum = (window - mean_ret).cumsum()
             R = cumsum.max() - cumsum.min()
@@ -211,9 +205,7 @@ def compute_hurst(close: np.ndarray, windows: list[int]) -> dict[str, np.ndarray
             if S > 1e-10:
                 rs = R / S
                 if rs > 0:
-                    # Hurst = log(R/S) / log(n/2)
                     h = np.log(rs) / np.log(len(window) / 2)
-                    # Clip to [0, 1] to prevent outliers
                     hurst[i] = np.clip(h, 0.0, 1.0)
 
         features[f"hurst_{w}"] = hurst
@@ -223,20 +215,17 @@ def compute_hurst(close: np.ndarray, windows: list[int]) -> dict[str, np.ndarray
 def compute_sharpe_rolling(close: np.ndarray, windows: list[int]) -> dict[str, np.ndarray]:
     """Rolling Sharpe ratio (annualized, clipped to [-10, 10])."""
     features = {}
-    log_ret = np.full(len(close), np.nan, dtype=np.float32)
-    log_ret[1:] = np.log(close[1:] / close[:-1]).astype(np.float32)
+    log_ret = np.full(len(close), np.nan, dtype=np.float64)
+    log_ret[1:] = np.log(close[1:] / close[:-1])
 
+    s = pd.Series(log_ret)
     for w in windows:
-        sharpe = np.full(len(close), np.nan, dtype=np.float32)
-        for i in range(w, len(close)):
-            window = log_ret[i-w+1:i+1]
-            mean_ret = window.mean()
-            std_ret = window.std()
-            if std_ret > 1e-10:
-                s = (mean_ret / std_ret) * np.sqrt(252)
-                # Clip to prevent outliers from low-vol regimes
-                sharpe[i] = np.clip(s, -10.0, 10.0)
-        features[f"sharpe_rolling_{w}"] = sharpe
+        # Original: mean/std over log_ret[i-w+1:i+1] (w bars including current), ddof=0
+        rolled = s.rolling(w, min_periods=w)
+        mean_ret = rolled.mean().values
+        std_ret = rolled.std(ddof=0).values
+        sharpe = np.where(std_ret > 1e-10, (mean_ret / std_ret) * np.sqrt(252), np.nan)
+        features[f"sharpe_rolling_{w}"] = np.clip(sharpe, -10.0, 10.0).astype(np.float32)
     return features
 
 

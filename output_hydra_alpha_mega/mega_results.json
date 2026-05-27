@@ -1,0 +1,74 @@
+{
+  "timestamp": "2026-05-27T09:08:52.916215",
+  "total_time_s": 1047.7065947055817,
+  "dataset": "data/hydra_xauusd_m5_master_clean.parquet",
+  "n_samples": 662941,
+  "n_features": 1347,
+  "split": {
+    "train": 397764,
+    "val": 132588,
+    "oos": 132589
+  },
+  "brains": {
+    "scalp": {
+      "target": "label_12b",
+      "val_auc": 0.5366460423305878,
+      "oos_auc": 0.5318110105043694,
+      "cv_auc": 0.5316277574503042,
+      "best_iteration": 29,
+      "train_time_s": 22.02411961555481,
+      "n_features": 300
+    },
+    "day": {
+      "target": "label_72b",
+      "val_auc": 0.5436640010472121,
+      "oos_auc": 0.5308169975795862,
+      "cv_auc": 0.5379002685189478,
+      "best_iteration": 130,
+      "train_time_s": 73.42495822906494,
+      "n_features": 400
+    },
+    "swing": {
+      "target": "label_288b",
+      "val_auc": 0.5433291706445231,
+      "oos_auc": 0.5299820263128195,
+      "cv_auc": 0.5344011416064173,
+      "best_iteration": 133,
+      "train_time_s": 56.86748242378235,
+      "n_features": 350
+    }
+  },
+  "meta": {
+    "val_auc": 0.5413092422614001,
+    "oos_auc": 0.5231157156156244
+  },
+  "oos_metrics": {
+    "accuracy": 0.5153972048963338,
+    "f1": 0.680214010202812,
+    "precision": 0.5153972048963338,
+    "recall": 1.0,
+    "auc_roc": 0.5231157156156244,
+    "log_loss": 0.6930567419681269
+  },
+  "confidence_gating": {
+    "0.5": {
+      "accuracy": 0.5113621793663125,
+      "f1": 0.4273440814594824,
+      "auc_roc": 0.5231157156156244,
+      "n_trades": 132589,
+      "trade_rate": 1.0,
+      "precision": 0.5395982142857143,
+      "recall": 0.3537520487005385
+    },
+    "0.55": {
+      "accuracy": 0.534204096974253,
+      "f1": 0.3740371258997348,
+      "auc_roc": 0.5515394210003904,
+      "n_trades": 10642,
+      "trade_rate": 0.0802630685803498,
+      "precision": 0.5983838383838384,
+      "recall": 0.27204261572373256
+    }
+  },
+  "optimal_threshold": 0.35
+}

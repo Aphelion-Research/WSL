@@ -148,68 +148,93 @@ class TripleBarrierLabeler:
         mfe = np.full(n, np.nan, dtype=np.float32)
         mae = np.full(n, np.nan, dtype=np.float32)
 
-        for t in range(n - self.horizon):
-            if not np.isfinite(atr[t]) or atr[t] <= 0:
-                continue
+        # Pre-filter valid entry bars
+        candidates = np.arange(n - self.horizon)
+        valid_mask = (
+            np.isfinite(atr[candidates]) &
+            (atr[candidates] > 0) &
+            (close[candidates] != 0) &
+            (atr[candidates] / close[candidates] >= self.min_atr_pct) &
+            (atr[candidates] >= spread[candidates] / self.spread_to_atr_min)
+        )
+        valid_idx = candidates[valid_mask]
 
-            # ATR filter
-            if close[t] == 0 or atr[t] / close[t] < self.min_atr_pct:
-                continue
+        if len(valid_idx) == 0:
+            return y, mfe, mae
 
-            # Spread-to-ATR filter (Agent 1 recommendation)
-            if atr[t] < spread[t] / self.spread_to_atr_min:
-                continue
+        # Process in chunks to bound memory: chunk_size × horizon floats
+        chunk_size = max(1, min(4096, 500_000_000 // (self.horizon * 8)))
 
-            # Barrier levels
-            entry = close[t]
+        for chunk_start in range(0, len(valid_idx), chunk_size):
+            chunk = valid_idx[chunk_start:chunk_start + chunk_size]
+            nc = len(chunk)
+
+            entries = close[chunk]
+            atrs = atr[chunk]
+
             if direction == 1:
-                stop_px = entry - self.stop_mult * atr[t]
-                target_px = entry + self.target_mult * atr[t]
+                stops = entries - self.stop_mult * atrs
+                targets = entries + self.target_mult * atrs
             else:
-                stop_px = entry + self.stop_mult * atr[t]
-                target_px = entry - self.target_mult * atr[t]
+                stops = entries + self.stop_mult * atrs
+                targets = entries - self.target_mult * atrs
 
-            # Track MFE/MAE
-            max_fav = 0.0
-            max_adv = 0.0
-            hit_bar = -1
+            # Build forward index matrix: (nc, horizon)
+            offsets = np.arange(1, self.horizon + 1)
+            fwd_idx = chunk[:, np.newaxis] + offsets[np.newaxis, :]  # (nc, horizon)
 
-            for k in range(1, self.horizon + 1):
-                if direction == 1:
-                    fav = (high[t + k] - entry) / atr[t]
-                    adv = (low[t + k] - entry) / atr[t]
+            highs_fwd = high[fwd_idx]  # (nc, horizon)
+            lows_fwd = low[fwd_idx]    # (nc, horizon)
 
-                    max_fav = max(max_fav, fav)
-                    max_adv = min(max_adv, adv)
+            # Compute favorable/adverse excursion per bar
+            if direction == 1:
+                fav_all = (highs_fwd - entries[:, np.newaxis]) / atrs[:, np.newaxis]
+                adv_all = (lows_fwd - entries[:, np.newaxis]) / atrs[:, np.newaxis]
+                stop_hit = lows_fwd <= stops[:, np.newaxis]
+                target_hit = highs_fwd >= targets[:, np.newaxis]
+            else:
+                fav_all = (entries[:, np.newaxis] - lows_fwd) / atrs[:, np.newaxis]
+                adv_all = (entries[:, np.newaxis] - highs_fwd) / atrs[:, np.newaxis]
+                stop_hit = highs_fwd >= stops[:, np.newaxis]
+                target_hit = lows_fwd <= targets[:, np.newaxis]
 
-                    # Check stop first (Agent 1: SL priority during same-bar hits)
-                    if low[t + k] <= stop_px and k >= self.min_hold_bars:
-                        y[t] = 0.0
-                        hit_bar = k
-                        break
-                    if high[t + k] >= target_px and k >= self.min_hold_bars:
-                        y[t] = 1.0
-                        hit_bar = k
-                        break
-                else:
-                    fav = (entry - low[t + k]) / atr[t]
-                    adv = (entry - high[t + k]) / atr[t]
+            # Apply min_hold_bars mask
+            hold_mask = offsets >= self.min_hold_bars  # (horizon,)
+            stop_hit_valid = stop_hit & hold_mask[np.newaxis, :]
+            target_hit_valid = target_hit & hold_mask[np.newaxis, :]
 
-                    max_fav = max(max_fav, fav)
-                    max_adv = min(max_adv, adv)
+            # Find first hit bar for each entry (horizon+1 means no hit)
+            no_hit = self.horizon + 1
+            stop_bars = np.where(stop_hit_valid, offsets[np.newaxis, :], no_hit).min(axis=1)
+            target_bars = np.where(target_hit_valid, offsets[np.newaxis, :], no_hit).min(axis=1)
 
-                    if high[t + k] >= stop_px and k >= self.min_hold_bars:
-                        y[t] = 0.0
-                        hit_bar = k
-                        break
-                    if low[t + k] <= target_px and k >= self.min_hold_bars:
-                        y[t] = 1.0
-                        hit_bar = k
-                        break
+            # Stop-loss priority: stop wins ties
+            hit_stop = (stop_bars <= target_bars) & (stop_bars < no_hit)
+            hit_target = (target_bars < stop_bars) & (target_bars < no_hit)
 
-            if hit_bar > 0:
-                mfe[t] = max_fav
-                mae[t] = max_adv
+            y[chunk[hit_stop]] = 0.0
+            y[chunk[hit_target]] = 1.0
+
+            # MFE/MAE up to first hit bar only (initialized at 0 like reference)
+            any_hit = hit_stop | hit_target
+            hit_bar_k = np.where(hit_stop, stop_bars, np.where(hit_target, target_bars, 0))
+
+            hit_indices = np.where(any_hit)[0]
+            if len(hit_indices) > 0:
+                # Vectorized MFE/MAE: mask columns beyond hit_bar per row
+                hit_k = hit_bar_k[hit_indices]  # (n_hits,)
+                # Create mask: col_idx < hit_k (columns 0..horizon-1 represent bars 1..horizon)
+                col_range = np.arange(self.horizon)[np.newaxis, :]  # (1, horizon)
+                valid_cols = col_range < hit_k[:, np.newaxis]  # (n_hits, horizon)
+
+                fav_masked = np.where(valid_cols, fav_all[hit_indices], -np.inf)
+                adv_masked = np.where(valid_cols, adv_all[hit_indices], np.inf)
+
+                mfe_vals = np.maximum(0.0, fav_masked.max(axis=1))
+                mae_vals = np.minimum(0.0, adv_masked.min(axis=1))
+
+                mfe[chunk[hit_indices]] = mfe_vals.astype(np.float32)
+                mae[chunk[hit_indices]] = mae_vals.astype(np.float32)
 
         return y, mfe, mae
 
