@@ -242,8 +242,16 @@ def compute_regime_probs(close: np.ndarray, window: int = 50) -> dict[str, np.nd
         vol[i] = window_ret.std() * np.sqrt(252)
         trend[i] = (close[i] / close[i-window]) - 1.0
 
-    # Normalize to [0,1]
-    vol_norm = np.where(vol > 1e-10, (vol - np.nanmin(vol)) / (np.nanmax(vol) - np.nanmin(vol) + 1e-10), 0.5)
+    # Normalize to [0,1] using ROLLING quantiles (point-in-time safe)
+    # For vol: compute rolling 252-bar (1yr) quantiles
+    vol_series = pd.Series(vol, dtype=np.float32)
+    vol_q25 = vol_series.shift(1).rolling(252, min_periods=50).quantile(0.25).values
+    vol_q75 = vol_series.shift(1).rolling(252, min_periods=50).quantile(0.75).values
+    vol_range = vol_q75 - vol_q25
+    vol_norm = np.where(vol_range > 1e-10, (vol - vol_q25) / (vol_range + 1e-10), 0.5).astype(np.float32)
+    vol_norm = np.clip(vol_norm, 0.0, 1.0)  # clip to [0,1]
+
+    # Trend already normalized correctly (no global stats)
     trend_norm = (trend + 1) / 2  # map [-1, 1] to [0, 1]
 
     # Regime heuristics
