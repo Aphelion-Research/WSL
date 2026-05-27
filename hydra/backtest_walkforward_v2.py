@@ -209,13 +209,17 @@ def run_backtest(close, high, low, signals, confidences,
         if not in_trade:
             sig = signals[t]
             conf = confidences[t]
-            if sig != 0 and conf >= mode.min_confidence and np.isfinite(atr[t]) and atr[t] > 0 and close[t] > 0:
+            # CRITICAL: Enter at t+1 (next bar), not t (same bar as signal)
+            # Signal from bar t features → enter bar t+1 (realistic execution)
+            if t + 1 >= n:
+                break  # no next bar available
+            if sig != 0 and conf >= mode.min_confidence and np.isfinite(atr[t]) and atr[t] > 0 and close[t+1] > 0:
                 direction = int(sig)
                 spread_cost = cost.spread_pips + cost.slippage_pips
-                entry_px = close[t] + direction * spread_cost / 2
-                entry_atr = atr[t]
+                entry_px = close[t+1] + direction * spread_cost / 2
+                entry_atr = atr[t]  # use bar t ATR for stop/target sizing
 
-                atr_pct = entry_atr / close[t]
+                atr_pct = entry_atr / close[t+1]
                 stop_px = entry_px * (1 - direction * mode.stop_mult * atr_pct)
                 target_px = entry_px * (1 + direction * mode.target_mult * atr_pct)
 
@@ -229,7 +233,7 @@ def run_backtest(close, high, low, signals, confidences,
                 if size_lots < 0.01:
                     equity_curve.append(equity)
                     continue
-                entry_bar = t
+                entry_bar = t + 1  # entry happens at next bar
                 in_trade = True
         else:
             exit_px = None

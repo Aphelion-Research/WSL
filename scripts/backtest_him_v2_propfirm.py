@@ -179,8 +179,14 @@ def run_propfirm_backtest(m15, features, proba, config):
                     signal = None
 
             if signal:
-                entry_price = close[i]
-                stop_distance = atr[i] * stop_mult
+                # CRITICAL: Enter at i+1 (next bar), not i (same bar as signal)
+                # Signal from bar i features → enter bar i+1 (realistic execution)
+                if i + 1 >= len(close):
+                    equity_curve.append({'time': dt, 'equity': equity})
+                    break  # no next bar available
+
+                entry_price = close[i+1]
+                stop_distance = atr[i] * stop_mult  # use bar i ATR for sizing
                 tp_distance = atr[i] * tp_mult
 
                 risk_amount = equity * risk_pct

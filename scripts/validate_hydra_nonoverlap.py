@@ -354,7 +354,14 @@ def generate_nonoverlap_trades(
             direction = -1
 
         if direction != 0:
-            exit_bar = min(i + horizon, n) - 1
+            # CRITICAL: Reject trade if full horizon doesn't fit in test fold
+            # Prevents using forward returns that extend beyond fold end
+            if i + horizon > n:
+                # Skip this trade — not enough bars remaining for full horizon
+                i += 1
+                continue
+
+            exit_bar = i + horizon - 1  # no longer need min() — already validated
             realized = float(returns[i]) if not np.isnan(returns[i]) else 0.0
             trades.append(Trade(
                 fold=fold_num,
