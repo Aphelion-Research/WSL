@@ -1,0 +1,14 @@
+artifact_uri: /home/Martin/Dominion/output_hydra_moe/mlruns/819414526356340828/7cf2e988e911436694f3ea1b882393df/artifacts
+end_time: 1779894413826
+entry_point_name: ''
+experiment_id: '819414526356340828'
+lifecycle_stage: active
+run_id: 7cf2e988e911436694f3ea1b882393df
+run_name: overjoyed-panda-337
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1779894216854
+status: 3
+tags: []
+user_id: Martin

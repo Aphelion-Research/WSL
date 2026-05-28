@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-05-27T16:06:24.017035",
+  "execution": "hold_to_horizon",
+  "hold_bars": 12,
+  "locked_config": {
+    "threshold": 0.5
+  },
+  "period2": {
+    "return_pct": 20.339192978673672,
+    "annualized": 20.339192978673672,
+    "trades": 2588,
+    "win_rate": 54.36630602782071,
+    "pf": 1.0779543203110524
+  },
+  "period3": {
+    "return_pct": -2.021301379832148,
+    "annualized": -4.8511233115971555,
+    "trades": 946,
+    "win_rate": 53.06553911205074,
+    "pf": 0.9780887118427202
+  },
+  "overfitting": {
+    "return_ratio": -0.23851110103944248,
+    "degradation": 25.19031629027083
+  },
+  "verdict": "\u2717 REJECT"
+}

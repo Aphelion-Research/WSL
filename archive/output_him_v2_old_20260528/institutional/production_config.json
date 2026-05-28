@@ -1,0 +1,38 @@
+{
+  "model": "M5",
+  "version": "2.0",
+  "timestamp": "2026-05-27T14:05:07.947356",
+  "training_period": "2015-2024",
+  "test_period": "2025-2026",
+  "config": {
+    "threshold": 0.68,
+    "holding_bars": 20,
+    "stop_multiplier": 1.0,
+    "tp_multiplier": 3.5,
+    "risk_per_trade": 0.01
+  },
+  "performance": {
+    "return_pct": 368.60932570898535,
+    "sharpe": 1.8593279716761182,
+    "sortino": 40.85815591466212,
+    "calmar": 12.375899139502387,
+    "max_dd": -29.784448107889677,
+    "win_rate": 32.10702341137124,
+    "profit_factor": 1.1482000133534478,
+    "total_trades": 1495,
+    "expectancy": 24.656142187892044,
+    "var_95": -431.8074491151826,
+    "cvar_95": -456.35656771066937,
+    "ulcer_index": 11.961088999570109,
+    "monte_carlo_ci_95": [
+      91.71606089061515,
+      683.2295433462976
+    ]
+  },
+  "recommendation": "DEPLOY",
+  "risk_factors": [
+    "max_drawdown_29.8%",
+    "regime_sensitive",
+    "requires_trend_filter"
+  ]
+}

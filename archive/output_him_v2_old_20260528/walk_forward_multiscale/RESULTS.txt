@@ -1,0 +1,21 @@
+Him V2 MultiScale — Walk-Forward Validation
+================================================================================
+
+LOCKED CONFIG:
+  Threshold: 0.55
+  Hold: 16 bars (80 min)
+
+PERIOD 2 (2024):
+  Return: +39.5% annual
+  Trades: 3133
+  Win Rate: 52.1%
+  PF: 1.10
+
+PERIOD 3 (2025-2026):
+  Return: +15.1% annual
+  Trades: 4707
+  Win Rate: 51.8%
+  PF: 1.04
+
+VERDICT: ✗ REJECT
+No edge: +15.1% annual insufficient

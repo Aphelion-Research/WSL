@@ -1,0 +1,99 @@
+# BOI M15 Multi-Timeframe Config
+# XAUUSD M15 scalping with M5/H1/H4/D1 context
+
+model_name: boi_m15_mtf
+version: "0.1.0"
+instrument: XAUUSD
+decision_timeframe: M15
+
+# Data
+data:
+  m15_path: "data/mt5_history/XAUUSD_M15.parquet"
+  m5_path: "data/mt5_history/XAUUSD_M5_dukascopy.parquet"
+  h1_path: "data/mt5_history/XAUUSD_H1.parquet"
+  h4_path: "data/mt5_history/XAUUSD_H4.parquet"
+  d1_path: "data/mt5_history/XAUUSD_D1.parquet"
+
+# Time splits (dates are inclusive)
+splits:
+  train_start: "2015-01-01"
+  train_end: "2022-12-31"
+  val_start: "2023-01-01"
+  val_end: "2023-12-31"
+  oos_start: "2024-01-01"
+  oos_end: "2026-05-20"
+
+# Label config
+label:
+  type: "triple_barrier_cost_aware"
+  entry_lag: 1  # Signal at bar i, entry at bar i+1
+  horizons: [4, 8, 16]  # M15 bars
+  default_horizon: 8
+  stop_atr_mult: 1.0
+  target_atr_mult: 2.0
+  atr_period: 14
+  include_cost: true
+  cost_model:
+    spread_points: 0.30
+    slippage_points: 0.10
+    commission_per_lot: 7.0
+    lot_size: 100.0
+  ambiguity_handling: "conservative"  # Stop hit first if both touched
+  classes:
+    short: 0
+    skip: 1
+    long: 2
+
+# Model
+model:
+  type: "xgboost"  # or "lightgbm"
+  objective: "multi:softprob"
+  num_class: 3
+  params:
+    max_depth: 5
+    learning_rate: 0.05
+    n_estimators: 300
+    subsample: 0.8
+    colsample_bytree: 0.8
+    min_child_weight: 5
+    gamma: 0.1
+    tree_method: "hist"
+  early_stopping_rounds: 30
+  use_class_weights: true
+
+# Execution (for validation)
+execution:
+  entry_lag: 1  # Next-bar entry
+  hold_bars: 8  # Match label horizon
+  stop_atr_mult: 1.0
+  target_atr_mult: 2.0
+  cost_model:
+    spread_points: 0.30
+    slippage_points: 0.10
+    commission_per_lot: 7.0
+  position_size_oz: 10.0  # 0.1 lot
+
+# Validation
+validation:
+  cost_sensitivity_multipliers: [0.0, 0.5, 1.0, 2.0, 3.0]
+  null_test_types: ["random", "shuffled", "shifted_1", "shifted_5", "shifted_20", "reversed"]
+
+  # Rejection criteria
+  rejection_criteria:
+    min_pf_1x_cost: 1.15
+    min_pf_2x_cost: 1.03
+    min_sharpe: 0.3
+    max_top5_contribution_pct: 50.0
+    min_months_profitable_pct: 40.0
+    must_beat_null_tests: true
+    must_beat_baselines: true
+
+# Output
+output:
+  base_dir: "output_boi"
+  model_file: "boi_m15_mtf_model.json"
+  metadata_file: "boi_m15_mtf_metadata.json"
+  features_file: "boi_m15_mtf_features.json"
+  validation_report: "validation_report.json"
+  diagnostics_report: "diagnostics_report.json"
+  trades_file: "trades.csv"

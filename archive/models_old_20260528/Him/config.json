@@ -1,0 +1,63 @@
+{
+  "model_file": "output_scalp15m/scalp15m_detrend4h.json",
+  "feature_cols": [
+    "ret_1bar",
+    "ret_4bar",
+    "ret_16bar",
+    "ret_96bar",
+    "range_pos_24h",
+    "vwap_dev_4h",
+    "vwap_dev_24h",
+    "atr_3h_pct",
+    "atr_24h_pct",
+    "vol_ratio",
+    "rsi_14",
+    "bb_pos",
+    "vol_zscore",
+    "cos_hour",
+    "sin_hour",
+    "cos_dow",
+    "pullback_from_high",
+    "pullback_from_low",
+    "spread_zscore",
+    "consec_up",
+    "consec_down",
+    "daily_sma50",
+    "daily_sma100",
+    "daily_ret_5d",
+    "daily_bull",
+    "daily_bear"
+  ],
+  "label": "detrend_4h",
+  "description": "Predict if gold 4h return exceeds trailing avg 4h return",
+  "timeframe": "M15",
+  "horizon": "16 bars (4 hours)",
+  "daily_overlay_shift": 2,
+  "warmup_bars": 288,
+  "params": {
+    "max_depth": 4,
+    "learning_rate": 0.01,
+    "subsample": 0.7,
+    "colsample_bytree": 0.5,
+    "min_child_weight": 100,
+    "reg_alpha": 3.0,
+    "reg_lambda": 10.0
+  },
+  "recommended_gating": {
+    "conservative": {
+      "threshold": 0.65,
+      "expected_wr": "70-85%",
+      "trades_per_day": "~1-3"
+    },
+    "moderate": {
+      "threshold": 0.6,
+      "expected_wr": "65-75%",
+      "trades_per_day": "~5-10"
+    },
+    "aggressive": {
+      "threshold": 0.55,
+      "expected_wr": "60-68%",
+      "trades_per_day": "~15-25"
+    }
+  }
+}

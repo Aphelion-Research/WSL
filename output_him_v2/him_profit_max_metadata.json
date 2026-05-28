@@ -1,0 +1,11 @@
+{
+  "model_name": "him_profit_max",
+  "version": "1.0.0",
+  "feature_count": 37,
+  "train_period": "2015-2022",
+  "val_period": "2023",
+  "label_type": "zero_cost_binary",
+  "label_horizon": 16,
+  "strategy": "Him V2 features + high regularization for selectivity",
+  "target_costs": "prop_firm_$1_per_trade"
+}

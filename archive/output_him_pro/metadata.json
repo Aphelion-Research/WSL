@@ -1,0 +1,12 @@
+{
+  "model_name": "him_pro",
+  "version": "1.0.0",
+  "ensemble_size": 3,
+  "feature_count": 36,
+  "train_period": "2018-2022",
+  "val_period": "2023",
+  "label_threshold": 0.0015,
+  "label_horizon": 12,
+  "strategy": "ensemble + regime filter + dynamic sizing",
+  "target": "maximum profit at prop firm costs"
+}

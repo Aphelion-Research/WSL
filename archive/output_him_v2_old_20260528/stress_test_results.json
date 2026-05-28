@@ -1,0 +1,167 @@
+{
+  "timestamp": "2026-05-27T13:10:18.501027",
+  "primary_oos": {
+    "train": "2015-2024",
+    "test": "2025-2026",
+    "M5": {
+      "auc": 0.7118360647851372,
+      "initial_capital": 10000.0,
+      "final_equity": 25383.899780591826,
+      "total_pnl": 15383.899780591826,
+      "return_pct": 153.83899780591827,
+      "total_trades": 1871,
+      "wins": 842,
+      "losses": 1029,
+      "win_rate": 45.0026723677178,
+      "profit_factor": 1.0853435851866227,
+      "max_drawdown_pct": -24.33477125924566,
+      "peak_equity": 26597.287411082998,
+      "breached": false,
+      "crash_2020": {}
+    },
+    "M15": {
+      "auc": 0.677261197371439,
+      "initial_capital": 10000.0,
+      "final_equity": 8950.19517040949,
+      "total_pnl": -1049.80482959051,
+      "return_pct": -10.4980482959051,
+      "total_trades": 337,
+      "wins": 129,
+      "losses": 208,
+      "win_rate": 38.27893175074184,
+      "profit_factor": 0.9515365945515561,
+      "max_drawdown_pct": -28.39463143865581,
+      "peak_equity": 12499.335385365517,
+      "breached": true,
+      "crash_2020": {}
+    },
+    "H1_stops": {
+      "auc": 0.6865060922919111,
+      "initial_capital": 10000.0,
+      "final_equity": 8987.338691727578,
+      "total_pnl": -1012.6613082724216,
+      "return_pct": -10.126613082724216,
+      "total_trades": 567,
+      "wins": 236,
+      "losses": 331,
+      "win_rate": 41.622574955908284,
+      "profit_factor": 0.9690261482539806,
+      "max_drawdown_pct": -28.665471110102565,
+      "peak_equity": 12598.861773656974,
+      "breached": true,
+      "crash_2020": {}
+    },
+    "H1_hold": {
+      "auc": 0.6865060922919111,
+      "initial_capital": 10000.0,
+      "final_equity": 8983.385122626383,
+      "total_pnl": -1016.6148773736168,
+      "return_pct": -10.166148773736168,
+      "total_trades": 36,
+      "wins": 15,
+      "losses": 21,
+      "win_rate": 41.66666666666667,
+      "profit_factor": 0.6977820876507862,
+      "max_drawdown_pct": -17.021163936564662,
+      "peak_equity": 10826.11609032308,
+      "breached": true,
+      "crash_2020": {}
+    }
+  },
+  "stress_test": {
+    "train": "2015-2019",
+    "test": "2020-2026",
+    "M5": {
+      "auc": 0.7169219576072748,
+      "initial_capital": 10000.0,
+      "final_equity": 66253.28548322579,
+      "total_pnl": 56253.28548322579,
+      "return_pct": 562.532854832258,
+      "total_trades": 8273,
+      "wins": 3613,
+      "losses": 4660,
+      "win_rate": 43.67218663120996,
+      "profit_factor": 1.0433748978615698,
+      "max_drawdown_pct": -47.08527124432703,
+      "peak_equity": 75492.55838315081,
+      "breached": false,
+      "crash_2020": {
+        "2020-03": {
+          "trades": 153,
+          "wins": 59,
+          "pnl": -746.9198798773255
+        },
+        "2020-04": {
+          "trades": 131,
+          "wins": 66,
+          "pnl": 1825.5326546306228
+        }
+      }
+    },
+    "M15": {
+      "auc": 0.6940847627901958,
+      "initial_capital": 10000.0,
+      "final_equity": 8934.193998525101,
+      "total_pnl": -1065.806001474899,
+      "return_pct": -10.658060014748989,
+      "total_trades": 665,
+      "wins": 253,
+      "losses": 412,
+      "win_rate": 38.045112781954884,
+      "profit_factor": 0.9754894002446726,
+      "max_drawdown_pct": -30.845408796613004,
+      "peak_equity": 12919.162477946265,
+      "breached": true,
+      "crash_2020": {
+        "2020-03": {
+          "trades": 93,
+          "wins": 33,
+          "pnl": -765.7222360664241
+        },
+        "2020-04": {
+          "trades": 62,
+          "wins": 28,
+          "pnl": 857.7460491697927
+        }
+      }
+    },
+    "H1_stops": {
+      "auc": 0.6960181545745291,
+      "initial_capital": 10000.0,
+      "final_equity": 8961.02453355377,
+      "total_pnl": -1038.9754664462307,
+      "return_pct": -10.389754664462307,
+      "total_trades": 140,
+      "wins": 56,
+      "losses": 84,
+      "win_rate": 40.0,
+      "profit_factor": 0.8659353166620198,
+      "max_drawdown_pct": -15.497986078640047,
+      "peak_equity": 10604.510020190952,
+      "breached": true,
+      "crash_2020": {
+        "2020-03": {
+          "trades": 59,
+          "wins": 23,
+          "pnl": -674.8931307219794
+        }
+      }
+    },
+    "H1_hold": {
+      "auc": 0.6960181545745291,
+      "initial_capital": 10000.0,
+      "final_equity": 8784.632495863214,
+      "total_pnl": -1215.367504136786,
+      "return_pct": -12.15367504136786,
+      "total_trades": 7,
+      "wins": 3,
+      "losses": 4,
+      "win_rate": 42.857142857142854,
+      "profit_factor": 0.2301425508628553,
+      "max_drawdown_pct": -13.58341086626244,
+      "peak_equity": 10165.446916989738,
+      "breached": true,
+      "crash_2020": {}
+    }
+  }
+}

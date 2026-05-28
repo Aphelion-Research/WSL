@@ -1,0 +1,1370 @@
+{
+  "backtest_date": "2026-05-27 12:36",
+  "model": "Him V2 Multi-Scale",
+  "train_period": "2015-01-01 to 2023-12-31",
+  "oos_period": "2024-01-01 to 2026-05-20",
+  "train_auc": 0.716158600998442,
+  "oos_auc": 0.6878806913882971,
+  "feature_cols": [
+    "ret_1bar",
+    "ret_4bar",
+    "ret_16bar",
+    "ret_96bar",
+    "ret_8bar",
+    "ret_32bar",
+    "ret_64bar",
+    "range_pos_6h",
+    "range_pos_12h",
+    "range_pos_24h",
+    "vwap_dev_4h",
+    "vwap_dev_12h",
+    "vwap_dev_24h",
+    "atr_3h_pct",
+    "atr_12h_pct",
+    "atr_24h_pct",
+    "vol_ratio_short",
+    "vol_ratio_long",
+    "rsi_14",
+    "bb_pos",
+    "vol_zscore",
+    "cos_hour",
+    "sin_hour",
+    "cos_dow",
+    "pullback_high_4h",
+    "pullback_low_4h",
+    "pullback_high_12h",
+    "pullback_low_12h",
+    "pullback_high_24h",
+    "pullback_low_24h",
+    "spread_zscore",
+    "consec_up",
+    "consec_down",
+    "multi_scale_consensus",
+    "daily_sma50",
+    "daily_sma100",
+    "daily_ret_5d"
+  ],
+  "num_features": 37,
+  "feature_importance": [
+    {
+      "feature": "range_pos_24h",
+      "gain": 496.1430969238281,
+      "pct": 18.767649565563804
+    },
+    {
+      "feature": "ret_96bar",
+      "gain": 370.6551818847656,
+      "pct": 14.02080691317486
+    },
+    {
+      "feature": "pullback_high_24h",
+      "gain": 222.53761291503906,
+      "pct": 8.417950305550153
+    },
+    {
+      "feature": "ret_64bar",
+      "gain": 157.49256896972656,
+      "pct": 5.9574855760978345
+    },
+    {
+      "feature": "vwap_dev_24h",
+      "gain": 146.63246154785156,
+      "pct": 5.546679315561632
+    },
+    {
+      "feature": "pullback_low_24h",
+      "gain": 128.20098876953125,
+      "pct": 4.8494703364878955
+    },
+    {
+      "feature": "range_pos_6h",
+      "gain": 101.4729232788086,
+      "pct": 3.838425398433794
+    },
+    {
+      "feature": "bb_pos",
+      "gain": 75.06633758544922,
+      "pct": 2.83954110559824
+    },
+    {
+      "feature": "vwap_dev_4h",
+      "gain": 71.88593292236328,
+      "pct": 2.719235652265196
+    },
+    {
+      "feature": "multi_scale_consensus",
+      "gain": 53.95969772338867,
+      "pct": 2.04113834056183
+    },
+    {
+      "feature": "cos_hour",
+      "gain": 48.9995231628418,
+      "pct": 1.853509371190801
+    },
+    {
+      "feature": "ret_16bar",
+      "gain": 48.062110900878906,
+      "pct": 1.8180497932181117
+    },
+    {
+      "feature": "pullback_low_4h",
+      "gain": 41.90644454956055,
+      "pct": 1.5851988483186155
+    },
+    {
+      "feature": "range_pos_12h",
+      "gain": 40.31218719482422,
+      "pct": 1.5248927319249257
+    },
+    {
+      "feature": "rsi_14",
+      "gain": 39.478302001953125,
+      "pct": 1.4933492817091505
+    },
+    {
+      "feature": "pullback_high_4h",
+      "gain": 38.57335662841797,
+      "pct": 1.4591178316460782
+    },
+    {
+      "feature": "vol_ratio_short",
+      "gain": 38.03071594238281,
+      "pct": 1.4385913135937904
+    },
+    {
+      "feature": "pullback_high_12h",
+      "gain": 37.34426498413086,
+      "pct": 1.4126248714356806
+    },
+    {
+      "feature": "vwap_dev_12h",
+      "gain": 37.23568344116211,
+      "pct": 1.4085175476406693
+    },
+    {
+      "feature": "ret_8bar",
+      "gain": 35.7962646484375,
+      "pct": 1.3540685234630945
+    },
+    {
+      "feature": "pullback_low_12h",
+      "gain": 34.60145950317383,
+      "pct": 1.3088725217360286
+    },
+    {
+      "feature": "sin_hour",
+      "gain": 33.23338317871094,
+      "pct": 1.257122175524105
+    },
+    {
+      "feature": "cos_dow",
+      "gain": 32.6380729675293,
+      "pct": 1.2346033226053994
+    },
+    {
+      "feature": "daily_sma50",
+      "gain": 30.166547775268555,
+      "pct": 1.1411127167934763
+    },
+    {
+      "feature": "daily_ret_5d",
+      "gain": 28.587566375732422,
+      "pct": 1.081384445331529
+    },
+    {
+      "feature": "atr_24h_pct",
+      "gain": 26.90545654296875,
+      "pct": 1.0177551253473704
+    },
+    {
+      "feature": "atr_12h_pct",
+      "gain": 26.87946319580078,
+      "pct": 1.016771872665414
+    },
+    {
+      "feature": "atr_3h_pct",
+      "gain": 26.6561279296875,
+      "pct": 1.0083237494605688
+    },
+    {
+      "feature": "daily_sma100",
+      "gain": 26.453998565673828,
+      "pct": 1.0006777838223504
+    },
+    {
+      "feature": "ret_32bar",
+      "gain": 26.271854400634766,
+      "pct": 0.9937878001038221
+    },
+    {
+      "feature": "vol_zscore",
+      "gain": 26.042219161987305,
+      "pct": 0.985101367271115
+    },
+    {
+      "feature": "ret_4bar",
+      "gain": 26.001157760620117,
+      "pct": 0.9835481339472849
+    },
+    {
+      "feature": "vol_ratio_long",
+      "gain": 22.18567657470703,
+      "pct": 0.8392195838471262
+    },
+    {
+      "feature": "consec_down",
+      "gain": 21.240135192871094,
+      "pct": 0.8034525049256185
+    },
+    {
+      "feature": "spread_zscore",
+      "gain": 13.39886474609375,
+      "pct": 0.5068400622526075
+    },
+    {
+      "feature": "ret_1bar",
+      "gain": 12.56042194366455,
+      "pct": 0.47512421093002766
+    }
+  ],
+  "configs": {
+    "Aggressive (0.55, trend)": {
+      "config": {
+        "name": "Aggressive (0.55, trend)",
+        "threshold": 0.55,
+        "trend_filter": true,
+        "risk_per_trade": 0.01,
+        "stop_atr_mult": 1.5,
+        "tp_atr_mult": 3.0
+      },
+      "initial_capital": 10000.0,
+      "final_equity": 24929.833872469877,
+      "total_pnl": 14929.833872469877,
+      "return_pct": 149.29833872469877,
+      "total_trades": 1520,
+      "wins": 650,
+      "losses": 870,
+      "win_rate": 42.76315789473684,
+      "profit_factor": 1.1132659202062842,
+      "max_drawdown_pct": -3.9844197749982775,
+      "peak_equity": 25656.985235011667,
+      "breached": false,
+      "breach_reason": null,
+      "monthly": {
+        "2024-01": {
+          "trades": 54,
+          "wins": 22,
+          "pnl": 344.24952350603627,
+          "longs": 54,
+          "shorts": 0
+        },
+        "2024-02": {
+          "trades": 24,
+          "wins": 8,
+          "pnl": -354.7885568968584,
+          "longs": 17,
+          "shorts": 7
+        },
+        "2024-03": {
+          "trades": 42,
+          "wins": 20,
+          "pnl": 471.832824348235,
+          "longs": 42,
+          "shorts": 0
+        },
+        "2024-04": {
+          "trades": 61,
+          "wins": 29,
+          "pnl": 356.03209171274995,
+          "longs": 61,
+          "shorts": 0
+        },
+        "2024-05": {
+          "trades": 81,
+          "wins": 33,
+          "pnl": 198.73885946918134,
+          "longs": 81,
+          "shorts": 0
+        },
+        "2024-06": {
+          "trades": 25,
+          "wins": 11,
+          "pnl": 175.85141680376063,
+          "longs": 25,
+          "shorts": 0
+        },
+        "2024-07": {
+          "trades": 57,
+          "wins": 22,
+          "pnl": -131.1146055659088,
+          "longs": 57,
+          "shorts": 0
+        },
+        "2024-08": {
+          "trades": 73,
+          "wins": 36,
+          "pnl": 2345.1592503240863,
+          "longs": 73,
+          "shorts": 0
+        },
+        "2024-09": {
+          "trades": 63,
+          "wins": 28,
+          "pnl": 505.0590715345778,
+          "longs": 63,
+          "shorts": 0
+        },
+        "2024-10": {
+          "trades": 49,
+          "wins": 25,
+          "pnl": 1712.0472776126662,
+          "longs": 49,
+          "shorts": 0
+        },
+        "2024-11": {
+          "trades": 54,
+          "wins": 21,
+          "pnl": 112.54259828868878,
+          "longs": 54,
+          "shorts": 0
+        },
+        "2024-12": {
+          "trades": 25,
+          "wins": 11,
+          "pnl": -37.77874041137636,
+          "longs": 16,
+          "shorts": 9
+        },
+        "2025-01": {
+          "trades": 35,
+          "wins": 16,
+          "pnl": 949.6666329103394,
+          "longs": 34,
+          "shorts": 1
+        },
+        "2025-02": {
+          "trades": 58,
+          "wins": 21,
+          "pnl": -633.7843663278234,
+          "longs": 58,
+          "shorts": 0
+        },
+        "2025-03": {
+          "trades": 50,
+          "wins": 25,
+          "pnl": 1851.599002269961,
+          "longs": 50,
+          "shorts": 0
+        },
+        "2025-04": {
+          "trades": 56,
+          "wins": 22,
+          "pnl": -401.91576876127743,
+          "longs": 56,
+          "shorts": 0
+        },
+        "2025-05": {
+          "trades": 81,
+          "wins": 36,
+          "pnl": 1685.5288944541276,
+          "longs": 81,
+          "shorts": 0
+        },
+        "2025-06": {
+          "trades": 60,
+          "wins": 16,
+          "pnl": -2864.029810016869,
+          "longs": 60,
+          "shorts": 0
+        },
+        "2025-07": {
+          "trades": 63,
+          "wins": 27,
+          "pnl": -197.57060939747348,
+          "longs": 63,
+          "shorts": 0
+        },
+        "2025-08": {
+          "trades": 31,
+          "wins": 12,
+          "pnl": -224.729145749015,
+          "longs": 31,
+          "shorts": 0
+        },
+        "2025-09": {
+          "trades": 63,
+          "wins": 25,
+          "pnl": -113.8707297798361,
+          "longs": 63,
+          "shorts": 0
+        },
+        "2025-10": {
+          "trades": 75,
+          "wins": 36,
+          "pnl": 2331.2071421607357,
+          "longs": 75,
+          "shorts": 0
+        },
+        "2025-11": {
+          "trades": 53,
+          "wins": 21,
+          "pnl": 1096.1146666234415,
+          "longs": 53,
+          "shorts": 0
+        },
+        "2025-12": {
+          "trades": 60,
+          "wins": 28,
+          "pnl": 3414.989022434261,
+          "longs": 60,
+          "shorts": 0
+        },
+        "2026-01": {
+          "trades": 36,
+          "wins": 18,
+          "pnl": 2133.46206933062,
+          "longs": 36,
+          "shorts": 0
+        },
+        "2026-02": {
+          "trades": 43,
+          "wins": 21,
+          "pnl": 183.3479138026901,
+          "longs": 43,
+          "shorts": 0
+        },
+        "2026-03": {
+          "trades": 82,
+          "wins": 26,
+          "pnl": -3849.3576247159335,
+          "longs": 54,
+          "shorts": 28
+        },
+        "2026-04": {
+          "trades": 24,
+          "wins": 12,
+          "pnl": 966.8229588386895,
+          "longs": 0,
+          "shorts": 24
+        },
+        "2026-05": {
+          "trades": 42,
+          "wins": 22,
+          "pnl": 2904.522613667391,
+          "longs": 0,
+          "shorts": 42
+        }
+      },
+      "exit_reasons": {
+        "stop": 776,
+        "tp": 335,
+        "timeout": 409
+      },
+      "avg_win": 225.7570260565247,
+      "avg_loss": -151.50831386697837,
+      "longs": 1409,
+      "shorts": 111
+    },
+    "Moderate (0.60, trend)": {
+      "config": {
+        "name": "Moderate (0.60, trend)",
+        "threshold": 0.6,
+        "trend_filter": true,
+        "risk_per_trade": 0.01,
+        "stop_atr_mult": 1.5,
+        "tp_atr_mult": 3.0
+      },
+      "initial_capital": 10000.0,
+      "final_equity": 20492.3706988865,
+      "total_pnl": 10492.370698886501,
+      "return_pct": 104.92370698886502,
+      "total_trades": 1182,
+      "wins": 506,
+      "losses": 676,
+      "win_rate": 42.8087986463621,
+      "profit_factor": 1.1151279483478045,
+      "max_drawdown_pct": -9.61435063023082,
+      "peak_equity": 20909.01417335756,
+      "breached": false,
+      "breach_reason": null,
+      "monthly": {
+        "2024-01": {
+          "trades": 44,
+          "wins": 16,
+          "pnl": -215.82272491355502,
+          "longs": 44,
+          "shorts": 0
+        },
+        "2024-02": {
+          "trades": 18,
+          "wins": 5,
+          "pnl": -564.841039369976,
+          "longs": 11,
+          "shorts": 7
+        },
+        "2024-03": {
+          "trades": 32,
+          "wins": 16,
+          "pnl": 592.1524262075974,
+          "longs": 32,
+          "shorts": 0
+        },
+        "2024-04": {
+          "trades": 46,
+          "wins": 21,
+          "pnl": 167.84401266395287,
+          "longs": 46,
+          "shorts": 0
+        },
+        "2024-05": {
+          "trades": 60,
+          "wins": 23,
+          "pnl": -299.91811562489914,
+          "longs": 60,
+          "shorts": 0
+        },
+        "2024-06": {
+          "trades": 24,
+          "wins": 10,
+          "pnl": 142.34664303388666,
+          "longs": 24,
+          "shorts": 0
+        },
+        "2024-07": {
+          "trades": 45,
+          "wins": 17,
+          "pnl": -71.62358949239092,
+          "longs": 45,
+          "shorts": 0
+        },
+        "2024-08": {
+          "trades": 58,
+          "wins": 29,
+          "pnl": 1580.3800701740145,
+          "longs": 58,
+          "shorts": 0
+        },
+        "2024-09": {
+          "trades": 47,
+          "wins": 24,
+          "pnl": 1338.718147325816,
+          "longs": 47,
+          "shorts": 0
+        },
+        "2024-10": {
+          "trades": 44,
+          "wins": 23,
+          "pnl": 1850.7502580170312,
+          "longs": 44,
+          "shorts": 0
+        },
+        "2024-11": {
+          "trades": 50,
+          "wins": 20,
+          "pnl": -418.8199006372236,
+          "longs": 50,
+          "shorts": 0
+        },
+        "2024-12": {
+          "trades": 20,
+          "wins": 10,
+          "pnl": 464.4987603692921,
+          "longs": 12,
+          "shorts": 8
+        },
+        "2025-01": {
+          "trades": 29,
+          "wins": 11,
+          "pnl": -349.4134072600763,
+          "longs": 28,
+          "shorts": 1
+        },
+        "2025-02": {
+          "trades": 49,
+          "wins": 18,
+          "pnl": -666.4270299987318,
+          "longs": 49,
+          "shorts": 0
+        },
+        "2025-03": {
+          "trades": 27,
+          "wins": 16,
+          "pnl": 1228.2044146749254,
+          "longs": 27,
+          "shorts": 0
+        },
+        "2025-04": {
+          "trades": 49,
+          "wins": 19,
+          "pnl": 581.3119454109086,
+          "longs": 49,
+          "shorts": 0
+        },
+        "2025-05": {
+          "trades": 66,
+          "wins": 29,
+          "pnl": 787.6223267007224,
+          "longs": 66,
+          "shorts": 0
+        },
+        "2025-06": {
+          "trades": 48,
+          "wins": 18,
+          "pnl": -522.7273085031301,
+          "longs": 48,
+          "shorts": 0
+        },
+        "2025-07": {
+          "trades": 47,
+          "wins": 23,
+          "pnl": 586.5022030370503,
+          "longs": 47,
+          "shorts": 0
+        },
+        "2025-08": {
+          "trades": 18,
+          "wins": 5,
+          "pnl": -660.5198324454848,
+          "longs": 18,
+          "shorts": 0
+        },
+        "2025-09": {
+          "trades": 39,
+          "wins": 20,
+          "pnl": 1122.3158936556658,
+          "longs": 39,
+          "shorts": 0
+        },
+        "2025-10": {
+          "trades": 51,
+          "wins": 26,
+          "pnl": 2164.9908067455985,
+          "longs": 51,
+          "shorts": 0
+        },
+        "2025-11": {
+          "trades": 42,
+          "wins": 15,
+          "pnl": -309.76611976919673,
+          "longs": 42,
+          "shorts": 0
+        },
+        "2025-12": {
+          "trades": 43,
+          "wins": 15,
+          "pnl": -581.6827948948471,
+          "longs": 43,
+          "shorts": 0
+        },
+        "2026-01": {
+          "trades": 24,
+          "wins": 9,
+          "pnl": 230.9260303777827,
+          "longs": 24,
+          "shorts": 0
+        },
+        "2026-02": {
+          "trades": 34,
+          "wins": 16,
+          "pnl": 917.9502581287277,
+          "longs": 34,
+          "shorts": 0
+        },
+        "2026-03": {
+          "trades": 74,
+          "wins": 27,
+          "pnl": -669.4583571657238,
+          "longs": 46,
+          "shorts": 28
+        },
+        "2026-04": {
+          "trades": 23,
+          "wins": 11,
+          "pnl": 468.0674891107091,
+          "longs": 0,
+          "shorts": 23
+        },
+        "2026-05": {
+          "trades": 31,
+          "wins": 14,
+          "pnl": 1598.809233328074,
+          "longs": 0,
+          "shorts": 31
+        }
+      },
+      "exit_reasons": {
+        "stop": 600,
+        "tp": 258,
+        "timeout": 324
+      },
+      "avg_win": 200.8477839979352,
+      "avg_loss": -134.81746746164006,
+      "longs": 1084,
+      "shorts": 98
+    },
+    "Conservative (0.65, trend)": {
+      "config": {
+        "name": "Conservative (0.65, trend)",
+        "threshold": 0.65,
+        "trend_filter": true,
+        "risk_per_trade": 0.01,
+        "stop_atr_mult": 1.5,
+        "tp_atr_mult": 3.0
+      },
+      "initial_capital": 10000.0,
+      "final_equity": 21654.798205395386,
+      "total_pnl": 11654.798205395386,
+      "return_pct": 116.54798205395385,
+      "total_trades": 857,
+      "wins": 386,
+      "losses": 471,
+      "win_rate": 45.040840140023334,
+      "profit_factor": 1.1775399458892095,
+      "max_drawdown_pct": -7.086283136762632,
+      "peak_equity": 21990.901114185057,
+      "breached": false,
+      "breach_reason": null,
+      "monthly": {
+        "2024-01": {
+          "trades": 35,
+          "wins": 12,
+          "pnl": -403.4803473091095,
+          "longs": 35,
+          "shorts": 0
+        },
+        "2024-02": {
+          "trades": 13,
+          "wins": 6,
+          "pnl": -256.39177456658547,
+          "longs": 7,
+          "shorts": 6
+        },
+        "2024-03": {
+          "trades": 20,
+          "wins": 12,
+          "pnl": 1140.0296071326427,
+          "longs": 20,
+          "shorts": 0
+        },
+        "2024-04": {
+          "trades": 28,
+          "wins": 11,
+          "pnl": 66.97614173257367,
+          "longs": 28,
+          "shorts": 0
+        },
+        "2024-05": {
+          "trades": 49,
+          "wins": 19,
+          "pnl": -128.9157741624911,
+          "longs": 49,
+          "shorts": 0
+        },
+        "2024-06": {
+          "trades": 24,
+          "wins": 10,
+          "pnl": 190.09618859527268,
+          "longs": 24,
+          "shorts": 0
+        },
+        "2024-07": {
+          "trades": 37,
+          "wins": 16,
+          "pnl": 167.7066162006994,
+          "longs": 37,
+          "shorts": 0
+        },
+        "2024-08": {
+          "trades": 36,
+          "wins": 20,
+          "pnl": 1174.2656441679399,
+          "longs": 36,
+          "shorts": 0
+        },
+        "2024-09": {
+          "trades": 35,
+          "wins": 19,
+          "pnl": 1319.376129901108,
+          "longs": 35,
+          "shorts": 0
+        },
+        "2024-10": {
+          "trades": 29,
+          "wins": 14,
+          "pnl": 912.8762679600329,
+          "longs": 29,
+          "shorts": 0
+        },
+        "2024-11": {
+          "trades": 42,
+          "wins": 15,
+          "pnl": -118.61253930197562,
+          "longs": 42,
+          "shorts": 0
+        },
+        "2024-12": {
+          "trades": 19,
+          "wins": 9,
+          "pnl": 151.74774775055505,
+          "longs": 13,
+          "shorts": 6
+        },
+        "2025-01": {
+          "trades": 24,
+          "wins": 10,
+          "pnl": 131.60151510715778,
+          "longs": 23,
+          "shorts": 1
+        },
+        "2025-02": {
+          "trades": 34,
+          "wins": 15,
+          "pnl": -29.747674489263588,
+          "longs": 34,
+          "shorts": 0
+        },
+        "2025-03": {
+          "trades": 18,
+          "wins": 10,
+          "pnl": 907.1427931785705,
+          "longs": 18,
+          "shorts": 0
+        },
+        "2025-04": {
+          "trades": 30,
+          "wins": 12,
+          "pnl": 215.41879548851355,
+          "longs": 30,
+          "shorts": 0
+        },
+        "2025-05": {
+          "trades": 61,
+          "wins": 29,
+          "pnl": 1869.5297378571827,
+          "longs": 61,
+          "shorts": 0
+        },
+        "2025-06": {
+          "trades": 40,
+          "wins": 14,
+          "pnl": -1266.765784181547,
+          "longs": 40,
+          "shorts": 0
+        },
+        "2025-07": {
+          "trades": 40,
+          "wins": 19,
+          "pnl": 442.94065797081447,
+          "longs": 40,
+          "shorts": 0
+        },
+        "2025-08": {
+          "trades": 12,
+          "wins": 6,
+          "pnl": 621.8805606017459,
+          "longs": 12,
+          "shorts": 0
+        },
+        "2025-09": {
+          "trades": 21,
+          "wins": 12,
+          "pnl": 1057.1372953507182,
+          "longs": 21,
+          "shorts": 0
+        },
+        "2025-10": {
+          "trades": 26,
+          "wins": 12,
+          "pnl": -373.66368521023736,
+          "longs": 26,
+          "shorts": 0
+        },
+        "2025-11": {
+          "trades": 19,
+          "wins": 7,
+          "pnl": -267.84521054465733,
+          "longs": 19,
+          "shorts": 0
+        },
+        "2025-12": {
+          "trades": 30,
+          "wins": 21,
+          "pnl": 3905.1466354809377,
+          "longs": 30,
+          "shorts": 0
+        },
+        "2026-01": {
+          "trades": 6,
+          "wins": 2,
+          "pnl": -700.2623240561877,
+          "longs": 6,
+          "shorts": 0
+        },
+        "2026-02": {
+          "trades": 31,
+          "wins": 14,
+          "pnl": 330.606994306208,
+          "longs": 31,
+          "shorts": 0
+        },
+        "2026-03": {
+          "trades": 57,
+          "wins": 20,
+          "pnl": -1680.2687835472755,
+          "longs": 30,
+          "shorts": 27
+        },
+        "2026-04": {
+          "trades": 19,
+          "wins": 10,
+          "pnl": 952.6235792661004,
+          "longs": 0,
+          "shorts": 19
+        },
+        "2026-05": {
+          "trades": 22,
+          "wins": 10,
+          "pnl": 1323.6491947159382,
+          "longs": 0,
+          "shorts": 22
+        }
+      },
+      "exit_reasons": {
+        "stop": 415,
+        "tp": 186,
+        "timeout": 256
+      },
+      "avg_win": 200.26129455671904,
+      "avg_loss": -139.375926737788,
+      "longs": 776,
+      "shorts": 81
+    },
+    "Ultra (0.70, trend)": {
+      "config": {
+        "name": "Ultra (0.70, trend)",
+        "threshold": 0.7,
+        "trend_filter": true,
+        "risk_per_trade": 0.01,
+        "stop_atr_mult": 1.5,
+        "tp_atr_mult": 3.0
+      },
+      "initial_capital": 10000.0,
+      "final_equity": 18430.11697079772,
+      "total_pnl": 8430.11697079772,
+      "return_pct": 84.30116970797721,
+      "total_trades": 572,
+      "wins": 264,
+      "losses": 308,
+      "win_rate": 46.15384615384615,
+      "profit_factor": 1.2135727656666737,
+      "max_drawdown_pct": -4.144581969243627,
+      "peak_equity": 20117.438248419472,
+      "breached": false,
+      "breach_reason": null,
+      "monthly": {
+        "2024-01": {
+          "trades": 29,
+          "wins": 15,
+          "pnl": 416.7227189125823,
+          "longs": 29,
+          "shorts": 0
+        },
+        "2024-02": {
+          "trades": 8,
+          "wins": 3,
+          "pnl": -349.4163200744522,
+          "longs": 6,
+          "shorts": 2
+        },
+        "2024-03": {
+          "trades": 16,
+          "wins": 9,
+          "pnl": 774.249877490557,
+          "longs": 16,
+          "shorts": 0
+        },
+        "2024-04": {
+          "trades": 17,
+          "wins": 7,
+          "pnl": -3.677648195462666,
+          "longs": 17,
+          "shorts": 0
+        },
+        "2024-05": {
+          "trades": 37,
+          "wins": 13,
+          "pnl": -646.1917850976297,
+          "longs": 37,
+          "shorts": 0
+        },
+        "2024-06": {
+          "trades": 22,
+          "wins": 9,
+          "pnl": 85.24881721593158,
+          "longs": 22,
+          "shorts": 0
+        },
+        "2024-07": {
+          "trades": 19,
+          "wins": 6,
+          "pnl": -432.45988118790655,
+          "longs": 19,
+          "shorts": 0
+        },
+        "2024-08": {
+          "trades": 20,
+          "wins": 12,
+          "pnl": 908.1582968671814,
+          "longs": 20,
+          "shorts": 0
+        },
+        "2024-09": {
+          "trades": 18,
+          "wins": 12,
+          "pnl": 1584.2700171172137,
+          "longs": 18,
+          "shorts": 0
+        },
+        "2024-10": {
+          "trades": 14,
+          "wins": 6,
+          "pnl": 173.11406142866042,
+          "longs": 14,
+          "shorts": 0
+        },
+        "2024-11": {
+          "trades": 34,
+          "wins": 11,
+          "pnl": -579.1561122636215,
+          "longs": 34,
+          "shorts": 0
+        },
+        "2024-12": {
+          "trades": 15,
+          "wins": 9,
+          "pnl": 327.7029632252643,
+          "longs": 10,
+          "shorts": 5
+        },
+        "2025-01": {
+          "trades": 15,
+          "wins": 8,
+          "pnl": 275.1979375453336,
+          "longs": 14,
+          "shorts": 1
+        },
+        "2025-02": {
+          "trades": 24,
+          "wins": 13,
+          "pnl": 641.9264252606979,
+          "longs": 24,
+          "shorts": 0
+        },
+        "2025-03": {
+          "trades": 7,
+          "wins": 5,
+          "pnl": 418.1091569134791,
+          "longs": 7,
+          "shorts": 0
+        },
+        "2025-04": {
+          "trades": 17,
+          "wins": 7,
+          "pnl": 177.74414928782173,
+          "longs": 17,
+          "shorts": 0
+        },
+        "2025-05": {
+          "trades": 44,
+          "wins": 21,
+          "pnl": 1256.0868695699153,
+          "longs": 44,
+          "shorts": 0
+        },
+        "2025-06": {
+          "trades": 29,
+          "wins": 13,
+          "pnl": 401.37253742226477,
+          "longs": 29,
+          "shorts": 0
+        },
+        "2025-07": {
+          "trades": 34,
+          "wins": 16,
+          "pnl": 667.5691634583916,
+          "longs": 34,
+          "shorts": 0
+        },
+        "2025-08": {
+          "trades": 7,
+          "wins": 5,
+          "pnl": 770.7571109093982,
+          "longs": 7,
+          "shorts": 0
+        },
+        "2025-09": {
+          "trades": 6,
+          "wins": 4,
+          "pnl": 708.293770051737,
+          "longs": 6,
+          "shorts": 0
+        },
+        "2025-10": {
+          "trades": 16,
+          "wins": 7,
+          "pnl": 226.39496993874175,
+          "longs": 16,
+          "shorts": 0
+        },
+        "2025-11": {
+          "trades": 12,
+          "wins": 6,
+          "pnl": 265.32362904900015,
+          "longs": 12,
+          "shorts": 0
+        },
+        "2025-12": {
+          "trades": 15,
+          "wins": 11,
+          "pnl": 1789.069125478302,
+          "longs": 15,
+          "shorts": 0
+        },
+        "2026-01": {
+          "trades": 3,
+          "wins": 2,
+          "pnl": 104.29680560273388,
+          "longs": 3,
+          "shorts": 0
+        },
+        "2026-02": {
+          "trades": 10,
+          "wins": 4,
+          "pnl": -218.6719543966,
+          "longs": 10,
+          "shorts": 0
+        },
+        "2026-03": {
+          "trades": 49,
+          "wins": 14,
+          "pnl": -2473.4441844641656,
+          "longs": 24,
+          "shorts": 25
+        },
+        "2026-04": {
+          "trades": 17,
+          "wins": 9,
+          "pnl": 1111.483713743419,
+          "longs": 0,
+          "shorts": 17
+        },
+        "2026-05": {
+          "trades": 18,
+          "wins": 7,
+          "pnl": 50.042739988927195,
+          "longs": 0,
+          "shorts": 18
+        }
+      },
+      "exit_reasons": {
+        "stop": 272,
+        "tp": 120,
+        "timeout": 180
+      },
+      "avg_win": 181.44692972371442,
+      "avg_loss": -128.15543011773664,
+      "longs": 504,
+      "shorts": 68
+    },
+    "Long-only Bull (0.60)": {
+      "config": {
+        "name": "Long-only Bull (0.60)",
+        "threshold": 0.6,
+        "trend_filter": false,
+        "long_only_bull": true,
+        "risk_per_trade": 0.01,
+        "stop_atr_mult": 1.5,
+        "tp_atr_mult": 3.0
+      },
+      "initial_capital": 10000.0,
+      "final_equity": 8952.956664693931,
+      "total_pnl": -1047.043335306069,
+      "return_pct": -10.470433353060688,
+      "total_trades": 1182,
+      "wins": 466,
+      "losses": 716,
+      "win_rate": 39.424703891708965,
+      "profit_factor": 0.9849625501257085,
+      "max_drawdown_pct": -10.470433353060688,
+      "peak_equity": 12503.608230081836,
+      "breached": true,
+      "breach_reason": "Total loss breach: equity $8953 <= $9000",
+      "monthly": {
+        "2024-01": {
+          "trades": 93,
+          "wins": 37,
+          "pnl": 60.37465148783363,
+          "longs": 46,
+          "shorts": 47
+        },
+        "2024-02": {
+          "trades": 90,
+          "wins": 40,
+          "pnl": 762.0724647647993,
+          "longs": 37,
+          "shorts": 53
+        },
+        "2024-03": {
+          "trades": 110,
+          "wins": 49,
+          "pnl": 829.6393032953611,
+          "longs": 32,
+          "shorts": 78
+        },
+        "2024-04": {
+          "trades": 113,
+          "wins": 46,
+          "pnl": -557.4843900646263,
+          "longs": 43,
+          "shorts": 70
+        },
+        "2024-05": {
+          "trades": 130,
+          "wins": 47,
+          "pnl": -657.3919864805116,
+          "longs": 59,
+          "shorts": 71
+        },
+        "2024-06": {
+          "trades": 123,
+          "wins": 48,
+          "pnl": 499.3025423396724,
+          "longs": 57,
+          "shorts": 66
+        },
+        "2024-07": {
+          "trades": 106,
+          "wins": 37,
+          "pnl": -1360.8142068939487,
+          "longs": 41,
+          "shorts": 65
+        },
+        "2024-08": {
+          "trades": 137,
+          "wins": 57,
+          "pnl": 1490.8216966341736,
+          "longs": 58,
+          "shorts": 79
+        },
+        "2024-09": {
+          "trades": 98,
+          "wins": 35,
+          "pnl": -1633.250618158294,
+          "longs": 41,
+          "shorts": 57
+        },
+        "2024-10": {
+          "trades": 110,
+          "wins": 46,
+          "pnl": 443.2369469747534,
+          "longs": 42,
+          "shorts": 68
+        },
+        "2024-11": {
+          "trades": 72,
+          "wins": 24,
+          "pnl": -923.5497392052971,
+          "longs": 46,
+          "shorts": 26
+        }
+      },
+      "exit_reasons": {
+        "stop": 631,
+        "tp": 253,
+        "timeout": 298
+      },
+      "avg_win": 147.17168614327352,
+      "avg_loss": -97.24727524870326,
+      "longs": 502,
+      "shorts": 680
+    },
+    "Wide RR (0.60, 2:4 ATR)": {
+      "config": {
+        "name": "Wide RR (0.60, 2:4 ATR)",
+        "threshold": 0.6,
+        "trend_filter": true,
+        "risk_per_trade": 0.01,
+        "stop_atr_mult": 2.0,
+        "tp_atr_mult": 4.0
+      },
+      "initial_capital": 10000.0,
+      "final_equity": 8980.441114511736,
+      "total_pnl": -1019.5588854882644,
+      "return_pct": -10.195588854882644,
+      "total_trades": 174,
+      "wins": 75,
+      "losses": 99,
+      "win_rate": 43.103448275862064,
+      "profit_factor": 0.8846174569269973,
+      "max_drawdown_pct": -10.195588854882644,
+      "peak_equity": 10684.462841644834,
+      "breached": true,
+      "breach_reason": "Total loss breach: equity $8980 <= $9000",
+      "monthly": {
+        "2024-01": {
+          "trades": 40,
+          "wins": 16,
+          "pnl": -290.70955087386665,
+          "longs": 40,
+          "shorts": 0
+        },
+        "2024-02": {
+          "trades": 17,
+          "wins": 5,
+          "pnl": -581.2570828935296,
+          "longs": 10,
+          "shorts": 7
+        },
+        "2024-03": {
+          "trades": 28,
+          "wins": 18,
+          "pnl": 734.6121868954929,
+          "longs": 28,
+          "shorts": 0
+        },
+        "2024-04": {
+          "trades": 38,
+          "wins": 18,
+          "pnl": 279.8292235546437,
+          "longs": 38,
+          "shorts": 0
+        },
+        "2024-05": {
+          "trades": 51,
+          "wins": 18,
+          "pnl": -1162.0336621710017,
+          "longs": 51,
+          "shorts": 0
+        }
+      },
+      "exit_reasons": {
+        "stop": 83,
+        "tp": 25,
+        "timeout": 66
+      },
+      "avg_win": 104.22369097288302,
+      "avg_loss": -89.25591624701505,
+      "longs": 167,
+      "shorts": 7
+    }
+  },
+  "baseline_comparison": {
+    "trades": 687,
+    "wr": 44.1,
+    "pf": 1.16,
+    "return": 80.5,
+    "dd": -15.9,
+    "period": "2025-01 to 2026-05 (17mo)",
+    "note": "OOS started 2025, trained to 2024"
+  }
+}

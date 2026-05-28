@@ -1,0 +1,252 @@
+{
+  "timestamp": "2026-05-27T13:22:17.820182",
+  "aucs": {
+    "M5": 0.7118360647851372,
+    "M15": 0.677261197371439,
+    "H1": 0.6865060922919111
+  },
+  "risk_profiles": {
+    "M5": {
+      "mode": "momentum",
+      "threshold": 0.65,
+      "risk_per_trade": 0.01,
+      "stop_atr_mult": 1.5,
+      "tp_atr_mult": 3.0,
+      "holding_bars_m5": 12
+    },
+    "M15_hold": {
+      "mode": "mean_reversion",
+      "threshold": 0.6,
+      "risk_per_trade": 0.0075,
+      "catastrophic_stop_mult": 5.0,
+      "holding_bars_m5": 48
+    },
+    "M15_wide": {
+      "mode": "mean_reversion_wide",
+      "threshold": 0.6,
+      "risk_per_trade": 0.0075,
+      "stop_atr_mult": 3.5,
+      "holding_bars_m5": 48
+    },
+    "H1_hold": {
+      "mode": "mean_reversion",
+      "threshold": 0.6,
+      "risk_per_trade": 0.0075,
+      "catastrophic_stop_mult": 5.0,
+      "holding_bars_m5": 48
+    },
+    "H1_wide": {
+      "mode": "mean_reversion_wide",
+      "threshold": 0.6,
+      "risk_per_trade": 0.0075,
+      "stop_atr_mult": 3.5,
+      "holding_bars_m5": 48
+    }
+  },
+  "oos_results": {
+    "M5_momentum": {
+      "initial_capital": 10000.0,
+      "final_equity": 25383.899780591826,
+      "total_pnl": 15383.899780591826,
+      "return_pct": 153.83899780591827,
+      "total_trades": 1871,
+      "wins": 842,
+      "losses": 1029,
+      "win_rate": 45.0026723677178,
+      "profit_factor": 1.0853435851866227,
+      "max_drawdown_pct": -24.33477125924566,
+      "peak_equity": 26597.287411082998,
+      "breached": false,
+      "exit_reasons": {
+        "tp": 321,
+        "stop": 862,
+        "timeout": 688
+      },
+      "avg_win": 232.35429843840203,
+      "avg_loss": -175.1782502473689
+    },
+    "M15_hold": {
+      "initial_capital": 10000.0,
+      "final_equity": 8965.285146243485,
+      "total_pnl": -1034.7148537565154,
+      "return_pct": -10.347148537565154,
+      "total_trades": 285,
+      "wins": 132,
+      "losses": 153,
+      "win_rate": 46.31578947368421,
+      "profit_factor": 0.9546981700743166,
+      "max_drawdown_pct": -34.600102873234704,
+      "peak_equity": 13708.408636891247,
+      "breached": true,
+      "exit_reasons": {
+        "timeout": 194,
+        "stop": 91
+      },
+      "avg_win": 165.19507567865665,
+      "avg_loss": -149.28408394339337
+    },
+    "M15_wide": {
+      "initial_capital": 10000.0,
+      "final_equity": 10529.228572678336,
+      "total_pnl": 529.2285726783357,
+      "return_pct": 5.292285726783357,
+      "total_trades": 671,
+      "wins": 296,
+      "losses": 375,
+      "win_rate": 44.113263785394935,
+      "profit_factor": 1.0208179888755708,
+      "max_drawdown_pct": -21.225195380906932,
+      "peak_equity": 11851.818973306828,
+      "breached": false,
+      "exit_reasons": {
+        "timeout": 372,
+        "stop": 299
+      },
+      "avg_win": 87.6720405525842,
+      "avg_loss": -67.79118781569754
+    },
+    "H1_hold": {
+      "initial_capital": 10000.0,
+      "final_equity": 8975.11605518197,
+      "total_pnl": -1024.8839448180297,
+      "return_pct": -10.248839448180297,
+      "total_trades": 80,
+      "wins": 35,
+      "losses": 45,
+      "win_rate": 43.75,
+      "profit_factor": 0.843219355859466,
+      "max_drawdown_pct": -18.96223399865648,
+      "peak_equity": 11075.226401272183,
+      "breached": true,
+      "exit_reasons": {
+        "timeout": 50,
+        "stop": 30
+      },
+      "avg_win": 157.49064734319788,
+      "avg_loss": -145.26792448511017
+    },
+    "H1_wide": {
+      "initial_capital": 10000.0,
+      "final_equity": 8952.812035780535,
+      "total_pnl": -1047.1879642194654,
+      "return_pct": -10.471879642194654,
+      "total_trades": 123,
+      "wins": 48,
+      "losses": 75,
+      "win_rate": 39.02439024390244,
+      "profit_factor": 0.7808562400064372,
+      "max_drawdown_pct": -15.694052715723995,
+      "peak_equity": 10619.431160167194,
+      "breached": true,
+      "exit_reasons": {
+        "timeout": 62,
+        "stop": 61
+      },
+      "avg_win": 77.73657122235953,
+      "avg_loss": -63.71391177190305
+    }
+  },
+  "stress_results": {
+    "M5_momentum": {
+      "initial_capital": 10000.0,
+      "final_equity": 66253.28548322579,
+      "total_pnl": 56253.28548322579,
+      "return_pct": 562.532854832258,
+      "total_trades": 8273,
+      "wins": 3613,
+      "losses": 4660,
+      "win_rate": 43.67218663120996,
+      "profit_factor": 1.0433748978615698,
+      "max_drawdown_pct": -47.08527124432703,
+      "peak_equity": 75492.55838315081,
+      "breached": false,
+      "exit_reasons": {
+        "timeout": 3045,
+        "tp": 1358,
+        "stop": 3870
+      },
+      "avg_win": 374.5258944384267,
+      "avg_loss": -278.3066032452381
+    },
+    "M15_hold": {
+      "initial_capital": 10000.0,
+      "final_equity": 8930.053930120543,
+      "total_pnl": -1069.9460698794574,
+      "return_pct": -10.699460698794573,
+      "total_trades": 80,
+      "wins": 36,
+      "losses": 44,
+      "win_rate": 45.0,
+      "profit_factor": 0.8262787216593651,
+      "max_drawdown_pct": -19.23869877739632,
+      "peak_equity": 11057.342805196378,
+      "breached": true,
+      "exit_reasons": {
+        "timeout": 51,
+        "stop": 29
+      },
+      "avg_win": 141.3620841558872,
+      "avg_loss": -139.97684317025892
+    },
+    "M15_wide": {
+      "initial_capital": 10000.0,
+      "final_equity": 8945.600052518466,
+      "total_pnl": -1054.3999474815337,
+      "return_pct": -10.543999474815337,
+      "total_trades": 521,
+      "wins": 216,
+      "losses": 305,
+      "win_rate": 41.45873320537428,
+      "profit_factor": 0.9451169831649805,
+      "max_drawdown_pct": -21.477423840570665,
+      "peak_equity": 11392.392468575727,
+      "breached": true,
+      "exit_reasons": {
+        "timeout": 292,
+        "stop": 229
+      },
+      "avg_win": 84.06190270526477,
+      "avg_loss": -62.989412891208985
+    },
+    "H1_hold": {
+      "initial_capital": 10000.0,
+      "final_equity": 8852.428232985707,
+      "total_pnl": -1147.571767014293,
+      "return_pct": -11.47571767014293,
+      "total_trades": 29,
+      "wins": 13,
+      "losses": 16,
+      "win_rate": 44.827586206896555,
+      "profit_factor": 0.49937057340781343,
+      "max_drawdown_pct": -13.072254649790741,
+      "peak_equity": 10183.662531820626,
+      "breached": true,
+      "exit_reasons": {
+        "timeout": 18,
+        "stop": 11
+      },
+      "avg_win": 88.05278083346184,
+      "avg_loss": -143.26611986558106
+    },
+    "H1_wide": {
+      "initial_capital": 10000.0,
+      "final_equity": 8967.192836138014,
+      "total_pnl": -1032.8071638619858,
+      "return_pct": -10.328071638619859,
+      "total_trades": 111,
+      "wins": 45,
+      "losses": 66,
+      "win_rate": 40.54054054054054,
+      "profit_factor": 0.7411911947407107,
+      "max_drawdown_pct": -12.252334102729938,
+      "peak_equity": 10219.295002828097,
+      "breached": true,
+      "exit_reasons": {
+        "timeout": 60,
+        "stop": 51
+      },
+      "avg_win": 65.72913716514879,
+      "avg_loss": -60.46391418626778
+    }
+  }
+}

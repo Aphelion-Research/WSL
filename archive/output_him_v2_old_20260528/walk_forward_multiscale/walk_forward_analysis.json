@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-05-27T16:12:43.047733",
+  "model": "Him_V2_MultiScale",
+  "locked_config": {
+    "threshold": 0.55,
+    "hold_bars": 16
+  },
+  "period2": {
+    "year": 2024,
+    "return_pct": 39.458133143299314,
+    "trades": 3133,
+    "win_rate": 52.058729652090655,
+    "pf": 1.097459467574997
+  },
+  "period3": {
+    "period": "2025-2026",
+    "return_pct": 21.40852966732615,
+    "annualized": 15.111903294583165,
+    "trades": 4707,
+    "win_rate": 51.79519864032292,
+    "pf": 1.038460177001947
+  },
+  "overfitting": {
+    "return_ratio": 0.38298576467623463,
+    "degradation": 24.34622984871615
+  },
+  "verdict": "\u2717 REJECT"
+}

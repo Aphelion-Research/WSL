@@ -1,0 +1,94 @@
+{
+  "timestamp": "2026-05-27T16:51:42.965622",
+  "oos_period": "2024-01-01 to 2026-05-20",
+  "thresholds_tested": [
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75
+  ],
+  "results": {
+    "0.5": {
+      "threshold": 0.5,
+      "num_trades": 8450,
+      "win_rate": 0.3595266272189349,
+      "sharpe": -0.11432653738381905,
+      "total_pnl_net": -94286.40633570048,
+      "max_drawdown": 94605.32098508463,
+      "profit_factor": -1.0,
+      "avg_win": 74.15916177613565,
+      "avg_loss": -59.05061711226891,
+      "top_5_trades_pct": 0.0,
+      "stability_verdict": "UNSTABLE: UNSTABLE_MONTHLY"
+    },
+    "0.55": {
+      "threshold": 0.55,
+      "num_trades": 4579,
+      "win_rate": 0.3590303559729199,
+      "sharpe": -0.10445231033276992,
+      "total_pnl_net": -55928.12575901086,
+      "max_drawdown": 56167.94762155452,
+      "profit_factor": -1.0,
+      "avg_win": 88.22135310283555,
+      "avg_loss": -68.47156056561222,
+      "top_5_trades_pct": 0.0,
+      "stability_verdict": "UNSTABLE: UNSTABLE_MONTHLY"
+    },
+    "0.6": {
+      "threshold": 0.6,
+      "num_trades": 1983,
+      "win_rate": 0.3751891074130106,
+      "sharpe": -0.07550630520399328,
+      "total_pnl_net": -22509.519092230512,
+      "max_drawdown": 24273.518730470714,
+      "profit_factor": -1.0,
+      "avg_win": 112.22314005528706,
+      "avg_loss": -85.55571855800164,
+      "top_5_trades_pct": 0.0,
+      "stability_verdict": "UNSTABLE: UNSTABLE_MONTHLY"
+    },
+    "0.65": {
+      "threshold": 0.65,
+      "num_trades": 708,
+      "win_rate": 0.3940677966101695,
+      "sharpe": -0.08256679083537065,
+      "total_pnl_net": -8794.990587618044,
+      "max_drawdown": 9511.059858661274,
+      "profit_factor": -1.0,
+      "avg_win": 116.81573677414816,
+      "avg_loss": -96.47221712728533,
+      "top_5_trades_pct": 0.0,
+      "stability_verdict": "UNSTABLE: UNSTABLE_MONTHLY"
+    },
+    "0.7": {
+      "threshold": 0.7,
+      "num_trades": 226,
+      "win_rate": 0.415929203539823,
+      "sharpe": -0.08930278375018935,
+      "total_pnl_net": -2072.123509308702,
+      "max_drawdown": 2616.1880388772815,
+      "profit_factor": -1.0,
+      "avg_win": 83.81477588990458,
+      "avg_loss": -75.38418517393728,
+      "top_5_trades_pct": 0.0,
+      "stability_verdict": "UNSTABLE: UNSTABLE_MONTHLY"
+    },
+    "0.75": {
+      "threshold": 0.75,
+      "num_trades": 11,
+      "win_rate": 0.2727272727272727,
+      "sharpe": -0.35000302245451215,
+      "total_pnl_net": -251.0596907735166,
+      "max_drawdown": 307.71357142856914,
+      "profit_factor": -1.0,
+      "avg_win": 67.72845604395624,
+      "avg_loss": -56.78063236317317,
+      "top_5_trades_pct": 0.0,
+      "stability_verdict": "STABLE"
+    }
+  },
+  "best_sharpe_threshold": 0.6,
+  "best_pnl_threshold": 0.75
+}

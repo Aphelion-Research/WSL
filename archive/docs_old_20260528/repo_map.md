@@ -1,0 +1,661 @@
+# Dominion V2 — Source Map
+
+**Files:** 586 | **Size:** 2.5 MB | **Tokens:** ~664,069
+
+## Directories
+- `./` — 11 files, 72 KB
+- `apps/` — 2 files, 0 KB
+- `artifacts/` — 1 files, 3 KB
+- `asset_graph/` — 7 files, 14 KB
+- `causal_engine/` — 8 files, 25 KB
+- `cpp/` — 11 files, 270 KB
+- `data_pipeline/` — 35 files, 141 KB
+- `docs/` — 1 files, 5 KB
+- `dominion/` — 15 files, 65 KB
+- `dominion_agent/` — 32 files, 226 KB
+- `dominion_ai/` — 30 files, 48 KB
+- `dominion_loader/` — 38 files, 222 KB
+- `exec_features/` — 13 files, 19 KB
+- `exec_sim/` — 14 files, 22 KB
+- `hydra/` — 80 files, 478 KB
+- `lob/` — 9 files, 23 KB
+- `notes/` — 1 files, 0 KB
+- `ragd/` — 95 files, 235 KB
+- `ragd_bus/` — 6 files, 8 KB
+- `ragd_chunker/` — 17 files, 16 KB
+- `ragd_embed/` — 15 files, 32 KB
+- `ragd_graph/` — 4 files, 10 KB
+- `ragd_hnsw/` — 8 files, 15 KB
+- `ragd_vault/` — 9 files, 24 KB
+- `research/` — 2 files, 1 KB
+- `research_os/` — 26 files, 53 KB
+- `reservoir/` — 7 files, 14 KB
+- `runs/` — 1 files, 0 KB
+- `scripts/` — 57 files, 490 KB
+- `tca/` — 9 files, 13 KB
+- `tests/` — 5 files, 20 KB
+- `tmp/` — 1 files, 2 KB
+- `toxicity/` — 10 files, 19 KB
+- `vault/` — 6 files, 9 KB
+
+## Files
+### ./
+- `AGENTS.md`
+- `CLAUDE.md`
+- `QUICKSTART.md`
+- `README.md`
+- `audit_repo.py` — categorize_file, main
+- `generate_repo_map.py` — is_source_or_config, extract_python_exports, guess_purpose
+- `generate_repo_map_compressed.py` — is_included, extract_key_exports, main
+- `look.py` — get_process_info, parse_runtime, get_real_progress
+- `pytest.ini`
+- `requirements.txt`
+- `skills-lock.json`
+### apps/
+- `apps/mt5/combat/wineprefix/drive_c/windows/system.ini`
+- `apps/mt5/combat/wineprefix/drive_c/windows/win.ini`
+### artifacts/
+- `artifacts/hydra/features_fold0.json`
+### asset_graph/
+- `asset_graph/__init__.py`
+- `asset_graph/cli.py` — cmd_build, cmd_show, main
+- `asset_graph/config.py`
+- `asset_graph/gat.py` — SimpleGAT, attention, forward
+- `asset_graph/graph.py` — init_graph_schema, build_correlation_graph, store_graph_snapshot
+- `asset_graph/tests/__init__.py`
+- `asset_graph/tests/test_graph.py` — test_correlation_graph, test_node_centrality
+### causal_engine/
+- `causal_engine/__init__.py`
+- `causal_engine/cli.py` — cmd_run, cmd_show, cmd_export
+- `causal_engine/config.py`
+- `causal_engine/dag.py` — init_dag_schema, store_dag, query_causal_predecessors
+- `causal_engine/information.py` — transfer_entropy, conditional_entropy_knn, compute_all_transfer_entropies
+- `causal_engine/pc_algorithm.py` — fisher_z_test, partial_correlation, pc_algorithm
+- `causal_engine/tests/__init__.py`
+- `causal_engine/tests/test_pc.py` — test_pc_finds_independence_uncorrelated, test_pc_finds_dependence_correlated, test_fisher_z_test
+### cpp/
+- `cpp/CMakeLists.txt`
+- `cpp/hydra_288b_fast_train.cpp`
+- `cpp/kernels/microstructure.cpp`
+- `cpp/kernels/microstructure.hpp`
+- `cpp/kernels/module.cpp`
+- `cpp/kernels/rolling.cpp`
+- `cpp/kernels/rolling.hpp`
+- `cpp/kernels/statistical.cpp`
+- `cpp/kernels/statistical.hpp`
+- `cpp/kernels/technical.cpp`
+- `cpp/kernels/technical.hpp`
+### data_pipeline/
+- `data_pipeline/__init__.py`
+- `data_pipeline/cli.py` — cmd_run, cmd_status, cmd_doctor
+- `data_pipeline/config.py`
+- `data_pipeline/features/__init__.py`
+- `data_pipeline/features/calendar.py` — compute_day_of_week, compute_week_of_month, compute_month_of_year
+- `data_pipeline/features/cot_features.py` — compute_cot_percentiles, compute_cot_momentum, compute_hedger_ratio
+- `data_pipeline/features/crossasset.py` — compute_rolling_correlation, compute_rolling_beta, compute_lead_lag
+- `data_pipeline/features/macro.py` — compute_real_yield_features, compute_yield_curve_features, compute_breakeven_features
+- `data_pipeline/features/microstructure.py` — compute_roll_spread, compute_corwin_schultz, compute_amihud
+- `data_pipeline/features/price.py` — compute_returns, compute_rolling_stats, compute_sharpe
+- `data_pipeline/features/regime.py` — detect_tactical_regime_hmm, detect_micro_regime, compute_regime_duration
+- `data_pipeline/features/regime_storage.py` — store_regime_labels, get_latest_regime
+- `data_pipeline/features/store.py` — FeatureStore, compute_all_features, validate_features
+- `data_pipeline/fusion/__init__.py`
+- `data_pipeline/fusion/bridge.py` — brownian_bridge, reconstruct_ticks_from_bars
+- `data_pipeline/fusion/conflict.py` — resolve_conflict, detect_anomaly
+- `data_pipeline/fusion/kalman.py` — KalmanFilter, KalmanFilterBank, predict
+- `data_pipeline/health/__init__.py`
+- `data_pipeline/health/anomaly.py` — AnomalyDetector, detect_price_anomaly, detect_volume_anomaly
+- `data_pipeline/health/monitor.py` — PipelineMonitor, check_staleness, detect_gaps
+- `data_pipeline/health/report.py` — ReportGenerator, generate_report, store_report
+- `data_pipeline/pipeline.py` — Pipeline, init_db, log_run_start
+- `data_pipeline/schema.py` — init_schema
+- `data_pipeline/sources/__init__.py`
+- `data_pipeline/sources/alphavantage.py` — AlphaVantageSource, fetch, validate
+- `data_pipeline/sources/base.py` — DataSource, fetch, validate
+- `data_pipeline/sources/cot.py` — COTSource, fetch, validate
+- `data_pipeline/sources/domdata.py` — DomdataSource, fetch, validate
+- `data_pipeline/sources/fred.py` — FREDSource, fetch, validate
+- `data_pipeline/sources/yahoo.py` — YahooSource, fetch, validate
+- `data_pipeline/tests/__init__.py`
+- `data_pipeline/tests/test_features.py` — test_compute_returns, test_compute_hurst, test_compute_autocorr
+- `data_pipeline/tests/test_fusion.py` — test_kalman_filter_converges, test_kalman_filter_bank_trust_update, test_brownian_bridge_respects_ohlc
+- `data_pipeline/tests/test_health.py` — test_anomaly_detector_price, test_anomaly_detector_volume, test_source_divergence_detection
+- `data_pipeline/tests/test_sources.py` — test_yahoo_source_validate, test_domdata_source_graceful_degradation, test_yahoo_source_retry
+### docs/
+- `docs/00_START_HERE/QUICKSTART.md`
+### dominion/
+- `dominion/__init__.py`
+- `dominion/dataset/__init__.py`
+- `dominion/dataset/contracts.py` — ValidationResult, DataContract, PointInTimeContract
+- `dominion/dataset/m5_requirements.py` — M5Status, check_m5_parquet, check_m5_duckdb
+- `dominion/dataset/registries.py` — SourceStatus, FeatureType, ColumnSpec
+- `dominion/dataset/registries_old.py` — SourceStatus, FeatureType, ColumnSpec
+- `dominion/dataset/semantic_names.py` — SemanticName, generate_ohlcv_names, generate_rolling_names
+- `dominion/features/__init__.py`
+- `dominion/features/cpp_bridge.py` — ensure_cpp_available, rolling_mean, rolling_std
+- `dominion/joins/__init__.py`
+- `dominion/joins/point_in_time.py` — asof_join_backward, multi_asof_join, validate_no_future_leakage
+- `dominion/matrix/__init__.py`
+- `dominion/matrix/builder.py` — MatrixBuilder, build_hydra_matrix, build
+- `dominion/quality/__init__.py`
+- `dominion/quality/gates.py` — GateResult, QualityGates, run_all_gates
+### dominion_agent/
+- `dominion_agent/__init__.py`
+- `dominion_agent/adversary.py` — run_adversarial_review
+- `dominion_agent/api.py` — sync_ragd
+- `dominion_agent/architecture.py` — refresh_architecture, show_architecture
+- `dominion_agent/claims.py` — claim_task, release_task, list_claims
+- `dominion_agent/cli.py` — build_agent_subparser, cmd_agent
+- `dominion_agent/complexity.py` — complexity_report, all_packages_report
+- `dominion_agent/conflicts.py` — check_conflicts
+- `dominion_agent/dashboard.py` — build_dashboard, build_next, format_dashboard_human
+- `dominion_agent/impact.py` — analyze_impact
+- `dominion_agent/locks.py` — acquire_lock, release_lock, list_locks
+- `dominion_agent/migrations.py` — apply_migrations
+- `dominion_agent/prompt_compiler.py` — compile_prompt
+- `dominion_agent/reports.py` — session_to_dict, task_to_dict, claim_to_dict
+- `dominion_agent/safety.py` — is_secret_path, redact_path, is_forbidden_trading_task
+- `dominion_agent/sessions.py` — start_session, heartbeat, end_session
+- `dominion_agent/store.py` — AgentStore, conn, db_path
+- `dominion_agent/tasks.py` — create_task, get_task, list_tasks
+- `dominion_agent/tests/test_adversary.py` — test_missing_validation_found, test_missing_evidence_detected, test_forbidden_token_in_scope_file
+- `dominion_agent/tests/test_cli.py` — test_cli_init_returns_session, test_cli_sessions_command, test_cli_task_create_and_list
+- `dominion_agent/tests/test_complexity.py` — test_scan_empty_dir, test_scan_counts_files, test_scan_counts_todos
+- `dominion_agent/tests/test_conflicts.py` — test_active_write_lock_detected, test_active_read_lock_no_conflict, test_secret_path_conflict
+- `dominion_agent/tests/test_e2e_smoke.py` — store, test_full_workflow, test_secret_paths_rejected
+- `dominion_agent/tests/test_impact.py` — test_ragd_files_require_cmake, test_domdata_files_require_no_trading_check, test_dominion_loader_requires_pytest
+- `dominion_agent/tests/test_locks.py` — test_acquire_write_lock, test_release_lock, test_acquire_read_lock
+- `dominion_agent/tests/test_prompt_compiler.py` — test_prompt_contains_task_id, test_prompt_contains_mission, test_prompt_contains_safety_rules
+- `dominion_agent/tests/test_sessions.py` — test_start_session_returns_session, test_start_session_invalid_role, test_start_session_invalid_name
+- `dominion_agent/tests/test_store.py` — test_store_creates_db_file, test_store_context_manager, test_store_conn_is_row_factory
+- `dominion_agent/tests/test_tasks.py` — test_create_task_basic, test_create_task_with_scope, test_create_task_invalid_kind
+- `dominion_agent/tui.py` — render_agent_panels
+- `dominion_agent/types.py` — Session, Task, ClaimResult
+- `dominion_agent/validators.py` — validate_session_status, validate_role, validate_task_status
+### dominion_ai/
+- `dominion_ai/__init__.py`
+- `dominion_ai/api.py` — ask
+- `dominion_ai/bench.py` — run_suite
+- `dominion_ai/budget.py` — estimate_tokens, chunk_value, compress_chunk
+- `dominion_ai/cli.py` — print_json, cmd_search, cmd_ask
+- `dominion_ai/confidence.py` — score_confidence
+- `dominion_ai/context.py` — assemble
+- `dominion_ai/eval.py` — run_eval
+- `dominion_ai/ledger.py` — LedgerEntry, list_entries, show_entry
+- `dominion_ai/obs.py` — new_trace_id, trace_path, emit_span
+- `dominion_ai/planner.py` — plan
+- `dominion_ai/ragd_client.py` — RagdError, RagdClient, parse_chunk
+- `dominion_ai/rerank.py` — rerank
+- `dominion_ai/retrieval.py` — retrieve
+- `dominion_ai/safety.py` — is_secret_path, redact_path, redact_secret_mentions
+- `dominion_ai/tests/test_budget.py` — test_budget_preserves_high_value_chunk
+- `dominion_ai/tests/test_cli.py` — test_cli_parses_new_subcommands
+- `dominion_ai/tests/test_confidence.py` — test_confidence_refuses_empty, test_confidence_ok_with_matching_chunk
+- `dominion_ai/tests/test_context.py` — test_assemble_preserves_citations_and_budget
+- `dominion_ai/tests/test_contract_scored_chunk.py` — test_scored_chunk_schema_stable
+- `dominion_ai/tests/test_contract_trace_join.py` — test_trace_join_schema_uses_trace_id
+- `dominion_ai/tests/test_eval.py` — test_eval_bundle_roundtrip
+- `dominion_ai/tests/test_ledger.py` — FakeClient, test_ledger_filters_kind_and_search, decisions
+- `dominion_ai/tests/test_planner.py` — test_golden_handoff_plan, test_planner_filters_python
+- `dominion_ai/tests/test_ragd_client.py` — test_parse_chunk_filters_secrets, test_parse_chunk_fallback_hashes_missing_content_hash, test_parse_chunk_redacts_secret_mentions_in_content
+- `dominion_ai/tests/test_rerank.py` — test_heuristic_rerank_promotes_term_hits
+- `dominion_ai/tests/test_retrieval.py` — FakeClient, test_retrieve_rrf_merges_sources, query
+- `dominion_ai/tests/test_trace.py` — test_trace_renders_spans
+- `dominion_ai/trace.py` — load_trace, render_trace, latest_traces
+- `dominion_ai/types.py` — RetrievalPlan, Citation, ScoredChunk
+### dominion_loader/
+- `dominion_loader/__init__.py`
+- `dominion_loader/api.py` — iter_files, get_manifest_entry, list_changed_since
+- `dominion_loader/bench.py` — BenchResult, register_suite, run_suite
+- `dominion_loader/cache.py` — CacheCorruption, CacheHit, Cache
+- `dominion_loader/chunking_hooks.py` — Chunk, register_chunker, chunker_for
+- `dominion_loader/classify.py` — classify, is_likely_binary
+- `dominion_loader/cli.py` — cmd_scan_native, cmd_scan, cmd_cache
+- `dominion_loader/discover.py` — DiscoveredFile, DiscoveryError, discover
+- `dominion_loader/graph.py` — KGNode, KGEdge, KnowledgeGraph
+- `dominion_loader/hashing.py` — HashResult, PriorEntry, document_id_for
+- `dominion_loader/hw_probe.py` — HardwareProfile, hw_probe, hw_probe_json
+- `dominion_loader/ignore.py` — Ignore, export_policy, policy_hash
+- `dominion_loader/ledger.py` — LedgerEntry, Ledger, append
+- `dominion_loader/manifest.py` — ManifestEntry, Manifest, get
+- `dominion_loader/obs.py` — new_trace_id, Tracer, get_tracer
+- `dominion_loader/profiler.py` — ProfileSpan, Profiler, span
+- `dominion_loader/ragd_bridge.py` — IngestResult, DeleteResult, RagdBridge
+- `dominion_loader/scan.py` — LoadedFile, ScanStats, scan
+- `dominion_loader/semantic_diff.py` — semantic_diff
+- `dominion_loader/tests/test_bench.py` — test_bench_result_percentiles, test_bench_result_to_dict, test_bench_result_empty_runs
+- `dominion_loader/tests/test_cache.py` — null_tracer, cache, test_put_and_get
+- `dominion_loader/tests/test_chunking_hooks.py` — clean_registry, test_register_and_retrieve, test_chunker_for_unknown_returns_none
+- `dominion_loader/tests/test_classify.py` — test_classify_extension, test_is_likely_binary_text, test_is_likely_binary_null_bytes
+- `dominion_loader/tests/test_contract_loaded_file.py` — null_tracer, small_repo, test_loaded_file_has_required_fields
+- `dominion_loader/tests/test_contract_ragd_ingestion.py` — test_ingest_result_has_required_fields, test_ingest_result_ok_property, test_ingest_result_elapsed_s
+- `dominion_loader/tests/test_discover.py` — synthetic_repo, test_discovers_source_files, test_secrets_never_discovered
+- `dominion_loader/tests/test_doctor.py` — run_dominion, test_doctor_runs_without_crash, test_doctor_json_output_valid
+- `dominion_loader/tests/test_graph.py` — kg, test_add_and_get_node, test_get_missing_node
+- `dominion_loader/tests/test_hashing.py` — setup_function, test_document_id_stable, test_document_id_different_paths
+- `dominion_loader/tests/test_hw_probe.py` — test_hw_probe_returns_profile, test_hw_probe_cpu_count_positive, test_hw_probe_ram_bytes_positive
+- `dominion_loader/tests/test_ignore.py` — ignore, test_must_ignore, test_must_not_ignore
+- `dominion_loader/tests/test_ledger.py` — ledger, test_append_returns_id, test_append_idempotent_on_same_content
+- `dominion_loader/tests/test_manifest.py` — make_entry, manifest, test_schema_creates_tables
+- `dominion_loader/tests/test_ragd_bridge.py` — null_tracer, test_ingest_paths_empty_list, test_bridge_disabled_returns_no_op
+- `dominion_loader/tests/test_scan.py` — null_tracer, FakeBridge, small_repo
+- `dominion_loader/tests/test_semantic_diff.py` — test_identical_is_format_only, test_trailing_whitespace_is_whitespace_only, test_extra_blank_lines_is_format_only
+- `dominion_loader/tests/test_truth_doctor.py` — test_deep_doctor_reports_missing_query_metadata, test_deep_doctor_detects_deleted_chunk_leak, test_deep_doctor_reports_cache_corruption
+- `dominion_loader/truth_doctor.py` — CmdResult, DoctorDeps, run_deep_doctor
+### exec_features/
+- `exec_features/__init__.py`
+- `exec_features/cli.py` — load_lob_data, cmd_compute, cmd_top
+- `exec_features/config.py`
+- `exec_features/depth_features.py` — compute_depth_features
+- `exec_features/flow_features.py` — compute_flow_features
+- `exec_features/ic_tracker.py` — compute_ic, compute_forward_returns, update_ic_for_features
+- `exec_features/quote_features.py` — compute_quote_features
+- `exec_features/schema.py` — init_exec_features_schema
+- `exec_features/spread_features.py` — compute_spread_features
+- `exec_features/store.py` — compute_all_features, store_features
+- `exec_features/tests/__init__.py`
+- `exec_features/tests/test_exec_features.py` — test_spread_features_count, test_depth_features_count, test_flow_features_count
+- `exec_features/trade_features.py` — compute_trade_features
+### exec_sim/
+- `exec_sim/__init__.py`
+- `exec_sim/cli.py` — load_market_data, cmd_run, cmd_report
+- `exec_sim/config.py`
+- `exec_sim/impact/__init__.py`
+- `exec_sim/impact/almgren_chriss.py` — permanent_impact, temporary_impact, total_cost
+- `exec_sim/matching.py` — walk_book, compute_slippage_bps
+- `exec_sim/schema.py` — init_exec_sim_schema
+- `exec_sim/strategies/__init__.py`
+- `exec_sim/strategies/base.py` — ExecutionStrategy, generate_slices, remaining_quantity
+- `exec_sim/strategies/pov.py` — POVStrategy, generate_slices
+- `exec_sim/strategies/twap.py` — TWAPStrategy, generate_slices
+- `exec_sim/strategies/vwap.py` — VWAPStrategy, generate_slices
+- `exec_sim/tests/__init__.py`
+- `exec_sim/tests/test_sim.py` — test_vwap_slices_sum_to_target, test_twap_uniform_slices, test_almgren_chriss_impact_nonnegative
+### hydra/
+- `hydra/__init__.py`
+- `hydra/backtest/__init__.py`
+- `hydra/backtest/cpp/CMakeLists.txt`
+- `hydra/backtest/cpp/backtester.cpp`
+- `hydra/backtest/cpp/backtester.hpp`
+- `hydra/backtest/cpp/duckdb_loader.cpp`
+- `hydra/backtest/cpp/main.cpp`
+- `hydra/backtest/cpp/onnx_runner.cpp`
+- `hydra/backtest/engine_py.py` — Trade, kelly_size, run_backtest
+- `hydra/backtest/metrics.py` — sharpe_ratio, sortino_ratio, max_drawdown
+- `hydra/backtest_3year.py` — CostScenario, ModeConfig, load_data
+- `hydra/backtest_9year_final.py` — CostScenario, ModeConfig, Trade
+- `hydra/backtest_walkforward.py` — CostScenario, ModeConfig, Trade
+- `hydra/backtest_walkforward_v2.py` — CostScenario, ModeConfig, Trade
+- `hydra/brains/__init__.py`
+- `hydra/brains/day.py` — DayBrain, fit, set_bma_weights
+- `hydra/brains/scalp.py` — ScalpBrain, fit, set_bma_weights
+- `hydra/brains/swing.py` — SwingBrain, fit, set_bma_weights
+- `hydra/cli.py` — cmd_train, cmd_predict, cmd_report
+- `hydra/config.py` — TargetConfig, CVConfig, FeatureConfig
+- `hydra/data_sources/__init__.py`
+- `hydra/data_sources/__main__.py`
+- `hydra/data_sources/base.py` — CoverageReport, FetchResult, NormalizeResult
+- `hydra/data_sources/duckdb_provider.py` — DuckDBProvider, probe, fetch
+- `hydra/data_sources/dukascopy_provider.py` — DukascopyProvider, probe, fetch
+- `hydra/data_sources/mt5_provider.py` — MT5Provider, probe, fetch
+- `hydra/data_sources/registry.py` — compute_date_range, run_audit, fetch_missing
+- `hydra/data_sources/yahoo_provider.py` — YahooProvider, probe, fetch
+- `hydra/download_mt5_history.py` — fetch_timeframe, convert_to_parquet, main
+- `hydra/export/__init__.py`
+- `hydra/export/fuse.py` — fuse_ensemble_onnx
+- `hydra/export/quantize.py` — quantize_model
+- `hydra/export/to_onnx.py` — export_sklearn_to_onnx, export_lgbm_to_onnx, export_xgb_to_onnx
+- `hydra/labels/__init__.py`
+- `hydra/labels/triple_barrier.py` — LabelMetadata, detect_session, session_spread
+- `hydra/loop/__init__.py`
+- `hydra/loop/improver.py` — HydraImprover, run
+- `hydra/loop/stopping.py` — hit_targets, edge_decayed, drawdown_kill
+- `hydra/loop/strategies.py` — Strategy, threshold_tuning, refit_bma
+- `hydra/models/__init__.py`
+- `hydra/models/base.py` — ModelWrapper, fit, predict_proba
+- `hydra/models/forests.py` — RFModel, ETModel, HGBModel
+- `hydra/models/gbm.py` — LGBMModel, XGBModel, CatBoostModel
+- `hydra/models/linear.py` — LRModel, GNBModel, LDAModel
+- `hydra/models/moe.py` — MixtureOfExperts, fit, predict_proba
+- `hydra/models/neural.py` — MLPModel, LSTMModel, TCNModel
+- `hydra/models/stacking.py` — StackingEnsemble, fit, predict_proba
+- `hydra/oos_forensic_replay.py` — CostScenario, ModeConfig, Trade
+- `hydra/progress.py` — load_state, find_latest_log, tail_file
+- `hydra/ragd/__init__.py`
+- `hydra/ragd/memory.py` — remember, recall, emit_event
+- `hydra/run_100.py`
+- `hydra/runtime_state.py` — read_state, write_state, update_state
+- `hydra/signals/__init__.py`
+- `hydra/signals/adversary.py` — HydraAdversary, fit, should_veto
+- `hydra/signals/core.py` — fuse_brains, agreement_multiplier, conflict_resolution
+- `hydra/signals/ensemble.py` — bma_weights, bma_predict, threshold_signal
+- `hydra/signals/filters.py` — permutation_entropy_gate, cot_filter, toxicity_gate
+- `hydra/storage/__init__.py`
+- `hydra/storage/duckdb_writer.py` — HydraDB, write_iteration, write_trades
+- `hydra/telemetry/__init__.py`
+- `hydra/telemetry/recorder.py` — TelemetryRecorder, record_iteration, record_system_snapshot
+- `hydra/telemetry/schema.py` — empty_packet
+- `hydra/tests/__init__.py`
+- `hydra/tests/test_backtester.py` — test_kelly_size_basic, test_kelly_size_low_confidence, test_all_longs_profitable_in_uptrend
+- `hydra/tests/test_cpp_parity.py` — test_cpp_python_trade_ledger_parity, test_cpp_throughput
+- `hydra/tests/test_ensemble.py` — test_bma_weights_sum_to_one, test_bma_weights_higher_sharpe_higher_weight, test_bma_predict_weighted_average
+- `hydra/tests/test_metrics.py` — test_sharpe_constant_returns, test_sharpe_zero_std, test_sharpe_negative_constant
+- `hydra/tests/test_onnx.py` — test_fuse_onnx_roundtrip, test_quantize_preserves_accuracy
+- `hydra/training/README.md`
+- `hydra/training/__init__.py`
+- `hydra/training/backtest.py` — BacktestEvaluator, evaluate, evaluate_walk_forward
+- `hydra/training/guardrails.py` — GateVerdictResult, TrainingGuardrails, check_training_allowed
+- `hydra/training/hydra_runner.py` — HydraRunner, load_and_validate, generate_labels
+- `hydra/training/metrics.py` — compute_training_metrics, compute_cost_adjusted_metrics, compute_all_metrics
+- `hydra/training/splits.py` — SplitMetadata, compute_embargo_purge, ChronologicalSplit
+- `hydra/utils/__init__.py`
+- `hydra/utils/atomic.py` — atomic_write_json, safe_read_json
+- `hydra/utils/eta.py` — ETAEstimator, update, eta_seconds
+- `hydra/utils/system_monitor.py` — get_system_stats
+### lob/
+- `lob/__init__.py`
+- `lob/cli.py` — cmd_compute, cmd_metrics, cmd_vpin
+- `lob/config.py`
+- `lob/ingestion.py` — load_gold_ticks, generate_synthetic_quotes, compute_roll_spread
+- `lob/metrics.py` — compute_ofi, compute_vpin, compute_roll_spread
+- `lob/schema.py` — init_lob_schema
+- `lob/state_machine.py` — LimitOrderBook, update_bid, update_ask
+- `lob/tests/__init__.py`
+- `lob/tests/test_lob.py` — test_lob_state_machine, test_lob_depth_weighted_mid, test_lob_depth_imbalance
+### notes/
+- `notes/README.md`
+### ragd/
+- `ragd/CMakeLists.txt`
+- `ragd/README.md`
+- `ragd/__init__.py`
+- `ragd/include/dominion_native/agent_conflicts.hpp`
+- `ragd/include/dominion_native/agent_locks.hpp`
+- `ragd/include/dominion_native/content_hash.hpp`
+- `ragd/include/dominion_native/doctor.hpp`
+- `ragd/include/dominion_native/file_classifier.hpp`
+- `ragd/include/dominion_native/forbidden_tokens.hpp`
+- `ragd/include/dominion_native/ignore_policy.hpp`
+- `ragd/include/dominion_native/manifest_store.hpp`
+- `ragd/include/dominion_native/path_normalizer.hpp`
+- `ragd/include/dominion_native/report.hpp`
+- `ragd/include/dominion_native/scan_plan.hpp`
+- `ragd/include/dominion_native/vault_doctor.hpp`
+- `ragd/include/dominion_native/version.hpp`
+- `ragd/include/ragd/agent_memory.h`
+- `ragd/include/ragd/bm25.h`
+- `ragd/include/ragd/config.h`
+- `ragd/include/ragd/dead_zone.h`
+- `ragd/include/ragd/http_api.h`
+- `ragd/include/ragd/indexer.h`
+- `ragd/include/ragd/intent_router.h`
+- `ragd/include/ragd/mcp_server.h`
+- `ragd/include/ragd/rag_engine.h`
+- `ragd/include/ragd/session_bus.h`
+- `ragd/include/ragd/sqlite_compat.h`
+- `ragd/include/ragd/storage.h`
+- `ragd/include/ragd/temporal.h`
+- `ragd/include/ragd/todo_engine.h`
+- `ragd/include/ragd/types.h`
+- `ragd/include/ragd/vector_store.h`
+- `ragd/include/ragd/watcher.h`
+- `ragd/scripts/__init__.py`
+- `ragd/scripts/ragd_maintenance.py` — Report, build_report, cleanup_duplicates
+- `ragd/scripts/ragd_mcp_stdio.py` — ragd_query, ragd_handoff_read, ragd_todo_list
+- `ragd/src/agent_memory.cpp`
+- `ragd/src/bm25.cpp`
+- `ragd/src/config.cpp`
+- `ragd/src/dead_zone.cpp`
+- `ragd/src/http_api.cpp`
+- `ragd/src/indexer.cpp`
+- `ragd/src/intent_router.cpp`
+- `ragd/src/main.cpp`
+- `ragd/src/mcp_server.cpp`
+- `ragd/src/native/agent_conflicts.cpp`
+- `ragd/src/native/agent_locks.cpp`
+- `ragd/src/native/content_hash.cpp`
+- `ragd/src/native/doctor.cpp`
+- `ragd/src/native/file_classifier.cpp`
+- `ragd/src/native/forbidden_tokens.cpp`
+- `ragd/src/native/ignore_policy.cpp`
+- `ragd/src/native/manifest_store.cpp`
+- `ragd/src/native/path_normalizer.cpp`
+- `ragd/src/native/report.cpp`
+- `ragd/src/native/scan_plan.cpp`
+- `ragd/src/native/vault_doctor.cpp`
+- `ragd/src/rag_engine.cpp`
+- `ragd/src/session_bus.cpp`
+- `ragd/src/storage.cpp`
+- `ragd/src/temporal.cpp`
+- `ragd/src/todo_engine.cpp`
+- `ragd/src/vector_store.cpp`
+- `ragd/src/watcher.cpp`
+- `ragd/tests/CMakeLists.txt`
+- `ragd/tests/native/test_agent_conflicts.cpp`
+- `ragd/tests/native/test_agent_locks.cpp`
+- `ragd/tests/native/test_content_hash.cpp`
+- `ragd/tests/native/test_doctor.cpp`
+- `ragd/tests/native/test_file_classifier.cpp`
+- `ragd/tests/native/test_forbidden_tokens.cpp`
+- `ragd/tests/native/test_ignore_policy.cpp`
+- `ragd/tests/native/test_manifest_store.cpp`
+- `ragd/tests/native/test_path_normalizer.cpp`
+- `ragd/tests/native/test_scan_plan.cpp`
+- `ragd/tests/native/test_vault_doctor.cpp`
+- `ragd/tests/test_agent_memory.cpp`
+- `ragd/tests/test_bm25.cpp`
+- `ragd/tests/test_dead_zone.cpp`
+- `ragd/tests/test_indexer.cpp`
+- `ragd/tests/test_intent_router.cpp`
+- `ragd/tests/test_maintenance_report.py` — test_report_empty_db, test_duplicate_detection_and_dry_run, test_apply_marks_deleted
+- `ragd/tests/test_mcp_server.cpp`
+- `ragd/tests/test_rag_engine.cpp`
+- `ragd/tests/test_session_bus.cpp`
+- `ragd/tests/test_storage.cpp`
+- `ragd/tests/test_temporal.cpp`
+- `ragd/tests/test_todo_engine.cpp`
+- `ragd/tests/test_vector_store.cpp`
+- `ragd/tests/test_watcher.cpp`
+- `ragd/tools/dominion_native_cli.cpp`
+- `ragd/tools/native_doctor_main.cpp`
+- `ragd/tools/native_manifest_main.cpp`
+- `ragd/tools/native_scan_main.cpp`
+- `ragd/tools/native_vault_doctor_main.cpp`
+### ragd_bus/
+- `ragd_bus/__init__.py`
+- `ragd_bus/client.py` — RAGDBusClient, RAGDBusSync, send
+- `ragd_bus/publisher.py` — BusPublisher, publish_pipeline_complete, publish_anomaly
+- `ragd_bus/tests/__init__.py`
+- `ragd_bus/tests/test_bus.py` — test_bus_client_init, test_bus_connect_fail, test_sync_client
+- `ragd_bus/topics.py`
+### ragd_chunker/
+- `ragd_chunker/__init__.py`
+- `ragd_chunker/chunker.py` — ASTChunk, content_hash, module_name
+- `ragd_chunker/config.py`
+- `ragd_chunker/languages/__init__.py`
+- `ragd_chunker/languages/cpp.py` — chunk_cpp
+- `ragd_chunker/languages/go.py` — chunk_go
+- `ragd_chunker/languages/javascript.py` — chunk_javascript
+- `ragd_chunker/languages/python.py` — chunk_python
+- `ragd_chunker/languages/rust.py` — chunk_rust
+- `ragd_chunker/languages/typescript.py` — chunk_typescript
+- `ragd_chunker/metadata.py` — python_imports, python_calls, python_docstring
+- `ragd_chunker/service.py` — Handler, main, do_GET
+- `ragd_chunker/tests/fixtures/sample.cpp`
+- `ragd_chunker/tests/fixtures/sample.py` — Greeter, helper, greet
+- `ragd_chunker/tests/test_cpp_chunker.py` — test_cpp_chunker_extracts_class_and_function
+- `ragd_chunker/tests/test_metadata.py` — test_python_metadata_extracts_docstring_imports_calls
+- `ragd_chunker/tests/test_python_chunker.py` — test_python_chunker_symbols_and_boundaries
+### ragd_embed/
+- `ragd_embed/__init__.py`
+- `ragd_embed/batcher.py` — BatchStats, EmbedBatcher, embed_in_batches
+- `ragd_embed/cache.py` — EmbeddingCache, close, get
+- `ragd_embed/cli.py` — cmd_run, cmd_stats, cmd_doctor
+- `ragd_embed/config.py` — EmbedConfig, load_config
+- `ragd_embed/pipeline.py` — ChunkInput, EmbedRunStats, provider_from_config
+- `ragd_embed/providers/__init__.py` — EmbedProvider, embed_batch, health
+- `ragd_embed/providers/ollama.py` — OllamaProvider, embed_batch, health
+- `ragd_embed/providers/openai.py` — OpenAIProvider, embed_batch, health
+- `ragd_embed/providers/voyage.py` — VoyageProvider, embed_batch, health
+- `ragd_embed/tests/test_batcher.py` — FlakyProvider, test_batches_split_and_retry, embed_batch
+- `ragd_embed/tests/test_cache.py` — test_cache_hit_and_provider_miss
+- `ragd_embed/tests/test_config.py` — test_provider_resolved_from_env, test_missing_key_raises_clear_error, test_ollama_provider_config
+- `ragd_embed/tests/test_ollama.py` — test_ollama_provider_init, test_ollama_provider_custom_base_url, test_ollama_api_key_ignored
+- `ragd_embed/tests/test_pipeline.py` — FakeProvider, test_unchanged_chunks_produce_zero_api_calls, test_changed_chunks_call_provider_once
+### ragd_graph/
+- `ragd_graph/__init__.py`
+- `ragd_graph/cli.py` — main
+- `ragd_graph/graph.py` — GraphStats, default_db, build_graph
+- `ragd_graph/tests/test_graph.py` — test_build_graph_from_chunks
+### ragd_hnsw/
+- `ragd_hnsw/__init__.py`
+- `ragd_hnsw/config.py` — default_index_path
+- `ragd_hnsw/index.py` — HNSWIndex, build, add
+- `ragd_hnsw/query.py` — semantic_query
+- `ragd_hnsw/semantic_server.py` — Handler, main, do_GET
+- `ragd_hnsw/sync.py` — SyncStats, sync_index
+- `ragd_hnsw/tests/test_index.py` — test_build_query_save_load, test_atomic_write_preserves_old_index, fail_replace
+- `ragd_hnsw/tests/test_sync.py` — test_sync_adds_active_and_skips_missing
+### ragd_vault/
+- `ragd_vault/__init__.py`
+- `ragd_vault/builder.py` — build_vault
+- `ragd_vault/cli.py` — default_vault, main
+- `ragd_vault/doctor.py` — VaultDoctorReport, inspect_vault
+- `ragd_vault/model.py` — SymbolInfo, FileInfo, default_ragd_db
+- `ragd_vault/repair.py` — RepairReport, repair_vault
+- `ragd_vault/sync.py` — sync_vault
+- `ragd_vault/tests/test_note_generation.py` — test_file_and_symbol_notes_are_valid
+- `ragd_vault/tests/test_vault_doctor.py` — test_vault_doctor_catches_broken_links_and_frontmatter
+### research/
+- `research/README.md`
+- `research/sources.yaml`
+### research_os/
+- `research_os/__init__.py`
+- `research_os/adapters/base.py` — FetchConfig, FetchAdapter, fetch
+- `research_os/adapters/browser_adapter.py` — BrowserAdapter, fetch
+- `research_os/adapters/registry.py` — available_adapters, resolve_adapter, default_config
+- `research_os/adapters/requests_adapter.py` — RequestsAdapter, fetch
+- `research_os/chunker.py` — chunk_markdown
+- `research_os/cleaner.py` — strip_noise, clean_text, html_to_text_fallback
+- `research_os/cli.py` — cmd_init, cmd_status, cmd_doctor
+- `research_os/config.py` — ResearchPaths, paths, ensure_dirs
+- `research_os/db.py` — utc_now, connect, initialize
+- `research_os/extractor.py` — extract
+- `research_os/fetcher.py` — content_hash, safe_name, validate_url_for_source
+- `research_os/models.py` — Source, FetchResult, ExtractedDocument
+- `research_os/normalize.py` — NormalizationResult, normalize_raw_text
+- `research_os/ollama_client.py` — summarize
+- `research_os/quality.py` — QualityReport, assess_quality
+- `research_os/ragd_client.py` — health, mcp_call, try_index_path
+- `research_os/scheduler.py` — run
+- `research_os/tests/test_adapters.py` — test_browser_adapter_unavailable_returns_actionable_error
+- `research_os/tests/test_chunker.py` — test_chunk_markdown_by_heading
+- `research_os/tests/test_config.py` — test_default_sources_roundtrip
+- `research_os/tests/test_db.py` — test_db_sources_jobs_documents
+- `research_os/tests/test_extractor.py` — test_extract_markdown_metadata
+- `research_os/tests/test_fetcher.py` — test_validate_url_blocks_outside_host, test_validate_url_allows_source_path
+- `research_os/tests/test_normalize_quality.py` — test_normalize_html_deterministic, test_quality_score_basic_cases
+- `research_os/tests/test_scheduler.py` — test_next_jobs_respects_limit
+### reservoir/
+- `reservoir/__init__.py`
+- `reservoir/cli.py` — cmd_train, main
+- `reservoir/config.py`
+- `reservoir/esn.py` — EchoStateNetwork, MultiScaleESN, reset
+- `reservoir/readout.py` — RidgeReadout, train_test_split_esn, evaluate_readout
+- `reservoir/tests/__init__.py`
+- `reservoir/tests/test_esn.py` — test_esn_state_update, test_esn_spectral_radius, test_esn_washout
+### runs/
+- `runs/hydra_9year_final_20260519_230459/config_used.yaml`
+### scripts/
+- `scripts/build_dataset_v1.py` — pivot_features, join_to_gold_master, add_target_variables
+- `scripts/build_full_dataset.py` — load_gold_ohlcv, load_macro, load_cot
+- `scripts/build_hydra_matrix.py` — main
+- `scripts/build_master_dataset.py` — strip_tz, to_naive, safe_merge
+- `scripts/build_master_extended.py` — strip_tz, to_naive, safe_merge
+- `scripts/codexrag.py` — query, main
+- `scripts/compile_source.py` — compile_dir, compile_scripts, main
+- `scripts/cost_aware_training_288b.py` — compute_trading_metrics, compute_classification_metrics
+- `scripts/dominion_cli.py` — run, http_json, ragd_health
+- `scripts/dominion_health.py` — run, which, latest_file
+- `scripts/dominion_ui.py` — run, render, main
+- `scripts/expand_features_3k.py` — load_base, add_lag_features, add_rolling_sweeps
+- `scripts/expand_features_3k_chunked.py` — load_base_chunked, compute_lags, add_lag_features
+- `scripts/expand_features_3k_turbo.py` — load_base, compute_lags_parallel, add_lag_features
+- `scripts/export_hydra_288b_binary.py` — main
+- `scripts/feature_stability.py` — compute_rolling_ic, detect_ic_decay, main
+- `scripts/fetch_alternative_data.py` — fetch_gpr, fetch_epu, fetch_etf_flows
+- `scripts/fetch_cot.py` — main
+- `scripts/fetch_cross_asset.py` — fetch_ticker, fetch_binance_daily, main
+- `scripts/fetch_crypto_binance.py` — fetch_binance_daily, main
+- `scripts/fetch_dukascopy_robust.py` — fetch_hour, fetch_day, main
+- `scripts/fetch_extended_cross_asset.py` — fetch_ticker, main
+- `scripts/fetch_extended_fred.py` — fetch_fred_csv, main
+- `scripts/fetch_m5_history.py` — fetch_m5_batch, fetch_all_m5, validate_m5_data
+- `scripts/fetch_macro_data.py` — fetch_fred_csv, main
+- `scripts/fetch_mt5_chunks.py` — fetch_chunk, main
+- `scripts/fetch_price_data.py` — fetch_dukascopy_hour, ticks_to_m5, fetch_day
+- `scripts/fetch_price_fast.py` — fetch_day_data, main
+- `scripts/hydra_rich_runner.py` — HydraState, build_command, render_dashboard
+- `scripts/hydra_train_fixed_commission_288b.py` — get_memory_mb, get_cpu_percent, elapsed
+- `scripts/label_baseline_sanity_audit.py`
+- `scripts/m5_feature_expansion.py` — compute_returns, compute_volatility_range, compute_technical_expanded
+- `scripts/metrics.py` — compute_sharpe, compute_ic, compute_turnover
+- `scripts/overnight_backtest.py` — backtest
+- `scripts/overnight_data_quality.py` — analyze_quality, main
+- `scripts/overnight_ensemble.py` — train_ensemble
+- `scripts/overnight_feature_engineering.py` — add_fourier_features, add_wavelet_features, add_entropy_features
+- `scripts/overnight_feature_selection.py` — select_features
+- `scripts/overnight_hyperopt.py` — hyperopt_lightgbm
+- `scripts/overnight_models.py` — train_all_models
+- `scripts/overnight_multilabel.py` — train_all_horizons
+- `scripts/regime_analysis.py` — add_micro_regime, compute_strategy_returns, main
+- `scripts/repair_master_dataset.py`
+- `scripts/run_hydra_training.py` — main
+- `scripts/run_multiple_training.py` — load_dataset, train_single_run, main
+- `scripts/run_training_final.py` — load_data, walk_forward_split, evaluate
+- `scripts/run_walk_forward_training.py` — load_dataset, create_chronological_folds, validate_fold_data
+- `scripts/summarize_hydra_results.py` — load_results, main
+- `scripts/temporal_split.py` — compute_split_dates, list_available_features, validate_split
+- `scripts/train_baselines.py` — load_data, prepare_features, train_ridge
+- `scripts/training_validation.py` — compute_metrics
+- `scripts/training_validation_clean.py` — compute_metrics
+- `scripts/validate_clean_dataset.py` — check
+- `scripts/validate_master_dataset.py` — check
+- `scripts/vault_sync.py` — parse_frontmatter, inject_synced_timestamp, sync_file
+- `scripts/verify_direction_results.py` — exists_size, first_nonempty, fnum
+- `scripts/verify_model_artifacts.py` — check_artifact, main
+### tca/
+- `tca/__init__.py`
+- `tca/analytics.py` — regime_breakdown, time_of_day_heatmap, waterfall_summary
+- `tca/attribution.py` — compute_attribution
+- `tca/benchmarks.py` — load_sim_benchmark, compute_benchmark_comparison
+- `tca/cli.py` — cmd_analyze, cmd_report, cmd_heatmap
+- `tca/config.py`
+- `tca/schema.py` — init_tca_schema
+- `tca/tests/__init__.py`
+- `tca/tests/test_tca.py` — test_attribution_sum, test_attribution_decision_cost, test_benchmark_comparison_sign
+### tests/
+- `tests/dataset/test_matrix_builder.py` — test_registry_exact_3000, test_registry_summary, test_build_small_matrix
+- `tests/training/__init__.py`
+- `tests/training/test_guardrails.py` — test_check_gate_verdict_missing, test_check_gate_verdict_pass, test_check_gate_verdict_fail
+- `tests/training/test_labels.py` — test_session_detection, test_session_spread, test_triple_barrier_basic
+- `tests/training/test_splits.py` — test_compute_embargo_purge, test_chronological_split_expanding, test_chronological_split_oos
+### tmp/
+- `tmp/ragd_mcp_smoke.py` — main
+### toxicity/
+- `toxicity/__init__.py`
+- `toxicity/adverse.py` — compute_adverse_selection, compute_toxicity_score
+- `toxicity/alerts.py` — generate_alerts, store_alerts
+- `toxicity/cli.py` — cmd_compute, cmd_status, cmd_alerts
+- `toxicity/config.py`
+- `toxicity/ofi.py` — compute_ofi_features
+- `toxicity/schema.py` — init_toxicity_schema
+- `toxicity/tests/__init__.py`
+- `toxicity/tests/test_toxicity.py` — test_vpin_bounded, test_ofi_sign, test_adverse_selection_formula
+- `toxicity/vpin.py` — compute_vpin_detailed
+### vault/
+- `vault/files/AGENTS.md`
+- `vault/files/QUICKSTART.md`
+- `vault/files/README.md`
+- `vault/files/docs/00_START_HERE/QUICKSTART.md`
+- `vault/files/ragd/README.md`
+- `vault/files/research/README.md`

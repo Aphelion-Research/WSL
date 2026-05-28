@@ -1,0 +1,271 @@
+{
+  "timestamp": "2026-05-27T16:39:22.938462",
+  "config": {
+    "threshold": 0.55,
+    "hold_bars": 16,
+    "stop_loss_atr_mult": 10.0,
+    "take_profit_atr_mult": null,
+    "cost_model": {
+      "spread_points": 0.3,
+      "slippage_points": 0.1,
+      "commission_per_lot": 7.0
+    }
+  },
+  "validation": {
+    "ohlcv": "PASS"
+  },
+  "baseline": {
+    "metrics": {
+      "num_trades": 51,
+      "win_rate": 0.27450980392156865,
+      "avg_pnl_net": -9.259466752005421,
+      "total_pnl_net": -472.2328043522761,
+      "sharpe": -0.4617907949261777,
+      "max_drawdown": 506.926586534874,
+      "avg_win": 13.741853334592495,
+      "avg_loss": -17.96266894693436
+    },
+    "num_trades": 51
+  },
+  "cost_sensitivity": {
+    "0.0x": {
+      "metrics": {
+        "num_trades": 51,
+        "win_rate": 0.5098039215686274,
+        "avg_pnl_net": 0.14053324799457792,
+        "total_pnl_net": 7.167195647723474,
+        "sharpe": 0.007008714653132523,
+        "max_drawdown": 155.82770970683214,
+        "avg_win": 14.700906230351446,
+        "avg_loss": -15.002254653656564
+      },
+      "num_trades": 51,
+      "total_pnl_net": 7.167195647723474,
+      "sharpe": 0.007008714653132523
+    },
+    "0.5x": {
+      "metrics": {
+        "num_trades": 51,
+        "win_rate": 0.35294117647058826,
+        "avg_pnl_net": -4.559466752005422,
+        "total_pnl_net": -232.53280435227634,
+        "sharpe": -0.22739104013652256,
+        "max_drawdown": 323.62658653487665,
+        "avg_win": 15.270298326081777,
+        "avg_loss": -15.375702249143893
+      },
+      "num_trades": 51,
+      "total_pnl_net": -232.53280435227634,
+      "sharpe": -0.22739104013652256
+    },
+    "1.0x": {
+      "metrics": {
+        "num_trades": 51,
+        "win_rate": 0.27450980392156865,
+        "avg_pnl_net": -9.259466752005421,
+        "total_pnl_net": -472.2328043522761,
+        "sharpe": -0.4617907949261777,
+        "max_drawdown": 506.926586534874,
+        "avg_win": 13.741853334592495,
+        "avg_loss": -17.96266894693436
+      },
+      "num_trades": 51,
+      "total_pnl_net": -472.2328043522761,
+      "sharpe": -0.4617907949261777
+    },
+    "2.0x": {
+      "metrics": {
+        "num_trades": 51,
+        "win_rate": 0.13725490196078433,
+        "avg_pnl_net": -18.659466752005418,
+        "total_pnl_net": -951.6328043522756,
+        "sharpe": -0.9305903045054876,
+        "max_drawdown": 951.6328043522756,
+        "avg_win": 13.46700872991452,
+        "avg_loss": -23.770496942310864
+      },
+      "num_trades": 51,
+      "total_pnl_net": -951.6328043522756,
+      "sharpe": -0.9305903045054876
+    },
+    "3.0x": {
+      "metrics": {
+        "num_trades": 51,
+        "win_rate": 0.0784313725490196,
+        "avg_pnl_net": -28.059466752005424,
+        "total_pnl_net": -1431.032804352278,
+        "sharpe": -1.3993898140847982,
+        "max_drawdown": 1431.032804352277,
+        "avg_win": 12.357290072728166,
+        "avg_loss": -31.499190737089137
+      },
+      "num_trades": 51,
+      "total_pnl_net": -1431.032804352278,
+      "sharpe": -1.3993898140847982
+    },
+    "summary": {
+      "degradation": [
+        {
+          "multiplier": 0.0,
+          "sharpe_ratio": -0.01517725067311691,
+          "pnl_ratio": -0.015177250673116923,
+          "sharpe": 0.007008714653132523,
+          "pnl": 7.167195647723474
+        },
+        {
+          "multiplier": 0.5,
+          "sharpe_ratio": 0.4924113746634415,
+          "pnl_ratio": 0.4924113746634416,
+          "sharpe": -0.22739104013652256,
+          "pnl": -232.53280435227634
+        },
+        {
+          "multiplier": 1.0,
+          "sharpe_ratio": 1.0,
+          "pnl_ratio": 1.0,
+          "sharpe": -0.4617907949261777,
+          "pnl": -472.2328043522761
+        },
+        {
+          "multiplier": 2.0,
+          "sharpe_ratio": 2.0151772506731165,
+          "pnl_ratio": 2.0151772506731165,
+          "sharpe": -0.9305903045054876,
+          "pnl": -951.6328043522756
+        },
+        {
+          "multiplier": 3.0,
+          "sharpe_ratio": 3.030354501346234,
+          "pnl_ratio": 3.0303545013462396,
+          "sharpe": -1.3993898140847982,
+          "pnl": -1431.032804352278
+        }
+      ],
+      "robust_to_2x_costs": false,
+      "robust_to_3x_costs": false
+    }
+  },
+  "null_tests": {
+    "original": {
+      "metrics": {
+        "num_trades": 51,
+        "win_rate": 0.27450980392156865,
+        "avg_pnl_net": -9.259466752005421,
+        "total_pnl_net": -472.2328043522761,
+        "sharpe": -0.4617907949261777,
+        "max_drawdown": 506.926586534874,
+        "avg_win": 13.741853334592495,
+        "avg_loss": -17.96266894693436
+      },
+      "num_trades": 51
+    },
+    "random": {
+      "metrics": {
+        "num_trades": 50,
+        "win_rate": 0.32,
+        "avg_pnl_net": -7.555191673742773,
+        "total_pnl_net": -377.7595836871385,
+        "sharpe": -0.44048693189353894,
+        "max_drawdown": 382.86561828928996,
+        "avg_win": 11.559543685268046,
+        "avg_loss": -16.550361254453748
+      },
+      "num_trades": 50
+    },
+    "shuffled": {
+      "metrics": {
+        "num_trades": 50,
+        "win_rate": 0.36,
+        "avg_pnl_net": -7.694619916820691,
+        "total_pnl_net": -384.7309958410342,
+        "sharpe": -0.4043175205387994,
+        "max_drawdown": 393.4261147395648,
+        "avg_win": 12.555454733389768,
+        "avg_loss": -19.085286907564075
+      },
+      "num_trades": 50
+    },
+    "shifted_1": {
+      "metrics": {
+        "num_trades": 51,
+        "win_rate": 0.3333333333333333,
+        "avg_pnl_net": -9.850967073720943,
+        "total_pnl_net": -502.39932075976765,
+        "sharpe": -0.5123520481867425,
+        "max_drawdown": 508.3655067251294,
+        "avg_win": 9.837572859308866,
+        "avg_loss": -19.695237040235845
+      },
+      "num_trades": 51
+    },
+    "shifted_5": {
+      "metrics": {
+        "num_trades": 50,
+        "win_rate": 0.24,
+        "avg_pnl_net": -11.102530321484938,
+        "total_pnl_net": -555.1265160742464,
+        "sharpe": -0.5565805042012291,
+        "max_drawdown": 555.1265160742457,
+        "avg_win": 14.920836159608916,
+        "avg_loss": -19.320435526040885
+      },
+      "num_trades": 50
+    },
+    "shifted_20": {
+      "metrics": {
+        "num_trades": 50,
+        "win_rate": 0.3,
+        "avg_pnl_net": -9.675138595891076,
+        "total_pnl_net": -483.75692979455334,
+        "sharpe": -0.5015436942524899,
+        "max_drawdown": 519.4180707759381,
+        "avg_win": 12.462523151166895,
+        "avg_loss": -19.162707916058775
+      },
+      "num_trades": 50
+    },
+    "reversed": {
+      "metrics": {
+        "num_trades": 51,
+        "win_rate": 0.2549019607843137,
+        "avg_pnl_net": -9.540533247994576,
+        "total_pnl_net": -486.56719564772334,
+        "sharpe": -0.4758082242324427,
+        "max_drawdown": 495.27382552471863,
+        "avg_win": 14.502122722936207,
+        "avg_loss": -17.765652395944578
+      },
+      "num_trades": 51
+    },
+    "summary": {
+      "original_sharpe": -0.4617907949261777,
+      "null_sharpes": [
+        -0.44048693189353894,
+        -0.4043175205387994,
+        -0.5123520481867425,
+        -0.5565805042012291,
+        -0.5015436942524899,
+        -0.4758082242324427
+      ],
+      "better_than_null": 4,
+      "worse_than_null": 2,
+      "verdict": "FAIL"
+    }
+  },
+  "stability": {
+    "monthly_pf": {
+      "2024-01": 0.2894681294866276
+    },
+    "quarterly_sharpe": {
+      "2024-Q%q": -0.45724102096540015
+    },
+    "yearly_return": {
+      "2024": -472.2328043522765
+    },
+    "top_5_trades_pct": 0.0,
+    "longest_win_streak": 3,
+    "longest_loss_streak": 7,
+    "verdict": "STABLE"
+  },
+  "verdict": "REJECTED: FAIL_NULL_TESTS"
+}

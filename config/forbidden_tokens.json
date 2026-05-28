@@ -36,6 +36,8 @@
     "notes/",
     "vault/",
     "graphify-out/",
+    "archive/",
+    "VM_RECOVERY_CONFIG.md",
     "dominion_cpp/MIGRATION_STATUS.md",
     "dominion_cpp/README.md",
     "dominion_cpp/src/mt5/safety.cpp"

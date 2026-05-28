@@ -1,8 +1,0 @@
-artifact_location: /home/Martin/Dominion/output_hydra_moe/mlruns/819414526356340828
-creation_time: 1779894216768
-experiment_id: '819414526356340828'
-last_update_time: 1779894216768
-lifecycle_stage: active
-name: hydra_moe
-trace_location: null
-workspace: default
